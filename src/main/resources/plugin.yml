@@ -1,0 +1,16 @@
+name: EverShop
+main: com.evermc.evershop.EverShop
+version: 1.0
+description: EverShop-1.0
+author: djytw
+load: POSTWORLD
+softdepend:
+ # mandatory dependencies
+ #- Vault
+ #- LangUtils
+api-version: 1.14
+
+commands:
+  evershop:
+    description: 'evershop'
+    aliases: [es]

@@ -1,0 +1,12 @@
+evershop:
+  database:
+    datasource: mysql
+    mysql:
+      hostname: 127.0.0.1
+      username: test
+      password: test
+      db_name: test
+      prefix: es_
+      port: 3306
+  linkMaterial: redstone
+  destroyMaterial: golden_axe
