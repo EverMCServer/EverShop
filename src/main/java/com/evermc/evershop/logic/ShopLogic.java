@@ -105,6 +105,25 @@ public class ShopLogic {
                 p.sendMessage("linked " + block.getType() + ", cur:" + getRegisteredContents(player));
             }
 
+            else if (linkable_redstone.contains(block.getType())){
+                if (player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
+                    p.sendMessage("You can't link redstone components and inventory at the same time");
+                    return;
+                }
+                player.reg_is_container = false;
+                Location loc = block.getLocation();
+                if (player.reg1.contains(loc)){
+                    player.reg1.remove(loc);
+                    p.sendMessage("unlinked " + block.getType());
+                }else{
+                    player.reg1.add(block.getLocation());
+                    p.sendMessage("linked " + block.getType());
+                }
+            }
+
+            else if (block.getState() instanceof Sign){
+                
+            }
         }
     }
     public String getRegisteredContents(PlayerInfo player){
