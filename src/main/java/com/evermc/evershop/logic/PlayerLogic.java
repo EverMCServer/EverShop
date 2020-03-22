@@ -1,7 +1,7 @@
 package com.evermc.evershop.logic;
 
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -13,18 +13,6 @@ import com.evermc.evershop.util.LogUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-
-class PlayerInfo {
-    int id;
-    UUID uuid;
-    String name;
-    boolean advanced;
-    Set<Location> reg1;
-    Set<Location> reg2;
-    public String toString(){
-        return "PlayerInfo{id:" + id + ", uuid:" + uuid + ", name:" + name + ", advanced:" + advanced + "}";
-    }
-}
 
 public class PlayerLogic {
     
@@ -38,13 +26,16 @@ public class PlayerLogic {
         this.SQL = plugin.getDataLogic().getSQL();
     }
 
-    /**
-     * get player id from @param player 
-     * if currrent name is different with cached name, update the cache
-     * note: this will block thread if not cached, so async!
-     * @return playerId
-     */
     public int getPlayer(Player p){
+        return getPlayerInfo(p).id;
+    }
+
+    /**
+     * get playerinfo from @param player 
+     * if currrent name is different with cached name, update the cache
+     * cache PlayerInfo when log in, to avoid blocking
+     */
+    public PlayerInfo getPlayerInfo(Player p){
         UUID uuid = p.getUniqueId();
         String name = p.getDisplayName();
         if (cachedPlayers.containsKey(uuid)){
@@ -56,13 +47,18 @@ public class PlayerLogic {
                 cachedPlayers.put(uuid, player);
                 fetchPlayer(p);
             }
-            return player.id;
+            return player;
         } else {
             return fetchPlayerSync(p);
         }
+
     }
 
-    private int fetchPlayerSync(Player p){
+    public boolean isAdvanced(Player p){
+        return getPlayerInfo(p).advanced;
+    }
+
+    private PlayerInfo fetchPlayerSync(Player p){
 
         UUID uuid = p.getUniqueId();
         String name = p.getDisplayName();
@@ -74,7 +70,7 @@ public class PlayerLogic {
         Object[] result = SQL.queryFirst(query, 4);
         if (result == null){
             LogUtil.log(Level.SEVERE, "Error in fetchPlayer.");
-            return 0;
+            return null;
         }
 
         PlayerInfo pi = new PlayerInfo();
@@ -82,14 +78,17 @@ public class PlayerLogic {
         pi.uuid = UUID.fromString((String)result[2]);
         pi.name = (String)result[1];
         pi.advanced = (Boolean)result[3];
+        pi.reg_is_container = false;
+        pi.reg1 = new HashSet<Location>();
+        pi.reg2 = new HashSet<Location>();
         cachedPlayers.put(pi.uuid, pi);
 
         LogUtil.log(Level.INFO, "Load " + pi);
 
-        return 0;
+        return pi;
     }
 
-    public void fetchPlayer(Player p){
+    private void fetchPlayer(Player p){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             fetchPlayerSync(p);
         });

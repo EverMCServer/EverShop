@@ -8,6 +8,7 @@ import com.evermc.evershop.util.LogUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,24 +33,27 @@ public class InteractEvent implements Listener{
     
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(PlayerInteractEvent event){
-        if (event.useInteractedBlock() != Result.DENY){
+        if (event.useInteractedBlock() != Result.ALLOW){
             return;
         }
         if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_BLOCK){
             return;
         }
-         
-        int player_id = plugin.getPlayerLogic().getPlayer(event.getPlayer());
-        int world_id = plugin.getDataLogic().getWorldId(event.getPlayer().getWorld());
-        //getclickedblockinfo
-        if (event.getMaterial() == linkMaterial){
-            // if event.getaction right && not advanced return
-            // if clickedblock is activated shop return
-            Block clicked = event.getClickedBlock();
-            if (clicked == null){
+        Block clicked = event.getClickedBlock();
+        if (clicked == null){
+            return;
+        }
+        if (clicked.getState() instanceof Sign){
+            Sign sign = (Sign) clicked.getState();
+            if ((int)sign.getLine(0).charAt(0) == 167){
+                plugin.getShopLogic().accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
+                // if clicked on formatted signs, no need to register, so return
                 return;
             }
         }
+        if (event.getMaterial() == linkMaterial){
+            plugin.getShopLogic().registerBlock(event.getPlayer(), clicked, event.getAction());
+        } 
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
