@@ -49,4 +49,14 @@ public class TransactionLogic {
         }
         return 0;
     }
+
+    public boolean isContainerShop(int action){
+        // TODO 
+        return action <= 2 && action >= 1;
+    }
+
+    public String getShopType(int action){
+        // TODO 
+        return default_actions[action-1];
+    }
 }

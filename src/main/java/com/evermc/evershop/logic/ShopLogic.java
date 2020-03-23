@@ -8,6 +8,7 @@ import java.util.Set;
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.SQLDataSource;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,22 +20,9 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-
-class ShopInfo{
-    int id;
-    int epoch;
-    int action_id;
-    int player_id;
-    int world_id;
-    int x;
-    int y;
-    int z;
-}
-
 public class ShopLogic {
 
     private EverShop plugin;
-    private SQLDataSource SQL;
 
     List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
@@ -55,13 +43,12 @@ public class ShopLogic {
     
     public ShopLogic(EverShop plugin){
         this.plugin = plugin;
-        this.SQL = plugin.getDataLogic().getSQL();
     }
 
     public void accessShop(Player p, Location loc, Action action){
 
     }
-    public void registerBlock(Player p, Block block, Action action){
+    public void registerBlock(final Player p, Block block, Action action){
 
         PlayerInfo player = plugin.getPlayerLogic().getPlayerInfo(p);
         if (action == Action.RIGHT_CLICK_BLOCK && !player.advanced){
@@ -120,8 +107,28 @@ public class ShopLogic {
             else if (block.getState() instanceof Sign){
                 String line = ((Sign)block.getState()).getLine(0);
                 int a = plugin.getTransactionLogic().getActionType(line);
+                if (a == 0) {
+                    p.sendMessage("The sign does not contain an available action!");
+                    return;
+                }
+                if (player.reg1.size() == 0){
+                    p.sendMessage("You should register items first!");
+                    return;
+                }
+                if (player.reg_is_container != plugin.getTransactionLogic().isContainerShop(a)){
+                    p.sendMessage("Shop type and your selection is not match!");
+                    return;
+                }
                 int n = getPrice(line);
-                p.sendMessage("Sign action="+a+"; price="+n);
+                final ShopInfo newshop = new ShopInfo(this.plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player));
+                final Sign sign = (Sign)block.getState();
+                plugin.getDataLogic().saveShop(newshop, () -> {
+                    String lin = sign.getLine(0);
+                    lin = ChatColor.BLUE.toString() + lin;
+                    sign.setLine(0, lin);
+                    sign.update();
+                    p.sendMessage("You have created a " + plugin.getTransactionLogic().getShopType(newshop.action_id) + " shop, price is " + newshop.price);
+                });
             }
         }
     }
@@ -137,8 +144,8 @@ public class ShopLogic {
         return Integer.parseInt(ret);
     }
 
-    private String getRegisteredContents(PlayerInfo player){
-        String result = "";
+    private Set<ItemStack> getRegisteredItemStacks(PlayerInfo player){
+
         Set<ItemStack> items = new HashSet<ItemStack>();
         if (player.reg_is_container){
             for (Location loc : player.reg1){
@@ -162,9 +169,14 @@ public class ShopLogic {
                     }
                 }
             }
-            for (ItemStack isc : items){
-                result += "" + isc.getType() + "x" + isc.getAmount() + ";";
-            }
+        }
+        return items;
+    }
+    private String getRegisteredContents(PlayerInfo player){
+        String result = "";
+        Set<ItemStack> items = getRegisteredItemStacks(player);
+        for (ItemStack isc : items){
+            result += "" + isc.getType() + "x" + isc.getAmount() + ";";
         }
         return result;
     }

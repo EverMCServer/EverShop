@@ -1,9 +1,6 @@
 package com.evermc.evershop.event;
 
-import java.util.logging.Level;
-
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

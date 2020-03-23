@@ -16,11 +16,13 @@ import org.bukkit.World;
 
 public class DataLogic{
     
+    private EverShop plugin;
     private SQLDataSource SQL;
     private Map <UUID, Integer> worldList;
 
     public DataLogic(EverShop plugin){
-        
+
+        this.plugin = plugin;
         String sqltype = plugin.getConfig().getString("evershop.database.datasource");
         if ("mysql".equals(sqltype)){
             SQL = new MySQLDataSource(plugin.getConfig().getConfigurationSection("evershop.database.mysql"));
@@ -135,5 +137,14 @@ public class DataLogic{
 
         LogUtil.log(Level.INFO, "Load " + worldList.size() + " worlds.");
 
+    }
+
+    public void saveShop(ShopInfo shop, final Runnable afterSave){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            // TODO SQL
+            System.out.println("SQL");
+            try{Thread.sleep(1000);}catch(Exception e){}
+            Bukkit.getScheduler().runTask(plugin, afterSave);
+        });
     }
 }
