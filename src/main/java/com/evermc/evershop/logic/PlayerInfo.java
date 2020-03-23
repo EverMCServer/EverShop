@@ -1,7 +1,7 @@
 package com.evermc.evershop.logic;
 
-import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.bukkit.Location;
 
@@ -10,8 +10,8 @@ public class PlayerInfo {
     UUID uuid;
     String name;
     boolean advanced;
-    HashSet<Location> reg1;
-    HashSet<Location> reg2;
+    CopyOnWriteArraySet<Location> reg1;
+    CopyOnWriteArraySet<Location> reg2;
     boolean reg_is_container;
 
     public String toString(){

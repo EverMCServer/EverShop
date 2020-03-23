@@ -62,7 +62,7 @@ public class InteractEvent implements Listener{
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(BlockPlaceEvent event){
         System.out.println("place@");
-        // if have record, delete record in db
+        // if placed sign, delete record in this location in db
     }
 
     @EventHandler (priority = EventPriority.NORMAL)

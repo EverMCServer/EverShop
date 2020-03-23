@@ -1,6 +1,6 @@
 package com.evermc.evershop.logic;
 
-import java.util.HashSet;
+import java.util.Set;
 
 import com.evermc.evershop.EverShop;
 
@@ -18,10 +18,10 @@ public class ShopInfo {
     int y;
     int z;
     int price;
-    HashSet<Location> targets;
-    HashSet<ItemStack> items;
+    Set<Location> targets;
+    Set<ItemStack> items;
     
-    public ShopInfo(EverShop plugin, int action_id, int player_id, Location loc, int price, HashSet<Location> targets, HashSet<ItemStack> items){
+    public ShopInfo(EverShop plugin, int action_id, int player_id, Location loc, int price, Set<Location> targets, Set<ItemStack> items){
         this.id = 0;
         this.epoch = (int)(System.currentTimeMillis()/1000);
         this.action_id = action_id;
@@ -35,7 +35,7 @@ public class ShopInfo {
         this.items = items;
     }
 
-    public ShopInfo(EverShop plugin, int action_id, Player p, Location loc, int price, HashSet<Location> targets, HashSet<ItemStack> items){
+    public ShopInfo(EverShop plugin, int action_id, Player p, Location loc, int price, Set<Location> targets, Set<ItemStack> items){
         this(plugin, action_id, plugin.getPlayerLogic().getPlayer(p), loc, price, targets, items);
     }
 

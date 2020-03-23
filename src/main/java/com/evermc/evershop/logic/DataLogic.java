@@ -1,7 +1,6 @@
 package com.evermc.evershop.logic;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +161,7 @@ public class DataLogic{
         });
     }
 
-    public static byte[] toBlob(Serializable object){
+    public static byte[] toBlob(Object object){
         try{
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(out);

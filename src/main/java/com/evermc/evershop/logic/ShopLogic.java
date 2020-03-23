@@ -2,6 +2,7 @@ package com.evermc.evershop.logic;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import com.evermc.evershop.EverShop;
@@ -66,6 +67,17 @@ public class ShopLogic {
                 Location loc;
                 if (container.getInventory().getSize() == 54){
                     loc = ((DoubleChestInventory)container.getInventory()).getLeftSide().getLocation();
+                    Location loc2 = ((DoubleChestInventory)container.getInventory()).getRightSide().getLocation();
+                    if (player.reg1.contains(loc2)){
+                        player.reg1.remove(loc2);
+                        p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                        return;
+                    }
+                    if (player.reg2.contains(loc2)){
+                        player.reg2.remove(loc2);
+                        p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                        return;
+                    }
                 }else{
                     loc = block.getLocation();
                 }
@@ -155,6 +167,12 @@ public class ShopLogic {
                     continue;
                 }
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
+                if (inv.getSize() == 54 && ((DoubleChestInventory)inv).getRightSide().getLocation().equals(loc)){
+                    player.reg1.remove(loc);
+                    player.reg2.remove(loc);
+                    player.reg1.add(((DoubleChestInventory)inv).getLeftSide().getLocation());
+                    continue;
+                }
                 for (ItemStack is : inv.getContents()){
                     if (is == null) continue;
                     boolean duplicate = false;
@@ -168,6 +186,19 @@ public class ShopLogic {
                     if (!duplicate){
                         items.add(is.clone());
                     }
+                }
+            }
+            for (Location loc : player.reg2){
+                if (!(loc.getBlock().getState() instanceof Container)){
+                    player.reg2.remove(loc);
+                    continue;
+                }
+                Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
+                if (inv.getSize() == 54 && ((DoubleChestInventory)inv).getRightSide().getLocation().equals(loc)){
+                    player.reg1.remove(loc);
+                    player.reg2.remove(loc);
+                    player.reg2.add(((DoubleChestInventory)inv).getLeftSide().getLocation());
+                    continue;
                 }
             }
         }

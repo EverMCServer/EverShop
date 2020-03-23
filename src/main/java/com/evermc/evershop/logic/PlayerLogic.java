@@ -1,9 +1,9 @@
 package com.evermc.evershop.logic;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
@@ -79,8 +79,8 @@ public class PlayerLogic {
         pi.name = (String)result[1];
         pi.advanced = (Boolean)result[3];
         pi.reg_is_container = false;
-        pi.reg1 = new HashSet<Location>();
-        pi.reg2 = new HashSet<Location>();
+        pi.reg1 = new CopyOnWriteArraySet<Location>();
+        pi.reg2 = new CopyOnWriteArraySet<Location>();
         cachedPlayers.put(pi.uuid, pi);
 
         LogUtil.log(Level.INFO, "Load " + pi);
