@@ -14,6 +14,7 @@ import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
@@ -152,6 +153,15 @@ public class DataLogic{
 
         LogUtil.log(Level.INFO, "Load " + worldList.size() + " worlds.");
 
+    }
+
+    public void removeShop(final Location loc){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            // TODO - remove the corresponding record in chests? Since shopid is auto incremental, it will nor reuse id, then remove is not necessary. 
+            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+             + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+            SQL.exec(query);
+        });
     }
 
     public void saveShop(final ShopInfo shop, final Runnable afterSave, final Runnable failSave){
