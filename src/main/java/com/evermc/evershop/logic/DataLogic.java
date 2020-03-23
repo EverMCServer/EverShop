@@ -11,6 +11,7 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.MySQLDataSource;
 import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.util.LogUtil;
+import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -57,6 +58,7 @@ public class DataLogic{
               "price int(11) NOT NULL," +
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
+              "perm varchar(1024) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY world_id (world_id,x,y,z)," +
               "KEY player_id (player_id)" +
@@ -77,6 +79,17 @@ public class DataLogic{
               "uuid varchar(36) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY uuid (uuid)" +
+            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "target` (" +
+              "id int(10) UNSIGNED NOT NULL AUTO_INCREMENT," +
+              "world_id int(10) UNSIGNED NOT NULL," +
+              "x int(11) NOT NULL," +
+              "y int(11) NOT NULL," +
+              "z int(11) NOT NULL," +
+              "shops varchar(1024) NOT NULL," +
+              "PRIMARY KEY (id)," +
+              "UNIQUE KEY world_id (world_id,x,y,z)" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "transaction` (" +
@@ -145,7 +158,7 @@ public class DataLogic{
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.epoch + "', '"
              + shop.action_id + "', '" + shop.player_id + "', '" + shop.world_id + "', '" + shop.x + "', '"
-             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?)";
+             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?, '')";
             byte[] targets = toBlob(shop.targets);
             byte[] items = toBlob(shop.items);
             if (targets.length >= 65535 || items.length >= 65535){
@@ -156,6 +169,13 @@ public class DataLogic{
             if (ret <= 0){
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
+            }
+            for (SerializableLocation sloc : shop.targets){
+                query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
+                + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') ON DUPLICATE KEY UPDATE `shops` = CONCAT(`shops`, '," + ret + "')";
+                System.out.println(query);
+                // TODO - if insert failed, revert all of the changes?
+                SQL.insert(query);
             }
             Bukkit.getScheduler().runTask(plugin, afterSave);
         });

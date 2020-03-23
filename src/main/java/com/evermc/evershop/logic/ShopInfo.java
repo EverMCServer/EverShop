@@ -1,8 +1,10 @@
 package com.evermc.evershop.logic;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -18,7 +20,7 @@ public class ShopInfo {
     int y;
     int z;
     int price;
-    Set<Location> targets;
+    Set<SerializableLocation> targets;
     Set<ItemStack> items;
     
     public ShopInfo(EverShop plugin, int action_id, int player_id, Location loc, int price, Set<Location> targets, Set<ItemStack> items){
@@ -31,7 +33,10 @@ public class ShopInfo {
         this.y = loc.getBlockY();
         this.z = loc.getBlockZ();
         this.price = price;
-        this.targets = targets;
+        this.targets = new HashSet<SerializableLocation>();
+        for (Location loca : targets){
+            this.targets.add(new SerializableLocation(plugin,loca));
+        }
         this.items = items;
     }
 

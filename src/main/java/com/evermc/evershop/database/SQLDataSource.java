@@ -201,10 +201,11 @@ public abstract class SQLDataSource{
         return ret;
     }
 
-    public int insertBlob(String query, byte[]...blobs){
+    public int insert(String query){
 
         Connection conn = null;
         PreparedStatement s = null;
+        ResultSet rs = null;
 
         try {
             conn = getConnection();
@@ -213,13 +214,67 @@ public abstract class SQLDataSource{
                 return -1;
             }
 
-            s = conn.prepareStatement(query);
+            s = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            s.execute();
+            rs = s.getGeneratedKeys();
+            int id=0;
+            if (rs != null && rs.next()) {
+                id = rs.getInt(1);
+            }
+            return id;
+
+        } catch (final SQLException e) {
+            LogUtil.log(Level.INFO, "Database connection error: " + e.getMessage());
+            e.printStackTrace();
+
+        } finally {
+            if (s != null)
+                try {
+                    s.close();
+                } catch (final SQLException ignored) {
+                }
+            if (conn != null)
+                try {
+                    conn.close();
+                } catch (final SQLException ignored) {
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * insert blob data to database
+     * @param query insert query statement, replace blob by '?'
+     * @param blobs blob datas. corresponding to sequence of '?'
+     * @return id of the inserted data
+     */
+    public int insertBlob(String query, byte[]...blobs){
+
+        Connection conn = null;
+        PreparedStatement s = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            if (conn == null){
+                LogUtil.log(Level.WARNING, "Failed to getConnection");
+                return -1;
+            }
+
+            s = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             
             for (int i = 0; i < blobs.length; i ++){
                 s.setBytes(i + 1, blobs[i]);
             }
 
-            return s.executeUpdate();
+            s.execute();
+            rs = s.getGeneratedKeys();
+            int id=0;
+            if (rs != null && rs.next()) {
+                id = rs.getInt(1);
+            }
+            return id;
 
         } catch (final SQLException e) {
             LogUtil.log(Level.INFO, "Database connection error: " + e.getMessage());
