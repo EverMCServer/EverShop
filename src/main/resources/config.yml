@@ -10,3 +10,9 @@ evershop:
       port: 3306
   linkMaterial: redstone
   destroyMaterial: golden_axe
+  #TODO change to lang files
+  alias:
+    buy: 
+      - 出售
+      - 卖
+    sell: 收购

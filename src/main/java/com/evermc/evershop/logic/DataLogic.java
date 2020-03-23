@@ -50,6 +50,7 @@ public class DataLogic{
               "x int(11) NOT NULL," +
               "y int(11) NOT NULL," +
               "z int(11) NOT NULL," +
+              "price int(11) NOT NULL," +
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
               "PRIMARY KEY (id)," +
@@ -72,7 +73,17 @@ public class DataLogic{
               "uuid varchar(36) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY uuid (uuid)" +
-            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+            ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "transaction` (" +
+              "id int(10) UNSIGNED NOT NULL AUTO_INCREMENT," +
+              "shop_id int(10) UNSIGNED NOT NULL," +
+              "player_id int(10) UNSIGNED NOT NULL," +
+              "time int(10) UNSIGNED NOT NULL," +
+              "count int(10) UNSIGNED NOT NULL," +
+              "PRIMARY KEY (id)," +
+              "UNIQUE KEY `union` (shop_id,player_id,time)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8;"
         };
         
         SQL.exec(query);

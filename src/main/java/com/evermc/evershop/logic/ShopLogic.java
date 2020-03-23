@@ -1,14 +1,11 @@
 package com.evermc.evershop.logic;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.action.ActionType;
 import com.evermc.evershop.database.SQLDataSource;
 
 import org.bukkit.Location;
@@ -26,14 +23,13 @@ import org.bukkit.inventory.ItemStack;
 class ShopInfo{
     int id;
     int epoch;
-    ActionType action_id;
+    int action_id;
     int player_id;
     int world_id;
     int x;
     int y;
     int z;
 }
-
 
 public class ShopLogic {
 
@@ -73,7 +69,7 @@ public class ShopLogic {
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
                 
-            // TODO: WorldGuard Check
+            // TODO: WorldGuard Check if block is not Sign
 
             if (linkable_container.contains(block.getType())){
                 if (!player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
@@ -122,15 +118,34 @@ public class ShopLogic {
             }
 
             else if (block.getState() instanceof Sign){
-                
+                String line = ((Sign)block.getState()).getLine(0);
+                int a = plugin.getTransactionLogic().getActionType(line);
+                int n = getPrice(line);
+                p.sendMessage("Sign action="+a+"; price="+n);
             }
         }
     }
-    public String getRegisteredContents(PlayerInfo player){
+
+    private int getPrice(String line){
+        String ret = "";
+        int i = line.length() - 1;
+        while (i >= 0 && !Character.isDigit(line.charAt(i))) i--;
+        for (;i >= 0 && Character.isDigit(line.charAt(i)); i--){
+            ret = line.charAt(i) + ret;
+        }
+        if ("".equals(ret)) return 0;
+        return Integer.parseInt(ret);
+    }
+
+    private String getRegisteredContents(PlayerInfo player){
         String result = "";
         Set<ItemStack> items = new HashSet<ItemStack>();
         if (player.reg_is_container){
             for (Location loc : player.reg1){
+                if (!(loc.getBlock().getState() instanceof Container)){
+                    player.reg1.remove(loc);
+                    continue;
+                }
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
                 for (ItemStack is : inv.getContents()){
                     if (is == null) continue;
@@ -138,14 +153,12 @@ public class ShopLogic {
                     for (ItemStack isc : items){
                         if (isc.isSimilar(is)){
                             duplicate = true;
-                            items.remove(isc);
                             isc.setAmount(isc.getAmount() + is.getAmount());
-                            items.add(isc);
                             break;
                         }
                     }
                     if (!duplicate){
-                        items.add(is);
+                        items.add(is.clone());
                     }
                 }
             }
