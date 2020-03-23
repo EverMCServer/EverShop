@@ -1,5 +1,7 @@
 package com.evermc.evershop.logic;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
 public class DataLogic{
     
@@ -56,7 +59,7 @@ public class DataLogic{
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
               "PRIMARY KEY (id)," +
-              "KEY world_id (world_id,x,y,z)," +
+              "UNIQUE KEY world_id (world_id,x,y,z)," +
               "KEY player_id (player_id)" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
@@ -84,7 +87,7 @@ public class DataLogic{
               "time int(10) UNSIGNED NOT NULL," +
               "count int(10) UNSIGNED NOT NULL," +
               "PRIMARY KEY (id)," +
-              "UNIQUE KEY `union` (shop_id,player_id,time)" +
+              "UNIQUE KEY `uni` (shop_id,player_id,time)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8;"
         };
         
@@ -139,12 +142,37 @@ public class DataLogic{
 
     }
 
-    public void saveShop(ShopInfo shop, final Runnable afterSave){
+    public void saveShop(final ShopInfo shop, final Runnable afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            // TODO SQL
-            System.out.println("SQL");
-            try{Thread.sleep(1000);}catch(Exception e){}
+            String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.epoch + "', '"
+             + shop.action_id + "', '" + shop.player_id + "', '" + shop.world_id + "', '" + shop.x + "', '"
+             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?)";
+            byte[] targets = toBlob(shop.targets);
+            byte[] items = toBlob(shop.items);
+            if (targets.length >= 65535 || items.length >= 65535){
+                Bukkit.getScheduler().runTask(plugin, failSave);
+                return;
+            }
+            int ret = SQL.insertBlob(query, targets, items);
+            if (ret <= 0){
+                Bukkit.getScheduler().runTask(plugin, failSave);
+                return;
+            }
             Bukkit.getScheduler().runTask(plugin, afterSave);
         });
+    }
+
+    public static byte[] toBlob(Serializable object){
+        try{
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(out);
+            outputStream.writeObject(object);
+            byte [] bytes = out.toByteArray();
+            outputStream.close();
+            return bytes;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null ;
+        }
     }
 }

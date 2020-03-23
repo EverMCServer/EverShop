@@ -3,10 +3,8 @@ package com.evermc.evershop.logic;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.database.SQLDataSource;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -127,7 +125,10 @@ public class ShopLogic {
                     lin = ChatColor.BLUE.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
+                    plugin.getPlayerLogic().getPlayerInfo(p).removeRegs();
                     p.sendMessage("You have created a " + plugin.getTransactionLogic().getShopType(newshop.action_id) + " shop, price is " + newshop.price);
+                }, () -> {
+                    p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
                 });
             }
         }
@@ -144,9 +145,9 @@ public class ShopLogic {
         return Integer.parseInt(ret);
     }
 
-    private Set<ItemStack> getRegisteredItemStacks(PlayerInfo player){
+    private HashSet<ItemStack> getRegisteredItemStacks(PlayerInfo player){
 
-        Set<ItemStack> items = new HashSet<ItemStack>();
+        HashSet<ItemStack> items = new HashSet<ItemStack>();
         if (player.reg_is_container){
             for (Location loc : player.reg1){
                 if (!(loc.getBlock().getState() instanceof Container)){
@@ -174,7 +175,7 @@ public class ShopLogic {
     }
     private String getRegisteredContents(PlayerInfo player){
         String result = "";
-        Set<ItemStack> items = getRegisteredItemStacks(player);
+        HashSet<ItemStack> items = getRegisteredItemStacks(player);
         for (ItemStack isc : items){
             result += "" + isc.getType() + "x" + isc.getAmount() + ";";
         }

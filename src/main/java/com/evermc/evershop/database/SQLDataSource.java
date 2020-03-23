@@ -154,7 +154,7 @@ public abstract class SQLDataSource{
 
     public Object[] queryFirst (String query, int col){
         Object[] ret = new Object[col];
-        
+
         Connection conn = null;
         PreparedStatement s = null;
         ResultSet rs = null;
@@ -199,5 +199,44 @@ public abstract class SQLDataSource{
             }
         }
         return ret;
+    }
+
+    public int insertBlob(String query, byte[]...blobs){
+
+        Connection conn = null;
+        PreparedStatement s = null;
+
+        try {
+            conn = getConnection();
+            if (conn == null){
+                LogUtil.log(Level.WARNING, "Failed to getConnection");
+                return -1;
+            }
+
+            s = conn.prepareStatement(query);
+            
+            for (int i = 0; i < blobs.length; i ++){
+                s.setBytes(i + 1, blobs[i]);
+            }
+
+            return s.executeUpdate();
+
+        } catch (final SQLException e) {
+            LogUtil.log(Level.INFO, "Database connection error: " + e.getMessage());
+            e.printStackTrace();
+
+        } finally {
+            if (s != null)
+                try {
+                    s.close();
+                } catch (final SQLException ignored) {
+                }
+            if (conn != null)
+                try {
+                    conn.close();
+                } catch (final SQLException ignored) {
+            }
+        }
+        return -1;
     }
 }
