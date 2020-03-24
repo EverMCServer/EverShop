@@ -36,4 +36,7 @@ public class SerializableLocation implements Serializable{
         data.put("z", this.z);
         return data;
     }
+    public String toString(){
+        return "SeriLoc{world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z;
+    }
 }

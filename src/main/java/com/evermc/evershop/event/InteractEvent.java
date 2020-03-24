@@ -3,6 +3,7 @@ package com.evermc.evershop.event;
 import com.evermc.evershop.EverShop;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -31,6 +32,7 @@ public class InteractEvent implements Listener{
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(PlayerInteractEvent event){
         if (event.useInteractedBlock() != Result.ALLOW){
+            // replacement of event.isCancelled()
             return;
         }
         if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_BLOCK){
@@ -55,16 +57,26 @@ public class InteractEvent implements Listener{
 
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(BlockBreakEvent event){
-        System.out.println("break@");
         // delete record in db? or update?
         // check break permission?
-        //   - async : cancel the event, and check. after check, set the block to air. -> 1. lag, 2. many bugs when set a redstone components to air(breakNaturally?)
+        //   - async : cancel the event, and check. after check, breakNatually
         //   - sync : maybe cache all chest info from database when start. (then need update chest when delete shop at DataLogic:160)
         //   - do not check, update shop only?
+        if (event.isCancelled()){
+            return;
+        }
+        if (!plugin.getShopLogic().isLinkableBlock(event.getBlock().getType())){
+            return;
+        }
+        event.setCancelled(true);
+        plugin.getShopLogic().tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(BlockPlaceEvent event){
+        if (event.isCancelled()){
+            return;
+        }
         // if placed sign, delete record in this location in db
         if (event.getBlockPlaced().getState() instanceof Sign){
             plugin.getDataLogic().removeShop(event.getBlockPlaced().getLocation());

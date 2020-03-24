@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.evermc.evershop.EverShop;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,6 +24,8 @@ import org.bukkit.inventory.ItemStack;
 public class ShopLogic {
 
     private EverShop plugin;
+
+    private Set<Location> pendingRemoveBlocks = new HashSet<Location>();
 
     List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
@@ -42,6 +46,10 @@ public class ShopLogic {
     
     public ShopLogic(EverShop plugin){
         this.plugin = plugin;
+    }
+
+    public boolean isLinkableBlock(Material m){
+        return linkable_container.contains(m) || linkable_redstone.contains(m);
     }
 
     public void accessShop(Player p, Location loc, Action action){
@@ -130,7 +138,8 @@ public class ShopLogic {
                     return;
                 }
                 int n = getPrice(line);
-                final ShopInfo newshop = new ShopInfo(this.plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player));
+                // TODO - init perm when creating shop
+                final ShopInfo newshop = new ShopInfo(this.plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
                 final Sign sign = (Sign)block.getState();
                 plugin.getDataLogic().saveShop(newshop, () -> {
                     String lin = sign.getLine(0);
@@ -211,5 +220,27 @@ public class ShopLogic {
             result += "" + isc.getType() + "x" + isc.getAmount() + ";";
         }
         return result;
+    }
+
+    public void tryBreakBlock(final Location loc, final Player p){
+        if (pendingRemoveBlocks.contains(loc)){
+            return;
+        }
+        pendingRemoveBlocks.add(loc);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            ShopInfo[] si = plugin.getDataLogic().getBlockInfo(loc);
+            if (si == null){
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    pendingRemoveBlocks.remove(loc);
+                    loc.getBlock().breakNaturally();
+                });
+            } else {
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    pendingRemoveBlocks.remove(loc);
+                    p.sendMessage("You cannot break this");
+                    // TODO - check perm and show info about shop
+                });
+            }
+        });
     }
 }

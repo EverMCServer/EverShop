@@ -2,8 +2,10 @@ package com.evermc.evershop.logic;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -48,11 +50,11 @@ public class DataLogic{
         String[] query = {
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "shop` (" +
-              "id int(10) UNSIGNED NOT NULL AUTO_INCREMENT," +
-              "epoch int(10) UNSIGNED NOT NULL," +
-              "action_id int(10) UNSIGNED NOT NULL," +
-              "player_id int(10) UNSIGNED NOT NULL," +
-              "world_id int(10) UNSIGNED NOT NULL," +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
+              "epoch int(10) NOT NULL," +
+              "action_id int(10) NOT NULL," +
+              "player_id int(10) NOT NULL," +
+              "world_id int(10) NOT NULL," +
               "x int(11) NOT NULL," +
               "y int(11) NOT NULL," +
               "z int(11) NOT NULL," +
@@ -183,12 +185,48 @@ public class DataLogic{
             for (SerializableLocation sloc : shop.targets){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') ON DUPLICATE KEY UPDATE `shops` = CONCAT(`shops`, '," + ret + "')";
-                System.out.println(query);
                 // TODO - if insert failed, revert all of the changes?
                 SQL.insert(query);
             }
             Bukkit.getScheduler().runTask(plugin, afterSave);
         });
+    }
+
+    public ShopInfo[] getBlockInfo(Location loc){
+        String query = "SELECT shops FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        List<Object[]> ret = SQL.query(query, 1);
+        if (ret.size() == 0){
+            return null;
+        }
+        String shopstr = (String)ret.get(0)[0];
+        if (shopstr == null || shopstr == ""){
+            return null;
+        }
+        Set<ShopInfo> retval = new HashSet<ShopInfo>();
+        for (String str : shopstr.split(",")){
+            int shop = Integer.parseInt(str);
+            ShopInfo t = getShopInfo(shop);
+            if (t != null){
+                retval.add(t);
+            }
+        }
+        if (retval.size() > 0){
+            return retval.toArray(new ShopInfo[retval.size()]);
+        } else {
+            return null;
+        }
+    }
+
+    public ShopInfo getShopInfo(int shopid){
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE id = '" + shopid + "'";
+        List<Object[]> ret = SQL.query(query, 12);
+        if (ret.size() == 0){
+            return null;
+        }
+        Object[] k = ret.get(0);
+        return new ShopInfo((int)k[0], (int)k[1], (int)k[2], (int)k[3], (int)k[4], (int)k[5]
+        , (int)k[6], (int)k[7], (int)k[8], (byte[])k[9], (byte[])k[10], (String)k[11]);
     }
 
     public static byte[] toBlob(Object object){
