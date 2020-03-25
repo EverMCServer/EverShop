@@ -3,7 +3,6 @@ package com.evermc.evershop.event;
 import com.evermc.evershop.EverShop;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -20,13 +19,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 public class InteractEvent implements Listener{
     
     private EverShop plugin;
-    private Material linkMaterial;
-    private Material destroyMaterial;
 
     public InteractEvent(EverShop plugin){
         this.plugin = plugin;
-        linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
-        destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
     }
     
     @EventHandler (priority = EventPriority.NORMAL)
@@ -50,20 +45,21 @@ public class InteractEvent implements Listener{
                 return;
             }
         }
-        if (event.getMaterial() == linkMaterial){
+        if (event.getMaterial() == plugin.getShopLogic().getLinkMaterial()){
             plugin.getShopLogic().registerBlock(event.getPlayer(), clicked, event.getAction());
         } 
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
     public void on(BlockBreakEvent event){
-        // delete record in db? or update?
-        // check break permission?
-        //   - async : cancel the event, and check. after check, breakNatually
-        //   - sync : maybe cache all chest info from database when start. (then need update chest when delete shop at DataLogic:160)
-        //   - do not check, update shop only?
+        
         if (event.isCancelled()){
             return;
+        }
+        // TODO - op break
+        if (event.getBlock().getState() instanceof Sign && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
+            event.setCancelled(true);
+            plugin.getShopLogic().tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
         }
         if (!plugin.getShopLogic().isLinkableBlock(event.getBlock().getType())){
             return;
@@ -80,6 +76,9 @@ public class InteractEvent implements Listener{
         // if placed sign, delete record in this location in db
         if (event.getBlockPlaced().getState() instanceof Sign){
             plugin.getDataLogic().removeShop(event.getBlockPlaced().getLocation());
+        }
+        if (event.getBlockPlaced().getType() == Material.CHEST || event.getBlockPlaced().getType() == Material.TRAPPED_CHEST){
+            // TODO - check if generates a double chest. -> cancel the event
         }
     }
 

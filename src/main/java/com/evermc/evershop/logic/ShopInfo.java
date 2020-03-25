@@ -1,7 +1,6 @@
 package com.evermc.evershop.logic;
 
 import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;

@@ -218,6 +218,18 @@ public class DataLogic{
         }
     }
 
+    public ShopInfo getShopInfo(Location loc){
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        List<Object[]> ret = SQL.query(query, 12);
+        if (ret.size() == 0){
+            return null;
+        }
+        Object[] k = ret.get(0);
+        return new ShopInfo((int)k[0], (int)k[1], (int)k[2], (int)k[3], (int)k[4], (int)k[5]
+        , (int)k[6], (int)k[7], (int)k[8], (byte[])k[9], (byte[])k[10], (String)k[11]);
+    }
+
     public ShopInfo getShopInfo(int shopid){
         String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE id = '" + shopid + "'";
         List<Object[]> ret = SQL.query(query, 12);

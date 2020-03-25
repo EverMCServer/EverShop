@@ -30,6 +30,13 @@ public class PlayerLogic {
         return getPlayerInfo(p).id;
     }
 
+    public PlayerInfo getPlayerInfo(int playerid){
+        for (PlayerInfo pi : cachedPlayers.values()){
+            if (pi.id == playerid) return pi;
+        }
+        return null;
+    }
+
     /**
      * get playerinfo from @param player 
      * if currrent name is different with cached name, update the cache

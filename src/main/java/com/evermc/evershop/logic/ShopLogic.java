@@ -2,7 +2,6 @@ package com.evermc.evershop.logic;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +24,9 @@ public class ShopLogic {
 
     private EverShop plugin;
 
+    private Material linkMaterial;
+    private Material destroyMaterial;
+
     private Set<Location> pendingRemoveBlocks = new HashSet<Location>();
 
     List<Material> linkable_container = Arrays.asList(
@@ -46,14 +48,40 @@ public class ShopLogic {
     
     public ShopLogic(EverShop plugin){
         this.plugin = plugin;
+        linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
+        destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
+    }
+
+    public Material getLinkMaterial(){
+        return this.linkMaterial;
+    }
+
+    public Material getDestroyMaterial(){
+        return this.destroyMaterial;
     }
 
     public boolean isLinkableBlock(Material m){
         return linkable_container.contains(m) || linkable_redstone.contains(m);
     }
 
-    public void accessShop(Player p, Location loc, Action action){
-
+    public void accessShop(final Player p, final Location loc, final Action action){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            ShopInfo si = plugin.getDataLogic().getShopInfo(loc);
+            if (si == null) return;
+            if (action == Action.LEFT_CLICK_BLOCK){
+                // TODO - check perm
+                final String str = "This shop " + 
+                // TODO - transaction types
+                "sells " +
+                si.items + " for $" + si.price + "!";
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    p.sendMessage(str);
+                });
+            } else {
+                // TODO - check perm
+                // TODO - transaction
+            }
+        });
     }
     public void registerBlock(final Player p, Block block, Action action){
 
@@ -62,7 +90,7 @@ public class ShopLogic {
             return;
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
-                
+
             // TODO: WorldGuard Check if block is not Sign
 
             if (linkable_container.contains(block.getType())){
@@ -222,7 +250,41 @@ public class ShopLogic {
         return result;
     }
 
-    public void tryBreakBlock(final Location loc, final Player p){
+    public void tryBreakShop(final Location loc, final Player p){
+        if (pendingRemoveBlocks.contains(loc)){
+            return;
+        }
+        pendingRemoveBlocks.add(loc);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            ShopInfo si = plugin.getDataLogic().getShopInfo(loc);
+            if (si == null){
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    pendingRemoveBlocks.remove(loc);
+                    loc.getBlock().breakNaturally();
+                });
+            } else {
+                if (si.player_id == plugin.getPlayerLogic().getPlayer(p)){
+                    Bukkit.getScheduler().runTask(plugin, ()->{
+                        pendingRemoveBlocks.remove(loc);
+                        plugin.getDataLogic().removeShop(loc);
+                        loc.getBlock().breakNaturally();
+                    });
+                } else {
+                    Bukkit.getScheduler().runTask(plugin, ()->{
+                        pendingRemoveBlocks.remove(loc);
+                        p.sendMessage("You cannot break this!");
+                    });
+                }
+            }
+        });
+    }
+    public void tryBreakBlock(final Location lo, final Player p){
+        final Location loc;
+        if (lo.getBlock().getState() instanceof Container && ((Container) lo.getBlock().getState()).getInventory().getSize() == 54){
+            loc = ((DoubleChestInventory)((Container) lo.getBlock().getState()).getInventory()).getLeftSide().getLocation();
+        }else{
+            loc = lo;
+        }
         if (pendingRemoveBlocks.contains(loc)){
             return;
         }
@@ -232,13 +294,25 @@ public class ShopLogic {
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
-                    loc.getBlock().breakNaturally();
+                    lo.getBlock().breakNaturally();
                 });
             } else {
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
-                    p.sendMessage("You cannot break this");
-                    // TODO - check perm and show info about shop
+                    String str = "You cannot break this! It's locked by ";
+                    int count = 0;
+                    for (ShopInfo sii : si){
+                        if (sii.player_id == plugin.getPlayerLogic().getPlayer(p)){
+                            str += "shop at (" + sii.x +"," + sii.y + "," + sii.z + "), ";
+                        }else{
+                            count++;
+                        }
+                    }
+                    if (count > 0){
+                        str += "" + count + " shops of other player.  ";
+                    }
+                    str = str.substring(0, str.length() - 2);
+                    p.sendMessage(str);
                 });
             }
         });
