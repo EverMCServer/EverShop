@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
 
 import org.bukkit.Location;
@@ -22,7 +21,7 @@ public class SerializableLocation implements Serializable{
     public int y;
     public int z;
     public int world;
-    public SerializableLocation(EverShop plugin, Location loc){
+    public SerializableLocation(Location loc){
         this.x = loc.getBlockX();
         this.y = loc.getBlockY();
         this.z = loc.getBlockZ();

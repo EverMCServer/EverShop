@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;

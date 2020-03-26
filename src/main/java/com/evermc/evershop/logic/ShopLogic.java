@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.structure.PlayerInfo;
+import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.structure.TransactionInfo;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -174,7 +177,7 @@ public class ShopLogic {
                 }
                 int n = getPrice(line);
                 // TODO - init perm when creating shop
-                final ShopInfo newshop = new ShopInfo(plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
+                final ShopInfo newshop = new ShopInfo(a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
                 if (newshop.items.size() == 0){
                     p.sendMessage("You should put some items in the chest first!");
                     return;

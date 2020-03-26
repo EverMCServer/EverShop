@@ -1,4 +1,4 @@
-package com.evermc.evershop.logic;
+package com.evermc.evershop.structure;
 
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -6,13 +6,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.bukkit.Location;
 
 public class PlayerInfo {
-    int id;
-    UUID uuid;
-    String name;
-    boolean advanced;
-    CopyOnWriteArraySet<Location> reg1;
-    CopyOnWriteArraySet<Location> reg2;
-    boolean reg_is_container;
+    public int id;
+    public UUID uuid;
+    public String name;
+    public boolean advanced;
+    public CopyOnWriteArraySet<Location> reg1;
+    public CopyOnWriteArraySet<Location> reg2;
+    public boolean reg_is_container;
 
     public String toString(){
         return "PlayerInfo{id:" + id + ", uuid:" + uuid + ", name:" + name + ", advanced:" + advanced + "}";

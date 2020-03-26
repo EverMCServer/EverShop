@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.MySQLDataSource;
 import com.evermc.evershop.database.SQLDataSource;
+import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
 

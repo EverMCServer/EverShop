@@ -1,4 +1,4 @@
-package com.evermc.evershop.logic;
+package com.evermc.evershop.structure;
 
 import java.util.HashSet;
 import java.util.Set;

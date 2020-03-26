@@ -1,4 +1,4 @@
-package com.evermc.evershop.logic;
+package com.evermc.evershop.structure;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
-import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.DataLogic;
+import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
@@ -16,30 +17,30 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 
 public class ShopInfo {
-    int id;
-    int epoch;
-    int action_id;
-    int player_id;
-    int world_id;
-    int x;
-    int y;
-    int z;
-    int price;
-    Set<SerializableLocation> targets;
-    Set<ItemStack> items;
-    String perm;
+    public int id;
+    public int epoch;
+    public int action_id;
+    public int player_id;
+    public int world_id;
+    public int x;
+    public int y;
+    public int z;
+    public int price;
+    public Set<SerializableLocation> targets;
+    public Set<ItemStack> items;
+    public String perm;
     
-    public ShopInfo(EverShop plugin, int action_id, int player_id, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
+    public ShopInfo(int action_id, int player_id, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
         this(0, (int)(System.currentTimeMillis()/1000), action_id, player_id, DataLogic.getWorldId(loc.getWorld()), 
         loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), price, null, items, perm);
         this.targets = new HashSet<SerializableLocation>();
         for (Location loca : targets){
-            this.targets.add(new SerializableLocation(plugin,loca));
+            this.targets.add(new SerializableLocation(loca));
         }
     }
 
-    public ShopInfo(EverShop plugin, int action_id, Player p, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
-        this(plugin, action_id, PlayerLogic.getPlayer(p), loc, price, targets, items, perm);
+    public ShopInfo(int action_id, Player p, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
+        this(action_id, PlayerLogic.getPlayer(p), loc, price, targets, items, perm);
     }
 
     public ShopInfo(int id, int epoch, int action_id, int player_id, int world_id, int x, int y, int z, int price, byte[] targets, byte[] items, String perm){
