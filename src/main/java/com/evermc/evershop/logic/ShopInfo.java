@@ -39,7 +39,7 @@ public class ShopInfo {
     }
 
     public ShopInfo(EverShop plugin, int action_id, Player p, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
-        this(plugin, action_id, plugin.getPlayerLogic().getPlayer(p), loc, price, targets, items, perm);
+        this(plugin, action_id, PlayerLogic.getPlayer(p), loc, price, targets, items, perm);
     }
 
     public ShopInfo(int id, int epoch, int action_id, int player_id, int world_id, int x, int y, int z, int price, byte[] targets, byte[] items, String perm){

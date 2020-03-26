@@ -22,13 +22,18 @@ import org.bukkit.util.io.BukkitObjectOutputStream;
 
 public class DataLogic{
     
-    private EverShop plugin;
     private SQLDataSource SQL;
-    private Map <UUID, Integer> worldList;
+    private static EverShop plugin;
+    private static Map <UUID, Integer> worldList;
 
-    public DataLogic(EverShop plugin){
+    static{
+        worldList = null;
+        plugin = null;
+    }
 
-        this.plugin = plugin;
+    public DataLogic(EverShop _plugin){
+
+        plugin = _plugin;
         String sqltype = plugin.getConfig().getString("evershop.database.datasource");
         if ("mysql".equals(sqltype)){
             SQL = new MySQLDataSource(plugin.getConfig().getConfigurationSection("evershop.database.mysql"));
@@ -109,18 +114,18 @@ public class DataLogic{
         SQL.exec(query);
     }
 
-    public int getWorldId(World w){
+    public static int getWorldId(World w){
         UUID uid = w.getUID();
         if (worldList.containsKey(uid)){
             return worldList.get(uid);
         } else {
             LogUtil.log(Level.SEVERE, "Reload worlds.");
-            initWorld();
+            plugin.getDataLogic().initWorld();
             return worldList.get(uid);
         }
     }
 
-    public UUID getWorldUUID(int id){
+    public static UUID getWorldUUID(int id){
         for (UUID uuid : worldList.keySet()){
             if (worldList.get(uuid) == id){
                 return uuid;
@@ -129,7 +134,7 @@ public class DataLogic{
         return null;
     }
 
-    public World getWorld(int id){
+    public static World getWorld(int id){
         UUID uid = getWorldUUID(id);
         if (uid == null) return null;
         return Bukkit.getWorld(uid);
@@ -175,7 +180,7 @@ public class DataLogic{
     public void removeShop(final Location loc){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             // TODO - remove the corresponding record in chests? Since shopid is auto incremental, it will nor reuse id, then remove is not necessary. 
-            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
              + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
             SQL.exec(query);
         });
@@ -208,7 +213,7 @@ public class DataLogic{
     }
 
     public ShopInfo[] getBlockInfo(Location loc){
-        String query = "SELECT shops FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+        String query = "SELECT shops FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
         + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
         List<Object[]> ret = SQL.query(query, 1);
         if (ret.size() == 0){
@@ -234,7 +239,7 @@ public class DataLogic{
     }
 
     public ShopInfo getShopInfo(Location loc){
-        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + plugin.getDataLogic().getWorldId(loc.getWorld())
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
         + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
         List<Object[]> ret = SQL.query(query, 12);
         if (ret.size() == 0){

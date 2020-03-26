@@ -23,9 +23,14 @@ import org.bukkit.inventory.ItemStack;
 public class ShopLogic {
 
     private EverShop plugin;
+    
+    private static Material linkMaterial;
+    private static Material destroyMaterial;
 
-    private Material linkMaterial;
-    private Material destroyMaterial;
+    static{
+        linkMaterial = null;
+        destroyMaterial = null;
+    }
 
     private Set<Location> pendingRemoveBlocks = new HashSet<Location>();
 
@@ -52,12 +57,12 @@ public class ShopLogic {
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
     }
 
-    public Material getLinkMaterial(){
-        return this.linkMaterial;
+    public static Material getLinkMaterial(){
+        return linkMaterial;
     }
 
-    public Material getDestroyMaterial(){
-        return this.destroyMaterial;
+    public static Material getDestroyMaterial(){
+        return destroyMaterial;
     }
 
     public boolean isLinkableBlock(Material m){
@@ -86,7 +91,7 @@ public class ShopLogic {
     }
     public void registerBlock(final Player p, Block block, Action action){
 
-        PlayerInfo player = plugin.getPlayerLogic().getPlayerInfo(p);
+        PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (action == Action.RIGHT_CLICK_BLOCK && !player.advanced){
             return;
         }
@@ -169,13 +174,17 @@ public class ShopLogic {
                 int n = getPrice(line);
                 // TODO - init perm when creating shop
                 final ShopInfo newshop = new ShopInfo(this.plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
+                if (newshop.items.size() == 0){
+                    p.sendMessage("You should put some items in the chest first!");
+                    return;
+                }
                 final Sign sign = (Sign)block.getState();
                 plugin.getDataLogic().saveShop(newshop, () -> {
                     String lin = sign.getLine(0);
                     lin = ChatColor.BLUE.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
-                    plugin.getPlayerLogic().getPlayerInfo(p).removeRegs();
+                    PlayerLogic.getPlayerInfo(p).removeRegs();
                     p.sendMessage("You have created a " + plugin.getTransactionLogic().getShopType(newshop.action_id) + " shop, price is " + newshop.price);
                 }, () -> {
                     p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
@@ -264,7 +273,7 @@ public class ShopLogic {
                     loc.getBlock().breakNaturally();
                 });
             } else {
-                if (si.player_id == plugin.getPlayerLogic().getPlayer(p)){
+                if (si.player_id == PlayerLogic.getPlayer(p)){
                     Bukkit.getScheduler().runTask(plugin, ()->{
                         pendingRemoveBlocks.remove(loc);
                         plugin.getDataLogic().removeShop(loc);
@@ -303,7 +312,7 @@ public class ShopLogic {
                     String str = "You cannot break this! It's locked by ";
                     int count = 0;
                     for (ShopInfo sii : si){
-                        if (sii.player_id == plugin.getPlayerLogic().getPlayer(p)){
+                        if (sii.player_id == PlayerLogic.getPlayer(p)){
                             str += "shop at (" + sii.x +"," + sii.y + "," + sii.z + "), ";
                         }else{
                             count++;

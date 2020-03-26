@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.DataLogic;
 
 import org.bukkit.Location;
 
@@ -25,7 +26,7 @@ public class SerializableLocation implements Serializable{
         this.x = loc.getBlockX();
         this.y = loc.getBlockY();
         this.z = loc.getBlockZ();
-        this.world = plugin.getDataLogic().getWorldId(loc.getWorld());
+        this.world = DataLogic.getWorldId(loc.getWorld());
     }
     
     public Map<String, Object> serialize() {
@@ -37,8 +38,8 @@ public class SerializableLocation implements Serializable{
         return data;
     }
 
-    public Location toLocation(EverShop plugin){
-        return new Location(plugin.getDataLogic().getWorld(this.world), this.x, this.y, this.z);
+    public Location toLocation(){
+        return new Location(DataLogic.getWorld(this.world), this.x, this.y, this.z);
     }
 
     public String toString(){

@@ -17,24 +17,31 @@ import org.bukkit.entity.Player;
 
 public class PlayerLogic {
     
-    private EverShop plugin;
-    private SQLDataSource SQL;
-    private Map<UUID, PlayerInfo> cachedPlayers;
-    private Map<Integer, PlayerInfo> cachedPlayerId;
+    private static EverShop plugin;
+    private static SQLDataSource SQL;
+    private static Map<UUID, PlayerInfo> cachedPlayers;
+    private static Map<Integer, PlayerInfo> cachedPlayerId;
     
-    public PlayerLogic(EverShop plugin){
-        this.plugin = plugin;
-        this.cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
-        this.cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();
-        this.SQL = plugin.getDataLogic().getSQL();
+    static {
+        plugin = null;
+        SQL = null;
+        cachedPlayerId = null;
+        cachedPlayers = null;
+    }
+
+    public PlayerLogic(EverShop _plugin){
+        plugin = _plugin;
+        cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
+        cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();
+        SQL = plugin.getDataLogic().getSQL();
         getAllPlayers();
     }
 
-    public int getPlayer(Player p){
+    public static int getPlayer(Player p){
         return getPlayerInfo(p).id;
     }
 
-    public PlayerInfo getPlayerInfo(int playerid){
+    public static PlayerInfo getPlayerInfo(int playerid){
         if (cachedPlayerId.containsKey(playerid)){
             return cachedPlayerId.get(playerid);
         } else {
@@ -49,7 +56,7 @@ public class PlayerLogic {
      * get playerinfo from @param player 
      * if currrent name is different with cached name, update the cache
      */
-    public PlayerInfo getPlayerInfo(Player p){
+    public static PlayerInfo getPlayerInfo(Player p){
         UUID uuid = p.getUniqueId();
         String name = p.getDisplayName();
         if (cachedPlayers.containsKey(uuid)){
@@ -72,11 +79,11 @@ public class PlayerLogic {
 
     }
 
-    public boolean isAdvanced(Player p){
+    public static boolean isAdvanced(Player p){
         return getPlayerInfo(p).advanced;
     }
 
-    private PlayerInfo fetchPlayerSync(Player p){
+    private static PlayerInfo fetchPlayerSync(Player p){
 
         UUID uuid = p.getUniqueId();
         String name = p.getDisplayName();
@@ -107,7 +114,7 @@ public class PlayerLogic {
         return pi;
     }
 
-    private PlayerInfo fetchPlayerSync(int playerid){
+    private static PlayerInfo fetchPlayerSync(int playerid){
 
         String query = "SELECT * FROM `" + SQL.getPrefix() + "player` WHERE id = '" + playerid + "'";
         Object[] result = SQL.queryFirst(query, 4);
@@ -132,13 +139,13 @@ public class PlayerLogic {
         return pi;
     }
 
-    private void fetchPlayer(Player p){
+    private static void fetchPlayer(Player p){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             fetchPlayerSync(p);
         });
     }
 
-    public void getAllPlayers(){
+    public static void getAllPlayers(){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "SELECT * FROM `" + SQL.getPrefix() + "player`";
             List<Object[]> result = SQL.query(query, 4);

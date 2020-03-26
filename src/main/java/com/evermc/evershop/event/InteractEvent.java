@@ -1,6 +1,8 @@
 package com.evermc.evershop.event;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.logic.ShopLogic;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -45,7 +47,7 @@ public class InteractEvent implements Listener{
                 return;
             }
         }
-        if (event.getMaterial() == plugin.getShopLogic().getLinkMaterial()){
+        if (event.getMaterial() == ShopLogic.getLinkMaterial()){
             plugin.getShopLogic().registerBlock(event.getPlayer(), clicked, event.getAction());
         } 
     }
@@ -87,7 +89,7 @@ public class InteractEvent implements Listener{
         // Saved player info will be cached at server start.
         // This is used to update playerinfo or add new player info.
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            plugin.getPlayerLogic().getPlayer(event.getPlayer());
+            PlayerLogic.getPlayer(event.getPlayer());
         });
     }
 }

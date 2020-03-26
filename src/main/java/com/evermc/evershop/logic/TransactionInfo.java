@@ -29,7 +29,7 @@ public class TransactionInfo{
         this.playerInv = p.getInventory();
         this.items = items;
         for (SerializableLocation loc : targets){
-            Location lo = loc.toLocation(plugin);
+            Location lo = loc.toLocation();
             BlockState bs = lo.getBlock().getState();
             if (bs instanceof Container)
             this.shopInv.add(((Container)bs).getInventory());
