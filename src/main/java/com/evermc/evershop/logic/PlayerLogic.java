@@ -1,5 +1,6 @@
 package com.evermc.evershop.logic;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,11 +20,14 @@ public class PlayerLogic {
     private EverShop plugin;
     private SQLDataSource SQL;
     private Map<UUID, PlayerInfo> cachedPlayers;
+    private Map<Integer, PlayerInfo> cachedPlayerId;
     
     public PlayerLogic(EverShop plugin){
         this.plugin = plugin;
         this.cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
+        this.cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();
         this.SQL = plugin.getDataLogic().getSQL();
+        getAllPlayers();
     }
 
     public int getPlayer(Player p){
@@ -31,16 +35,19 @@ public class PlayerLogic {
     }
 
     public PlayerInfo getPlayerInfo(int playerid){
-        for (PlayerInfo pi : cachedPlayers.values()){
-            if (pi.id == playerid) return pi;
+        if (cachedPlayerId.containsKey(playerid)){
+            return cachedPlayerId.get(playerid);
+        } else {
+            // this should not happen because all players will be cached at start.
+            PlayerInfo pi = fetchPlayerSync(playerid);
+            LogUtil.log(Level.WARNING, "fetchPlayerSync: playerid=" + playerid + ", PlayerInfo: " + pi);
+            return pi;
         }
-        return null;
     }
 
     /**
      * get playerinfo from @param player 
      * if currrent name is different with cached name, update the cache
-     * cache PlayerInfo when log in, to avoid blocking
      */
     public PlayerInfo getPlayerInfo(Player p){
         UUID uuid = p.getUniqueId();
@@ -52,11 +59,15 @@ public class PlayerLogic {
                 // update cache and db
                 player.name = name;
                 cachedPlayers.put(uuid, player);
+                cachedPlayerId.put(player.id, player);
                 fetchPlayer(p);
             }
             return player;
         } else {
-            return fetchPlayerSync(p);
+            // this should not happen because all players will be cached at start.
+            PlayerInfo pi = fetchPlayerSync(p);
+            LogUtil.log(Level.WARNING, "fetchPlayerSync: Player: [" + p.getUniqueId() + " | " + p.getDisplayName() + "], PlayerInfo: " + pi);
+            return pi;
         }
 
     }
@@ -76,7 +87,7 @@ public class PlayerLogic {
         query = "SELECT * FROM `" + SQL.getPrefix() + "player` WHERE uuid = '" + uuid + "'";
         Object[] result = SQL.queryFirst(query, 4);
         if (result == null){
-            LogUtil.log(Level.SEVERE, "Error in fetchPlayer.");
+            LogUtil.log(Level.SEVERE, "Error in fetchPlayer(Player= [" + p.getUniqueId() + " | " + p.getDisplayName() + "]).");
             return null;
         }
 
@@ -89,6 +100,32 @@ public class PlayerLogic {
         pi.reg1 = new CopyOnWriteArraySet<Location>();
         pi.reg2 = new CopyOnWriteArraySet<Location>();
         cachedPlayers.put(pi.uuid, pi);
+        cachedPlayerId.put(pi.id, pi);
+
+        LogUtil.log(Level.INFO, "Load " + pi);
+
+        return pi;
+    }
+
+    private PlayerInfo fetchPlayerSync(int playerid){
+
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "player` WHERE id = '" + playerid + "'";
+        Object[] result = SQL.queryFirst(query, 4);
+        if (result == null){
+            LogUtil.log(Level.SEVERE, "Error in fetchPlayer(playerid=" + playerid +").");
+            return null;
+        }
+
+        PlayerInfo pi = new PlayerInfo();
+        pi.id = (Integer)result[0];
+        pi.uuid = UUID.fromString((String)result[2]);
+        pi.name = (String)result[1];
+        pi.advanced = (Boolean)result[3];
+        pi.reg_is_container = false;
+        pi.reg1 = new CopyOnWriteArraySet<Location>();
+        pi.reg2 = new CopyOnWriteArraySet<Location>();
+        cachedPlayers.put(pi.uuid, pi);
+        cachedPlayerId.put(pi.id, pi);
 
         LogUtil.log(Level.INFO, "Load " + pi);
 
@@ -98,6 +135,33 @@ public class PlayerLogic {
     private void fetchPlayer(Player p){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             fetchPlayerSync(p);
+        });
+    }
+
+    public void getAllPlayers(){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            String query = "SELECT * FROM `" + SQL.getPrefix() + "player`";
+            List<Object[]> result = SQL.query(query, 4);
+            if (result == null || result.size() == 0){
+                LogUtil.log(Level.SEVERE, "getAllPlayers(): no player found.");
+                return;
+            }
+            
+            for (Object[] o : result){
+                PlayerInfo pi = new PlayerInfo();
+                pi.id = (Integer)o[0];
+                pi.uuid = UUID.fromString((String)o[2]);
+                pi.name = (String)o[1];
+                pi.advanced = (Boolean)o[3];
+                pi.reg_is_container = false;
+                pi.reg1 = new CopyOnWriteArraySet<Location>();
+                pi.reg2 = new CopyOnWriteArraySet<Location>();
+                cachedPlayers.put(pi.uuid, pi);
+                cachedPlayerId.put(pi.id, pi);
+            }
+    
+            LogUtil.log(Level.INFO, "Load " + cachedPlayers.size() + " players.");
+    
         });
     }
 }

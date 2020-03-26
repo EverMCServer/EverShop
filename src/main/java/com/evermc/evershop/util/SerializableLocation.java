@@ -36,6 +36,11 @@ public class SerializableLocation implements Serializable{
         data.put("z", this.z);
         return data;
     }
+
+    public Location toLocation(EverShop plugin){
+        return new Location(plugin.getDataLogic().getWorld(this.world), this.x, this.y, this.z);
+    }
+
     public String toString(){
         return "SeriLoc{world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z;
     }

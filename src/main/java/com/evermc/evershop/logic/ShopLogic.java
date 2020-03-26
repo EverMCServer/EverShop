@@ -75,7 +75,8 @@ public class ShopLogic {
                 "sells " +
                 si.items + " for $" + si.price + "!";
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(str);
+                    TransactionInfo ti = new TransactionInfo(plugin, si.targets, p, si.items);
+                    p.sendMessage(str + "; shophas:"+ti.shopHasItems()+", playerhas:"+ti.playerCanHold());
                 });
             } else {
                 // TODO - check perm

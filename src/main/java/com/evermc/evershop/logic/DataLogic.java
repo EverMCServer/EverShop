@@ -120,6 +120,21 @@ public class DataLogic{
         }
     }
 
+    public UUID getWorldUUID(int id){
+        for (UUID uuid : worldList.keySet()){
+            if (worldList.get(uuid) == id){
+                return uuid;
+            }
+        }
+        return null;
+    }
+
+    public World getWorld(int id){
+        UUID uid = getWorldUUID(id);
+        if (uid == null) return null;
+        return Bukkit.getWorld(uid);
+    }
+
     public void initWorld(){
         
         worldList = new HashMap<UUID, Integer>();

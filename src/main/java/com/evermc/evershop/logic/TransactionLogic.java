@@ -5,17 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.database.SQLDataSource;
 
 public class TransactionLogic {
 
-    private SQLDataSource SQL;
     private Map<String, Integer> actions = new HashMap<String, Integer>();
     private final String [] default_actions = {"buy", "sell", "aaa"}; 
 
     public TransactionLogic(EverShop plugin){
-        
-        this.SQL = plugin.getDataLogic().getSQL();
 
         for (int i = 0; i < default_actions.length; i ++){
             actions.put(default_actions[i], i + 1);
