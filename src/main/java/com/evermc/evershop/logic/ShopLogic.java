@@ -22,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopLogic {
 
-    private EverShop plugin;
+    private static EverShop plugin;
     
     private static Material linkMaterial;
     private static Material destroyMaterial;
@@ -30,18 +30,19 @@ public class ShopLogic {
     static{
         linkMaterial = null;
         destroyMaterial = null;
+        plugin = null;
     }
 
-    private Set<Location> pendingRemoveBlocks = new HashSet<Location>();
+    private static Set<Location> pendingRemoveBlocks = new HashSet<Location>();
 
-    List<Material> linkable_container = Arrays.asList(
+    static final List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
         Material.TRAPPED_CHEST,
         Material.BARREL,
         Material.HOPPER
     );
 
-    List<Material> linkable_redstone = Arrays.asList(
+    static final List<Material> linkable_redstone = Arrays.asList(
         Material.LEVER,
         Material.ACACIA_BUTTON,
         Material.BIRCH_BUTTON,
@@ -51,8 +52,8 @@ public class ShopLogic {
         Material.SPRUCE_BUTTON
     );
     
-    public ShopLogic(EverShop plugin){
-        this.plugin = plugin;
+    public ShopLogic(EverShop _plugin){
+        plugin = _plugin;
         linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
     }
@@ -65,13 +66,13 @@ public class ShopLogic {
         return destroyMaterial;
     }
 
-    public boolean isLinkableBlock(Material m){
+    public static boolean isLinkableBlock(Material m){
         return linkable_container.contains(m) || linkable_redstone.contains(m);
     }
 
-    public void accessShop(final Player p, final Location loc, final Action action){
+    public static void accessShop(final Player p, final Location loc, final Action action){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            ShopInfo si = plugin.getDataLogic().getShopInfo(loc);
+            ShopInfo si = DataLogic.getShopInfo(loc);
             if (si == null) return;
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
@@ -89,7 +90,7 @@ public class ShopLogic {
             }
         });
     }
-    public void registerBlock(final Player p, Block block, Action action){
+    public static void registerBlock(final Player p, Block block, Action action){
 
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (action == Action.RIGHT_CLICK_BLOCK && !player.advanced){
@@ -158,7 +159,7 @@ public class ShopLogic {
 
             else if (block.getState() instanceof Sign){
                 String line = ((Sign)block.getState()).getLine(0);
-                int a = plugin.getTransactionLogic().getActionType(line);
+                int a = TransactionLogic.getActionType(line);
                 if (a == 0) {
                     p.sendMessage("The sign does not contain an available action!");
                     return;
@@ -167,25 +168,25 @@ public class ShopLogic {
                     p.sendMessage("You should register items first!");
                     return;
                 }
-                if (player.reg_is_container != plugin.getTransactionLogic().isContainerShop(a)){
+                if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
                     p.sendMessage("Shop type and your selection is not match!");
                     return;
                 }
                 int n = getPrice(line);
                 // TODO - init perm when creating shop
-                final ShopInfo newshop = new ShopInfo(this.plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
+                final ShopInfo newshop = new ShopInfo(plugin, a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
                 if (newshop.items.size() == 0){
                     p.sendMessage("You should put some items in the chest first!");
                     return;
                 }
                 final Sign sign = (Sign)block.getState();
-                plugin.getDataLogic().saveShop(newshop, () -> {
+                DataLogic.saveShop(newshop, () -> {
                     String lin = sign.getLine(0);
                     lin = ChatColor.BLUE.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
-                    p.sendMessage("You have created a " + plugin.getTransactionLogic().getShopType(newshop.action_id) + " shop, price is " + newshop.price);
+                    p.sendMessage("You have created a " + TransactionLogic.getShopType(newshop.action_id) + " shop, price is " + newshop.price);
                 }, () -> {
                     p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
                 });
@@ -193,7 +194,7 @@ public class ShopLogic {
         }
     }
 
-    private int getPrice(String line){
+    private static int getPrice(String line){
         String ret = "";
         int i = line.length() - 1;
         while (i >= 0 && !Character.isDigit(line.charAt(i))) i--;
@@ -204,7 +205,7 @@ public class ShopLogic {
         return Integer.parseInt(ret);
     }
 
-    private HashSet<ItemStack> getRegisteredItemStacks(PlayerInfo player){
+    private static HashSet<ItemStack> getRegisteredItemStacks(PlayerInfo player){
 
         HashSet<ItemStack> items = new HashSet<ItemStack>();
         if (player.reg_is_container){
@@ -251,7 +252,7 @@ public class ShopLogic {
         }
         return items;
     }
-    private String getRegisteredContents(PlayerInfo player){
+    private static String getRegisteredContents(PlayerInfo player){
         String result = "";
         HashSet<ItemStack> items = getRegisteredItemStacks(player);
         for (ItemStack isc : items){
@@ -260,13 +261,13 @@ public class ShopLogic {
         return result;
     }
 
-    public void tryBreakShop(final Location loc, final Player p){
+    public static void tryBreakShop(final Location loc, final Player p){
         if (pendingRemoveBlocks.contains(loc)){
             return;
         }
         pendingRemoveBlocks.add(loc);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            ShopInfo si = plugin.getDataLogic().getShopInfo(loc);
+            ShopInfo si = DataLogic.getShopInfo(loc);
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
@@ -276,7 +277,7 @@ public class ShopLogic {
                 if (si.player_id == PlayerLogic.getPlayer(p)){
                     Bukkit.getScheduler().runTask(plugin, ()->{
                         pendingRemoveBlocks.remove(loc);
-                        plugin.getDataLogic().removeShop(loc);
+                        DataLogic.removeShop(loc);
                         loc.getBlock().breakNaturally();
                     });
                 } else {
@@ -288,7 +289,7 @@ public class ShopLogic {
             }
         });
     }
-    public void tryBreakBlock(final Location lo, final Player p){
+    public static void tryBreakBlock(final Location lo, final Player p){
         final Location loc;
         if (lo.getBlock().getState() instanceof Container && ((Container) lo.getBlock().getState()).getInventory().getSize() == 54){
             loc = ((DoubleChestInventory)((Container) lo.getBlock().getState()).getInventory()).getLeftSide().getLocation();
@@ -300,7 +301,7 @@ public class ShopLogic {
         }
         pendingRemoveBlocks.add(loc);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            ShopInfo[] si = plugin.getDataLogic().getBlockInfo(loc);
+            ShopInfo[] si = DataLogic.getBlockInfo(loc);
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);

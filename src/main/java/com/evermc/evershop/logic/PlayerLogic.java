@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
@@ -18,13 +17,11 @@ import org.bukkit.entity.Player;
 public class PlayerLogic {
     
     private static EverShop plugin;
-    private static SQLDataSource SQL;
     private static Map<UUID, PlayerInfo> cachedPlayers;
     private static Map<Integer, PlayerInfo> cachedPlayerId;
     
     static {
         plugin = null;
-        SQL = null;
         cachedPlayerId = null;
         cachedPlayers = null;
     }
@@ -33,7 +30,6 @@ public class PlayerLogic {
         plugin = _plugin;
         cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
         cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();
-        SQL = plugin.getDataLogic().getSQL();
         getAllPlayers();
     }
 
@@ -88,11 +84,11 @@ public class PlayerLogic {
         UUID uuid = p.getUniqueId();
         String name = p.getDisplayName();
 
-        String query = "INSERT INTO `" + SQL.getPrefix() + "player` (`name`, `uuid`) VALUES ('" + name + "', '" + uuid + "') ON DUPLICATE KEY UPDATE `name` = VALUES(name)";
-        SQL.exec(query);
+        String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`) VALUES ('" + name + "', '" + uuid + "') ON DUPLICATE KEY UPDATE `name` = VALUES(name)";
+        DataLogic.getSQL().exec(query);
 
-        query = "SELECT * FROM `" + SQL.getPrefix() + "player` WHERE uuid = '" + uuid + "'";
-        Object[] result = SQL.queryFirst(query, 4);
+        query = "SELECT * FROM `" + DataLogic.getPrefix() + "player` WHERE uuid = '" + uuid + "'";
+        Object[] result = DataLogic.getSQL().queryFirst(query, 4);
         if (result == null){
             LogUtil.log(Level.SEVERE, "Error in fetchPlayer(Player= [" + p.getUniqueId() + " | " + p.getDisplayName() + "]).");
             return null;
@@ -116,8 +112,8 @@ public class PlayerLogic {
 
     private static PlayerInfo fetchPlayerSync(int playerid){
 
-        String query = "SELECT * FROM `" + SQL.getPrefix() + "player` WHERE id = '" + playerid + "'";
-        Object[] result = SQL.queryFirst(query, 4);
+        String query = "SELECT * FROM `" + DataLogic.getPrefix() + "player` WHERE id = '" + playerid + "'";
+        Object[] result = DataLogic.getSQL().queryFirst(query, 4);
         if (result == null){
             LogUtil.log(Level.SEVERE, "Error in fetchPlayer(playerid=" + playerid +").");
             return null;
@@ -147,8 +143,8 @@ public class PlayerLogic {
 
     public static void getAllPlayers(){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "SELECT * FROM `" + SQL.getPrefix() + "player`";
-            List<Object[]> result = SQL.query(query, 4);
+            String query = "SELECT * FROM `" + DataLogic.getPrefix() + "player`";
+            List<Object[]> result = DataLogic.getSQL().query(query, 4);
             if (result == null || result.size() == 0){
                 LogUtil.log(Level.SEVERE, "getAllPlayers(): no player found.");
                 return;

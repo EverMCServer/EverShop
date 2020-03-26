@@ -8,8 +8,8 @@ import com.evermc.evershop.EverShop;
 
 public class TransactionLogic {
 
-    private Map<String, Integer> actions = new HashMap<String, Integer>();
-    private final String [] default_actions = {"buy", "sell", "aaa"}; 
+    private static Map<String, Integer> actions = new HashMap<String, Integer>();
+    private static final String [] default_actions = {"buy", "sell", "aaa"}; 
 
     public TransactionLogic(EverShop plugin){
 
@@ -29,7 +29,7 @@ public class TransactionLogic {
         }
     }
 
-    public int getActionType(String action){
+    public static int getActionType(String action){
         if (actions.containsKey(action)){
             return actions.get(action);
         }
@@ -46,12 +46,12 @@ public class TransactionLogic {
         return 0;
     }
 
-    public boolean isContainerShop(int action){
+    public static boolean isContainerShop(int action){
         // TODO 
         return action <= 2 && action >= 1;
     }
 
-    public String getShopType(int action){
+    public static String getShopType(int action){
         // TODO 
         return default_actions[action-1];
     }

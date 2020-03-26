@@ -1,6 +1,7 @@
 package com.evermc.evershop.event;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 
@@ -42,13 +43,13 @@ public class InteractEvent implements Listener{
         if (clicked.getState() instanceof Sign){
             Sign sign = (Sign) clicked.getState();
             if ((int)sign.getLine(0).charAt(0) == 167){
-                plugin.getShopLogic().accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
+                ShopLogic.accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
                 // if clicked on formatted signs, no need to register, so return
                 return;
             }
         }
         if (event.getMaterial() == ShopLogic.getLinkMaterial()){
-            plugin.getShopLogic().registerBlock(event.getPlayer(), clicked, event.getAction());
+            ShopLogic.registerBlock(event.getPlayer(), clicked, event.getAction());
         } 
     }
 
@@ -61,13 +62,13 @@ public class InteractEvent implements Listener{
         // TODO - op break
         if (event.getBlock().getState() instanceof Sign && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
             event.setCancelled(true);
-            plugin.getShopLogic().tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
+            ShopLogic.tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
         }
-        if (!plugin.getShopLogic().isLinkableBlock(event.getBlock().getType())){
+        if (!ShopLogic.isLinkableBlock(event.getBlock().getType())){
             return;
         }
         event.setCancelled(true);
-        plugin.getShopLogic().tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
+        ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
@@ -77,7 +78,7 @@ public class InteractEvent implements Listener{
         }
         // if placed sign, delete record in this location in db
         if (event.getBlockPlaced().getState() instanceof Sign){
-            plugin.getDataLogic().removeShop(event.getBlockPlaced().getLocation());
+            DataLogic.removeShop(event.getBlockPlaced().getLocation());
         }
         if (event.getBlockPlaced().getType() == Material.CHEST || event.getBlockPlaced().getType() == Material.TRAPPED_CHEST){
             // TODO - check if generates a double chest. -> cancel the event

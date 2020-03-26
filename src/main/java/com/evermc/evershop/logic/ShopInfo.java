@@ -30,7 +30,7 @@ public class ShopInfo {
     String perm;
     
     public ShopInfo(EverShop plugin, int action_id, int player_id, Location loc, int price, Set<Location> targets, Set<ItemStack> items, String perm){
-        this(0, (int)(System.currentTimeMillis()/1000), action_id, player_id, plugin.getDataLogic().getWorldId(loc.getWorld()), 
+        this(0, (int)(System.currentTimeMillis()/1000), action_id, player_id, DataLogic.getWorldId(loc.getWorld()), 
         loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), price, null, items, perm);
         this.targets = new HashSet<SerializableLocation>();
         for (Location loca : targets){
