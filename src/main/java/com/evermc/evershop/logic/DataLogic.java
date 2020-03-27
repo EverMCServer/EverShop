@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.database.LiteDataSource;
 import com.evermc.evershop.database.MySQLDataSource;
 import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.structure.ShopInfo;
@@ -33,19 +34,26 @@ public class DataLogic{
         SQL = null;
     }
 
-    public DataLogic(EverShop _plugin){
+    public static boolean init(EverShop _plugin){
 
         plugin = _plugin;
         String sqltype = plugin.getConfig().getString("evershop.database.datasource");
         if ("mysql".equals(sqltype)){
             SQL = new MySQLDataSource(plugin.getConfig().getConfigurationSection("evershop.database.mysql"));
-            setupDB();
+            if (SQL == null || !SQL.testConnection()) return false;
+            setupDB_MySQL();
             LogUtil.log(Level.INFO, "Connected to MySQL dataSource");
+        } else if ("sqlite".equals(sqltype)){
+            SQL = new LiteDataSource(plugin.getConfig().getConfigurationSection("evershop.database.sqlite"));  
+            if (SQL == null || !SQL.testConnection()) return false;
+            setupDB_SQLite();
+            LogUtil.log(Level.INFO, "Connected to SQLite dataSource");
         } else {
             LogUtil.log(Level.SEVERE, "Unrecognized data source");
+            return false;
         }
 
-        initWorld();
+        return initWorld();
     }
 
     public static SQLDataSource getSQL(){
@@ -56,7 +64,7 @@ public class DataLogic{
         return SQL.getPrefix();
     }
     
-    public void setupDB(){
+    public static void setupDB_MySQL(){
 
         String[] query = {
 
@@ -120,6 +128,62 @@ public class DataLogic{
         SQL.exec(query);
     }
 
+    public static void setupDB_SQLite(){
+
+        String[] query = {
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "shop` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "epoch INTEGER NOT NULL," +
+              "action_id INTEGER NOT NULL," +
+              "player_id INTEGER NOT NULL," +
+              "world_id INTEGER NOT NULL," +
+              "x INTEGER NOT NULL," +
+              "y INTEGER NOT NULL," +
+              "z INTEGER NOT NULL," +
+              "price INTEGER NOT NULL," +
+              "targets BLOB NOT NULL," +
+              "items BLOB NOT NULL," +
+              "perm varchar(1024) NOT NULL," +
+              "UNIQUE (world_id,x,y,z)" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "player` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "name varchar(16) NOT NULL," +
+              "uuid varchar(36) NOT NULL," +
+              "advanced tinyint(1) NOT NULL DEFAULT '0'," +
+              "UNIQUE (uuid)" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "world` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "uuid varchar(36) NOT NULL," +
+              "UNIQUE (uuid)" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "target` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "world_id INTEGER NOT NULL," +
+              "x INTEGER NOT NULL," +
+              "y INTEGER NOT NULL," +
+              "z INTEGER NOT NULL," +
+              "shops varchar(1024) NOT NULL," +
+              "UNIQUE (world_id,x,y,z)" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "transaction` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "shop_id INTEGER NOT NULL," +
+              "player_id INTEGER NOT NULL," +
+              "time INTEGER NOT NULL," +
+              "count INTEGER NOT NULL," +
+              "UNIQUE (shop_id,player_id,time)" +
+            ");"
+        };
+        SQL.exec(query);
+    }
+
     public static int getWorldId(World w){
         UUID uid = w.getUID();
         if (worldList.containsKey(uid)){
@@ -146,15 +210,15 @@ public class DataLogic{
         return Bukkit.getWorld(uid);
     }
 
-    public static void initWorld(){
+    public static boolean initWorld(){
         
         worldList = new HashMap<UUID, Integer>();
 
-        String query = "INSERT IGNORE INTO `" + SQL.getPrefix() + "world` (uuid) VALUES ";
+        String query = SQL.INSERT_IGNORE() + "INTO `" + SQL.getPrefix() + "world` (uuid) VALUES ";
         
         if (Bukkit.getWorlds() == null){
             LogUtil.log(Level.SEVERE, "Cannot get worlds.");
-            return;
+            return false;
         }
 
         for (World w : Bukkit.getWorlds()){
@@ -172,7 +236,7 @@ public class DataLogic{
         
         if (result == null){
             LogUtil.log(Level.SEVERE, "Error in initWorld.");
-            return;
+            return false;
         }
         
         for (Object[] o : result){
@@ -181,6 +245,7 @@ public class DataLogic{
 
         LogUtil.log(Level.INFO, "Load " + worldList.size() + " worlds.");
 
+        return true;
     }
 
     public static void removeShop(final Location loc){
@@ -210,7 +275,7 @@ public class DataLogic{
             }
             for (SerializableLocation sloc : shop.targets){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
-                + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') ON DUPLICATE KEY UPDATE `shops` = CONCAT(`shops`, '," + ret + "')";
+                + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
                 // TODO - if insert failed, revert all of the changes?
                 SQL.insert(query);
             }

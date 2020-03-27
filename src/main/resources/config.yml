@@ -1,6 +1,6 @@
 evershop:
   database:
-    datasource: mysql
+    datasource: sqlite
     mysql:
       hostname: 127.0.0.1
       username: test
@@ -8,6 +8,9 @@ evershop:
       db_name: test
       prefix: es_
       port: 3306
+    sqlite: 
+      filename: database.db
+      prefix: es_
   linkMaterial: redstone
   destroyMaterial: golden_axe
   #TODO change to lang files

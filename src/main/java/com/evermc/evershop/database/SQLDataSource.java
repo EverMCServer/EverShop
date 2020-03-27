@@ -6,22 +6,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.zaxxer.hikari.HikariDataSource;
-
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
+import javax.sql.DataSource;
+
 import com.evermc.evershop.util.LogUtil;
 
 public abstract class SQLDataSource{
     
     protected ConfigurationSection config;
     protected String prefix;
-    protected HikariDataSource ds;
+    protected DataSource ds;
 
-    abstract SQLDataSource createDataSource();
+    public abstract String INSERT_IGNORE();
+    public abstract String ON_DUPLICATE(String col);
+    public abstract String CONCAT(String s1, String s2);
+    
 
     public Connection getConnection() {
         try {
@@ -32,6 +36,21 @@ public abstract class SQLDataSource{
             return null;
         }
         return null;
+    }
+
+    public boolean testConnection(){
+        if (ds != null){
+            try{
+                Connection conn;
+                conn = ds.getConnection();
+                conn.close();
+                return true;
+            } catch (SQLException e) {
+                return false;
+            } 
+        } else {
+            return false;
+        }
     }
 
     public String getPrefix(){

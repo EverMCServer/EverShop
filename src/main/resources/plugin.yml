@@ -4,10 +4,8 @@ version: 1.0
 description: EverShop-1.0
 author: djytw
 load: POSTWORLD
-softdepend:
- # mandatory dependencies
- #- Vault
- #- LangUtils
+depend:
+ - Vault
 api-version: 1.14
 
 commands:

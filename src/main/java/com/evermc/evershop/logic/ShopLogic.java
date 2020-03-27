@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
@@ -85,7 +86,7 @@ public class ShopLogic {
                 si.items + " for $" + si.price + "!";
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(plugin, si.targets, p, si.items);
-                    p.sendMessage(str + "; shophas:"+ti.shopHasItems()+", playerhas:"+ti.playerCanHold());
+                    p.sendMessage(str + "; shophas:"+ti.shopHasItems()+", playerhas:"+ti.playerCanHold() + ", playermoney="+VaultHandler.getEconomy().getBalance(p));
                 });
             } else {
                 // TODO - check perm

@@ -55,7 +55,7 @@ public class PlayerLogic {
      */
     public static PlayerInfo getPlayerInfo(Player p){
         UUID uuid = p.getUniqueId();
-        String name = p.getDisplayName();
+        String name = p.getName();
         if (cachedPlayers.containsKey(uuid)){
             // cache hit, no block
             PlayerInfo player = cachedPlayers.get(uuid);
@@ -70,7 +70,7 @@ public class PlayerLogic {
         } else {
             // this should not happen because all players will be cached at start.
             PlayerInfo pi = fetchPlayerSync(p);
-            LogUtil.log(Level.WARNING, "fetchPlayerSync: Player: [" + p.getUniqueId() + " | " + p.getDisplayName() + "], PlayerInfo: " + pi);
+            LogUtil.log(Level.WARNING, "fetchPlayerSync: Player: [" + p.getUniqueId() + " | " + p.getName() + "], PlayerInfo: " + pi);
             return pi;
         }
 
@@ -83,15 +83,16 @@ public class PlayerLogic {
     private static PlayerInfo fetchPlayerSync(Player p){
 
         UUID uuid = p.getUniqueId();
-        String name = p.getDisplayName();
+        String name = p.getName();
 
-        String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`) VALUES ('" + name + "', '" + uuid + "') ON DUPLICATE KEY UPDATE `name` = VALUES(name)";
+        String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`) VALUES ('" + name + "', '" + uuid + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`name` = '" + name + "'";
+        System.out.println(query);
         DataLogic.getSQL().exec(query);
 
         query = "SELECT * FROM `" + DataLogic.getPrefix() + "player` WHERE uuid = '" + uuid + "'";
         Object[] result = DataLogic.getSQL().queryFirst(query, 4);
         if (result == null){
-            LogUtil.log(Level.SEVERE, "Error in fetchPlayer(Player= [" + p.getUniqueId() + " | " + p.getDisplayName() + "]).");
+            LogUtil.log(Level.SEVERE, "Error in fetchPlayer(Player= [" + p.getUniqueId() + " | " + p.getName() + "]).");
             return null;
         }
 
@@ -99,7 +100,10 @@ public class PlayerLogic {
         pi.id = (Integer)result[0];
         pi.uuid = UUID.fromString((String)result[2]);
         pi.name = (String)result[1];
-        pi.advanced = (Boolean)result[3];
+        if (result[3] instanceof Integer)
+            pi.advanced = ((int)result[3]) != 0;
+        else
+            pi.advanced = (Boolean)result[3];
         pi.reg_is_container = false;
         pi.reg1 = new CopyOnWriteArraySet<Location>();
         pi.reg2 = new CopyOnWriteArraySet<Location>();
@@ -156,7 +160,10 @@ public class PlayerLogic {
                 pi.id = (Integer)o[0];
                 pi.uuid = UUID.fromString((String)o[2]);
                 pi.name = (String)o[1];
-                pi.advanced = (Boolean)o[3];
+                if (o[3] instanceof Integer)
+                    pi.advanced = ((int)o[3]) != 0;
+                else
+                    pi.advanced = (Boolean)o[3];
                 pi.reg_is_container = false;
                 pi.reg1 = new CopyOnWriteArraySet<Location>();
                 pi.reg2 = new CopyOnWriteArraySet<Location>();

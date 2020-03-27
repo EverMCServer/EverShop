@@ -1,10 +1,14 @@
 package com.evermc.evershop;
 
+import java.util.logging.Level;
+
 import com.evermc.evershop.event.InteractEvent;
+import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,11 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class EverShop extends JavaPlugin {
 
     private static EverShop instance;
-    private DataLogic dataLogic;
-    private PlayerLogic playerLogic;
-    private ShopLogic shopLogic;
-    private TransactionLogic transactionLogic;
-
     @Override      
     public void onDisable(){  
 
@@ -24,31 +23,28 @@ public class EverShop extends JavaPlugin {
     @Override  
     public void onEnable(){  
         instance = this;
+        if(!this.getDataFolder().exists()){
+            this.getDataFolder().mkdir();
+        }
+        if (!VaultHandler.setupEconomy() ) {
+            LogUtil.log(Level.SEVERE, "Disabled due to no Vault dependency found!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        VaultHandler.setupPermissions();
+
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
-        this.dataLogic = new DataLogic(this);
-        this.playerLogic = new PlayerLogic(this);
-        this.shopLogic = new ShopLogic(this);
-        this.transactionLogic = new TransactionLogic(this);
+        if (!DataLogic.init(this)){
+            LogUtil.log(Level.SEVERE, "Fail to start DataLogic! Check your database config.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        new PlayerLogic(this);
+        new ShopLogic(this);
+        new TransactionLogic(this);
     }  
 
     public static EverShop getInstance() {
         return EverShop.instance;
     }
-
-    public DataLogic getDataLogic(){
-        return this.dataLogic;
-    }
-
-    public PlayerLogic getPlayerLogic(){
-        return this.playerLogic;
-    }
-
-    public ShopLogic getShopLogic(){
-        return this.shopLogic;
-    }
-
-    public TransactionLogic getTransactionLogic(){
-        return this.transactionLogic;
-    }
-
 }  
