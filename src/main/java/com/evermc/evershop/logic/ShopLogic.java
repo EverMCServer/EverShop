@@ -56,7 +56,7 @@ public class ShopLogic {
         Material.SPRUCE_BUTTON
     );
     
-    public ShopLogic(EverShop _plugin){
+    public static void init(EverShop _plugin){
         plugin = _plugin;
         linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));

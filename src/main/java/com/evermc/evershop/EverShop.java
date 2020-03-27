@@ -39,9 +39,9 @@ public class EverShop extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        new PlayerLogic(this);
-        new ShopLogic(this);
-        new TransactionLogic(this);
+        PlayerLogic.init(this);
+        ShopLogic.init(this);
+        TransactionLogic.init(this);
     }  
 
     public static EverShop getInstance() {

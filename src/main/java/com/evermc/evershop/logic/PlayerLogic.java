@@ -27,7 +27,7 @@ public class PlayerLogic {
         cachedPlayers = null;
     }
 
-    public PlayerLogic(EverShop _plugin){
+    public static void init(EverShop _plugin){
         plugin = _plugin;
         cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
         cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();

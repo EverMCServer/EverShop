@@ -11,7 +11,7 @@ public class TransactionLogic {
     private static Map<String, Integer> actions = new HashMap<String, Integer>();
     private static final String [] default_actions = {"buy", "sell", "aaa"}; 
 
-    public TransactionLogic(EverShop plugin){
+    public static void init(EverShop plugin){
 
         for (int i = 0; i < default_actions.length; i ++){
             actions.put(default_actions[i], i + 1);

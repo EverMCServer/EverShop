@@ -49,7 +49,7 @@ public class DataLogic{
             setupDB_SQLite();
             LogUtil.log(Level.INFO, "Connected to SQLite dataSource");
         } else {
-            LogUtil.log(Level.SEVERE, "Unrecognized data source");
+            LogUtil.log(Level.SEVERE, "Unrecognized database type: " + sqltype + ", should be one of the following: mysql, sqlite");
             return false;
         }
 
