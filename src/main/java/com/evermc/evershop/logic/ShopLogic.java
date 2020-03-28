@@ -175,7 +175,7 @@ public class ShopLogic {
                     return;
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
-                if (newshop.getAllItems().size() == 0){
+                if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
                     p.sendMessage("You should put some items in the chest first!");
                     return;
                 }

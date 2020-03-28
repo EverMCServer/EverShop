@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -67,7 +65,6 @@ public class TransactionInfo{
         } else if (si.action_id == TransactionLogic.BUY.id() || si.action_id == TransactionLogic.IBUY.id() ){
             itemsOut = new HashMap<ItemStack, Integer>();
             addAllItems(itemsOut, si.getAllItems());
-            System.out.println("itemsOut: "+itemsOut);
             itemsIn = null;
         } else if (si.action_id == TransactionLogic.SELL.id() || si.action_id == TransactionLogic.ISELL.id()){
             itemsOut = null;

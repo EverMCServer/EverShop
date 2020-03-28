@@ -233,7 +233,6 @@ public class ShopInfo {
 
     @SuppressWarnings("unchecked")
     public HashSet<ItemStack> getAllItems(){
-        System.out.println("getAllItems: "+this.items);
         if (TransactionLogic.itemsetCount(this.action_id) == 1){
             HashSet<ItemStack> ret = new HashSet<ItemStack>();
             ret.addAll((HashSet<ItemStack>)this.items);

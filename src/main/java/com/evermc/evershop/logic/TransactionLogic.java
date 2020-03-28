@@ -18,10 +18,10 @@ public enum TransactionLogic {
     ISELL(5, 0, 1),
     ITRADE(6, 0, 2),
     ISLOT(7, 0, 0),
-    TOGGLE(8, 0, 0),
-    DEVICE(9, 0, 0),
-    DEVICEON(10, 0, 0),
-    DEVICEOFF(11, 0, 0)
+    TOGGLE(8, 1, 0),
+    DEVICE(9, 1, 0),
+    DEVICEON(10, 1, 0),
+    DEVICEOFF(11, 1, 0)
     ;
 
     private int index;
@@ -44,7 +44,10 @@ public enum TransactionLogic {
             actions.put(tl.name(), tl.index);
             map.put(tl.index, tl);
             Object con = plugin.getConfig().get("evershop.alias." + tl.name());
-            if (con == null) continue;
+            if (con == null) {
+                actionstr.put(tl.index, tl.name());
+                continue;
+            }
             if (con instanceof String){
                 actions.put((String)con, tl.index);
                 actionstr.put(tl.index, (String)con);
@@ -62,7 +65,6 @@ public enum TransactionLogic {
                 actionstr.put(tl.index, tl.name());
             }
         }
-        System.out.println(actions);
     }
 
     public static int getId(String action){

@@ -273,9 +273,6 @@ public class DataLogic{
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
             }
-            if (TransactionLogic.targetCount(shop.action_id) == 1) {
-
-            }
             for (SerializableLocation sloc : shop.getAllTargets()){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");

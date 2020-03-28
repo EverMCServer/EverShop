@@ -86,7 +86,6 @@ public class PlayerLogic {
         String name = p.getName();
 
         String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`) VALUES ('" + name + "', '" + uuid + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`name` = '" + name + "'";
-        System.out.println(query);
         DataLogic.getSQL().exec(query);
 
         query = "SELECT * FROM `" + DataLogic.getPrefix() + "player` WHERE uuid = '" + uuid + "'";
