@@ -15,7 +15,7 @@ evershop:
   destroyMaterial: golden_axe
   #TODO change to lang files
   alias:
-    buy: 
+    BUY: 
       - 出售
       - 卖
-    sell: 收购
+    SELL: 收购

@@ -80,12 +80,10 @@ public class ShopLogic {
             if (si == null) return;
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
-                final String str = "This shop " + 
-                // TODO - transaction types
-                "sells " +
+                final String str = "This shop " + TransactionLogic.getName(si.action_id) +
                 si.items + " for $" + si.price + "!";
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    TransactionInfo ti = new TransactionInfo(plugin, si.targets, p, si.items);
+                    TransactionInfo ti = new TransactionInfo(si, p);
                     p.sendMessage(str + "; shophas:"+ti.shopHasItems()+", playerhas:"+ti.playerCanHold() + ", playermoney="+VaultHandler.getEconomy().getBalance(p));
                 });
             } else {
@@ -163,7 +161,7 @@ public class ShopLogic {
 
             else if (block.getState() instanceof Sign){
                 String line = ((Sign)block.getState()).getLine(0);
-                int a = TransactionLogic.getActionType(line);
+                int a = TransactionLogic.getId(line);
                 if (a == 0) {
                     p.sendMessage("The sign does not contain an available action!");
                     return;
@@ -176,10 +174,8 @@ public class ShopLogic {
                     p.sendMessage("Shop type and your selection is not match!");
                     return;
                 }
-                int n = getPrice(line);
-                // TODO - init perm when creating shop
-                final ShopInfo newshop = new ShopInfo(a, player.id, block.getLocation(), n, player.reg1, getRegisteredItemStacks(player), "");
-                if (newshop.items.size() == 0){
+                final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
+                if (newshop.getAllItems().size() == 0){
                     p.sendMessage("You should put some items in the chest first!");
                     return;
                 }
@@ -190,7 +186,7 @@ public class ShopLogic {
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
-                    p.sendMessage("You have created a " + TransactionLogic.getShopType(newshop.action_id) + " shop, price is " + newshop.price);
+                    p.sendMessage("You have created a " + TransactionLogic.getName(newshop.action_id) + " shop, price is " + newshop.price);
                 }, () -> {
                     p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
                 });
@@ -198,33 +194,12 @@ public class ShopLogic {
         }
     }
 
-    private static int getPrice(String line){
-        String ret = "";
-        int i = line.length() - 1;
-        while (i >= 0 && !Character.isDigit(line.charAt(i))) i--;
-        for (;i >= 0 && Character.isDigit(line.charAt(i)); i--){
-            ret = line.charAt(i) + ret;
-        }
-        if ("".equals(ret)) return 0;
-        return Integer.parseInt(ret);
-    }
-
-    private static HashSet<ItemStack> getRegisteredItemStacks(PlayerInfo player){
-
+    public static HashSet<ItemStack> getReg1(PlayerInfo player){
+        player.cleanupRegs();
         HashSet<ItemStack> items = new HashSet<ItemStack>();
         if (player.reg_is_container){
             for (Location loc : player.reg1){
-                if (!(loc.getBlock().getState() instanceof Container)){
-                    player.reg1.remove(loc);
-                    continue;
-                }
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
-                if (inv.getSize() == 54 && ((DoubleChestInventory)inv).getRightSide().getLocation().equals(loc)){
-                    player.reg1.remove(loc);
-                    player.reg2.remove(loc);
-                    player.reg1.add(((DoubleChestInventory)inv).getLeftSide().getLocation());
-                    continue;
-                }
                 for (ItemStack is : inv.getContents()){
                     if (is == null) continue;
                     boolean duplicate = false;
@@ -240,25 +215,38 @@ public class ShopLogic {
                     }
                 }
             }
+        }
+        return items;
+    }
+
+    public static HashSet<ItemStack> getReg2(PlayerInfo player){
+        player.cleanupRegs();
+        HashSet<ItemStack> items = new HashSet<ItemStack>();
+        if (player.reg_is_container){
             for (Location loc : player.reg2){
-                if (!(loc.getBlock().getState() instanceof Container)){
-                    player.reg2.remove(loc);
-                    continue;
-                }
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
-                if (inv.getSize() == 54 && ((DoubleChestInventory)inv).getRightSide().getLocation().equals(loc)){
-                    player.reg1.remove(loc);
-                    player.reg2.remove(loc);
-                    player.reg2.add(((DoubleChestInventory)inv).getLeftSide().getLocation());
-                    continue;
+                for (ItemStack is : inv.getContents()){
+                    if (is == null) continue;
+                    boolean duplicate = false;
+                    for (ItemStack isc : items){
+                        if (isc.isSimilar(is)){
+                            duplicate = true;
+                            isc.setAmount(isc.getAmount() + is.getAmount());
+                            break;
+                        }
+                    }
+                    if (!duplicate){
+                        items.add(is.clone());
+                    }
                 }
             }
         }
         return items;
     }
+
     private static String getRegisteredContents(PlayerInfo player){
         String result = "";
-        HashSet<ItemStack> items = getRegisteredItemStacks(player);
+        HashSet<ItemStack> items = getReg1(player);
         for (ItemStack isc : items){
             result += "" + isc.getType() + "x" + isc.getAmount() + ";";
         }

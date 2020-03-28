@@ -80,7 +80,7 @@ public class DataLogic{
               "price int(11) NOT NULL," +
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
-              "perm varchar(1024) NOT NULL," +
+              "extra varchar(1024) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY world_id (world_id,x,y,z)," +
               "KEY player_id (player_id)" +
@@ -144,7 +144,7 @@ public class DataLogic{
               "price INTEGER NOT NULL," +
               "targets BLOB NOT NULL," +
               "items BLOB NOT NULL," +
-              "perm varchar(1024) NOT NULL," +
+              "extra varchar(1024) NOT NULL," +
               "UNIQUE (world_id,x,y,z)" +
             ");",
 
@@ -273,7 +273,10 @@ public class DataLogic{
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
             }
-            for (SerializableLocation sloc : shop.targets){
+            if (TransactionLogic.targetCount(shop.action_id) == 1) {
+
+            }
+            for (SerializableLocation sloc : shop.getAllTargets()){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
                 // TODO - if insert failed, revert all of the changes?
@@ -317,8 +320,7 @@ public class DataLogic{
             return null;
         }
         Object[] k = ret.get(0);
-        return new ShopInfo((int)k[0], (int)k[1], (int)k[2], (int)k[3], (int)k[4], (int)k[5]
-        , (int)k[6], (int)k[7], (int)k[8], (byte[])k[9], (byte[])k[10], (String)k[11]);
+        return new ShopInfo(k);
     }
 
     public static ShopInfo getShopInfo(int shopid){
@@ -328,8 +330,7 @@ public class DataLogic{
             return null;
         }
         Object[] k = ret.get(0);
-        return new ShopInfo((int)k[0], (int)k[1], (int)k[2], (int)k[3], (int)k[4], (int)k[5]
-        , (int)k[6], (int)k[7], (int)k[8], (byte[])k[9], (byte[])k[10], (String)k[11]);
+        return new ShopInfo(k);
     }
 
     public static byte[] toBlob(Object object){
