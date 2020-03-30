@@ -1,6 +1,6 @@
 evershop:
   database:
-    datasource: mysql
+    datasource: sqlite
     mysql:
       hostname: 127.0.0.1
       username: test

@@ -60,11 +60,18 @@ public class InteractEvent implements Listener{
             return;
         }
         // TODO - op break
+        if (event.getBlock().getState() instanceof Sign && event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
+            event.setCancelled(true);
+            return;
+        }
         if (event.getBlock().getState() instanceof Sign && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
             event.setCancelled(true);
             ShopLogic.tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
         }
         if (!ShopLogic.isLinkableBlock(event.getBlock().getType())){
+            if (event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
+                event.setCancelled(true);
+            }
             return;
         }
         event.setCancelled(true);

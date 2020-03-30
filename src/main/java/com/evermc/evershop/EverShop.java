@@ -26,6 +26,8 @@ public class EverShop extends JavaPlugin {
         if(!this.getDataFolder().exists()){
             this.getDataFolder().mkdir();
         }
+        saveDefaultConfig();
+        reloadConfig();
         if (!VaultHandler.setupEconomy() ) {
             LogUtil.log(Level.SEVERE, "Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);

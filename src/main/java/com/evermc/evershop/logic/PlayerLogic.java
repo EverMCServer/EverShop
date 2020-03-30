@@ -150,7 +150,7 @@ public class PlayerLogic {
             String query = "SELECT * FROM `" + DataLogic.getPrefix() + "player`";
             List<Object[]> result = DataLogic.getSQL().query(query, 4);
             if (result == null || result.size() == 0){
-                LogUtil.log(Level.SEVERE, "getAllPlayers(): no player found.");
+                LogUtil.log(Level.INFO, "No player in database.");
                 return;
             }
             

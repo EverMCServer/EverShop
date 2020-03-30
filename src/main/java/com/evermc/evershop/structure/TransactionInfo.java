@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.util.SerializableLocation;
@@ -182,13 +181,4 @@ public class TransactionInfo{
         return it.size() <= emptycount;
     }
 
-    // TODO - tax logic
-    public boolean playerHasMoney(){
-        return VaultHandler.getEconomy().getBalance(this.player) >= this.price;
-    }
-
-    // TODO - tax logic
-    public boolean shopHasMoney(){
-        return VaultHandler.getEconomy().getBalance(this.owner) >= this.price;
-    }
 }
