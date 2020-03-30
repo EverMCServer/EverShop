@@ -10,4 +10,12 @@ public class TaxLogic {
     public static boolean playerHasMoney(OfflinePlayer player, double price){
         return VaultHandler.getEconomy().getBalance(player) >= price;
     }
+
+    public static void deposit(OfflinePlayer player, double price){
+        VaultHandler.getEconomy().depositPlayer(player, price);
+    }
+
+    public static void withdraw(OfflinePlayer player, double price){
+        VaultHandler.getEconomy().withdrawPlayer(player, price);
+    }
 }

@@ -12,7 +12,9 @@ import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 
@@ -253,6 +255,24 @@ public class ShopInfo {
             return (ArrayList<HashSet<ItemStack>>)this.items;
         else 
             return null;
+    }
+
+    public void setSignState(boolean avail){
+        Location loc = SerializableLocation.toLocation(this.world_id, this.x, this.y, this.z);
+        Sign sign = (Sign)loc.getBlock().getState();
+        String lin = sign.getLine(0);
+        if (lin.charAt(0) != 167 || lin.charAt(2) != 167){
+            LogUtil.log(Level.SEVERE, "setSignState(): Unrecognized shop: " + this);
+            return;
+        }
+        StringBuilder strBuilder = new StringBuilder(lin);
+        if (avail){
+            strBuilder.setCharAt(1, ChatColor.BLUE.getChar());
+        }else{
+            strBuilder.setCharAt(1, ChatColor.RED.getChar());
+        }
+        sign.setLine(0, strBuilder.toString());
+        sign.update();
     }
 
     public String toString(){

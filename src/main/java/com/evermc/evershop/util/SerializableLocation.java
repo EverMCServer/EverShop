@@ -27,7 +27,7 @@ public class SerializableLocation implements Serializable{
         this.z = loc.getBlockZ();
         this.world = DataLogic.getWorldId(loc.getWorld());
     }
-    
+
     public Map<String, Object> serialize() {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("world", this.world);
@@ -39,6 +39,10 @@ public class SerializableLocation implements Serializable{
 
     public Location toLocation(){
         return new Location(DataLogic.getWorld(this.world), this.x, this.y, this.z);
+    }
+
+    public static Location toLocation(int world, int x, int y, int z){
+        return new Location(DataLogic.getWorld(world), x, y, z);
     }
 
     public String toString(){

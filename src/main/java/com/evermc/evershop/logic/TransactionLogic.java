@@ -3,8 +3,14 @@ package com.evermc.evershop.logic;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.structure.TransactionInfo;
+import com.evermc.evershop.util.LogUtil;
+
+import org.bukkit.entity.Player;
 
 public enum TransactionLogic {
     
@@ -121,5 +127,32 @@ public enum TransactionLogic {
 
     public int id(){
         return this.index;
+    }
+
+    public static void doTransaction(ShopInfo si, Player p){
+        TransactionInfo ti = new TransactionInfo(si, p);
+        switch(getEnum(ti.getAction())){
+            case BUY:
+            if (!ti.shopHasItems()){
+                p.sendMessage("sold out");
+                break;
+            }
+            if (!ti.playerCanHold()){
+                p.sendMessage("cannot hold");
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                p.sendMessage("insufficient money");
+                break;
+            }
+            ti.shopRemoveItems();
+            ti.playerGiveItems();
+            ti.playerPayMoney();
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have bought " + si.items + "!");
+            break;
+            default:
+            LogUtil.log(Level.SEVERE, "Not Implemented!");
+        }
     }
 }

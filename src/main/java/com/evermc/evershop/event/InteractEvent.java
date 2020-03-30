@@ -6,6 +6,7 @@ import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -66,16 +67,16 @@ public class InteractEvent implements Listener{
         }
         if (event.getBlock().getState() instanceof Sign && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
             event.setCancelled(true);
-            ShopLogic.tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
+            if (event.getPlayer().getGameMode() == GameMode.SURVIVAL)
+                ShopLogic.tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
         }
         if (!ShopLogic.isLinkableBlock(event.getBlock().getType())){
-            if (event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
-                event.setCancelled(true);
-            }
             return;
         }
         event.setCancelled(true);
-        ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
+        if (event.getPlayer().getInventory().getItemInMainHand().getType() != ShopLogic.getLinkMaterial()){
+            ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
+        }
     }
 
     @EventHandler (priority = EventPriority.NORMAL)

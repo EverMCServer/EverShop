@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
@@ -84,11 +83,14 @@ public class ShopLogic {
                 si.items + " for $" + si.price + "!";
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
-                    p.sendMessage(str + "; shophas:"+ti.shopHasItems()+", playerhas:"+ti.playerCanHold() + ", playermoney="+VaultHandler.getEconomy().getBalance(p));
+                    si.setSignState(ti.shopHasItems());
+                    p.sendMessage(str);
                 });
             } else {
                 // TODO - check perm
-                // TODO - transaction
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    TransactionLogic.doTransaction(si, p);
+                });
             }
         });
     }
@@ -182,7 +184,7 @@ public class ShopLogic {
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, () -> {
                     String lin = sign.getLine(0);
-                    lin = ChatColor.BLUE.toString() + lin;
+                    lin = ChatColor.BLUE.toString() + ChatColor.BOLD.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();

@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.logic.TaxLogic;
 import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
@@ -32,12 +35,14 @@ public class TransactionInfo{
     private Player player;
     private OfflinePlayer owner;
     private int price;
+    private int action_id;
 
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
         this.player = p;
         this.owner = Bukkit.getOfflinePlayer(PlayerLogic.getPlayerInfo(si.player_id).uuid);
         this.price = si.price;
+        this.action_id = si.action_id;
         // targets
         if (TransactionLogic.targetCount(si.action_id) == 2){
             shopOut = new HashSet<Inventory>();
@@ -91,6 +96,9 @@ public class TransactionInfo{
 
     // Only checks if shopOut has itemsOut 
     public boolean shopHasItems(){
+        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+            return true;
+        }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
         for (Inventory iv : shopOut){
             for (ItemStack is : iv.getContents()){
@@ -112,6 +120,9 @@ public class TransactionInfo{
 
     // Only checks if shopIn has itemsIn 
     public boolean shopCanHold(){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+            return true;
+        }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
         int emptycount = 0;
         for (Inventory iv : shopIn){
@@ -139,6 +150,9 @@ public class TransactionInfo{
 
     // Only checks if player has itemsIn 
     public boolean playerHasItems(){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+            return true;
+        }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
         for (ItemStack is : playerInv.getStorageContents()){
             if (is == null) continue;
@@ -158,6 +172,9 @@ public class TransactionInfo{
 
     // Only checks if player has itemsOut 
     public boolean playerCanHold(){
+        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+            return true;
+        }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
         int emptycount = 0;
         for (ItemStack is : playerInv.getStorageContents()){
@@ -181,4 +198,59 @@ public class TransactionInfo{
         return it.size() <= emptycount;
     }
 
+    public boolean playerHasMoney(){
+        return TaxLogic.playerHasMoney(this.player, this.price);
+    }
+
+    public boolean shopHasMoney(){
+        return TaxLogic.playerHasMoney(this.owner, this.price);
+    }
+
+    public int getAction(){
+        return this.action_id;
+    }
+
+    public void shopRemoveItems(){
+        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+            LogUtil.log(Level.SEVERE, "Not supported.");
+            return;
+        }
+        HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
+        for (Inventory iv : shopOut){
+            ItemStack[] iss = iv.getContents();
+            for (int i = 0; i < iss.length; i++){
+                ItemStack is = iss[i];
+                if (is == null) continue;
+                for (ItemStack its : it.keySet()){
+                    if (its.isSimilar(is)){
+                        if (it.get(its) > is.getAmount()){
+                            it.put(its, it.get(its) - is.getAmount());
+                            iss[i] = null;
+                        } else {
+                            if (it.get(its) < is.getAmount())
+                                is.setAmount(is.getAmount() - it.get(its));
+                            else 
+                                iss[i] = null;
+                            it.remove(its);
+                        }
+                        break;
+                    }
+                }
+            }
+            iv.setStorageContents(iss);
+        }
+        return;
+    }
+
+    public void playerGiveItems(){
+        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+            LogUtil.log(Level.SEVERE, "Not supported.");
+            return;
+        }
+        this.playerInv.addItem(this.itemsOut.keySet().toArray(new ItemStack[this.itemsOut.keySet().size()]));
+    }
+
+    public void playerPayMoney(){
+        TaxLogic.withdraw(this.player, this.price);
+    }
 }

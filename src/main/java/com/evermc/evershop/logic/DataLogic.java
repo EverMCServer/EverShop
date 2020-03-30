@@ -343,4 +343,10 @@ public class DataLogic{
             return null ;
         }
     }
+    public static void recordTransaction(int shopid, int playerid){
+        int time = (int)(System.currentTimeMillis()/1000/60); //create 1 record every minute
+        String query = "INSERT INTO `" + SQL.getPrefix() + "transaction` VALUES (null, '" + shopid + "', '" 
+        + playerid + "', '" + time + "', '1') " + SQL.ON_DUPLICATE("shop_id,player_id,time")+ " count = count + 1";
+        SQL.insert(query);
+    }
 }
