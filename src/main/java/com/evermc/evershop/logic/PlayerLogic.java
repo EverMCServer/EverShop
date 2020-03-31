@@ -80,6 +80,16 @@ public class PlayerLogic {
         return getPlayerInfo(p).advanced;
     }
 
+    public static void setAdvanced(final Player p, final boolean advanced){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            PlayerInfo pi = getPlayerInfo(p);
+            pi.advanced = advanced;
+            String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`, `advanced`) VALUES ('" + pi.name + "', '"
+            + pi.uuid + "', '" + pi.advanced + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`advanced` = " + pi.advanced;
+            DataLogic.getSQL().exec(query);
+        });
+    }
+
     private static PlayerInfo fetchPlayerSync(Player p){
 
         UUID uuid = p.getUniqueId();

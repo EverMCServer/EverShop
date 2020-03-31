@@ -3,27 +3,32 @@ package com.evermc.evershop.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.evermc.evershop.logic.PlayerLogic;
+
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 public class CommandEvent implements CommandExecutor, TabCompleter {
     
     private String[][] base_commands = {
         {"advanced", "evershop.advanced", "toggle advance mode"},
-        {"info",     "evershop.info",     "view shop info"},
+        {"help",     "evershop",          "show help"},
+        {"info",     "evershop.info",     "view shop info", "shopid"},
         {"inspect",  "evershop.inspect",  "toggle inspect mode"},
-        {"list",     "evershop.list",     "list shops"},
-        {"log",      "evershop.info",     "show shop transaction logs"},
+        {"list",     "evershop.list",     "list shops", "player"},
+        {"log",      "evershop.info",     "show shop transaction logs", "shopid"},
         {"reload",   "evershop.admin.op", "reload the plugin"},
-        {"set",      "evershop.set",      "set shop attributes"}
+        {"set",      "evershop.set",      "set shop attributes", "..."}
     };
     private String[][] set_commands = {
-        {"permission", "evershop.set.perm", "set shop permission"},
-        {"text",       "evershop.set.text", "set sign text"},
-        {"price",      "evershop.set.price","set shop price"},
-        {"time",       "evershop.set.time", "set redstone poweron time"}
+        {"permission", "evershop.set.perm", "set shop permission", "..."},
+        {"text",       "evershop.set.text", "set sign text", "1-4", "text"},
+        {"price",      "evershop.set.price","set shop price", "price"},
+        {"time",       "evershop.set.time", "set redstone poweron time", "time"}
     };
     private String[][] set_perm_commands = {
         {"type",       "evershop.set.perm", "set permission type"},
@@ -31,9 +36,39 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         {"allow",      "evershop.set.perm", "set allow"}
     };
 
+    // use naive if-else check since few commands available
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        sender.sendMessage("HI!");
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] _args) {
+
+        // discards spaces in args
+        ArrayList<String> alargs = new ArrayList<String>();
+        for (int i = 0; i < _args.length; i ++) {
+            if (_args[i].length() > 0){
+                alargs.add(_args[i]);
+            }
+        }
+        String[] args = alargs.toArray(new String[alargs.size()]);
+        
+        if (args.length == 0){
+            show_usage(sender);
+            return true;
+        } else if (args.length == 1){
+            if ("advanced".startsWith(args[0])){
+                if (sender instanceof Player){
+                    if (PlayerLogic.isAdvanced((Player)sender)){
+                        PlayerLogic.setAdvanced((Player)sender, false);
+                        sender.sendMessage("Advanced mode: off");
+                    } else {
+                        PlayerLogic.setAdvanced((Player)sender, true);
+                        sender.sendMessage("Advanced mode: on");
+                    }
+                } else {
+                    sender.sendMessage("this command must be executed by players");
+                }
+            } else if ("info".startsWith(args[0])){
+                
+            }
+        }
         return true;
     }
 
@@ -120,5 +155,23 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             }
         }
         return ret;
+    }
+
+    private void show_usage(CommandSender sender){
+        ArrayList<String> msg = new ArrayList<String>();
+        msg.add("EverShop help:");
+        for (String[] t : base_commands){
+            if (sender.hasPermission(t[1])){
+                String str = ChatColor.AQUA.toString() + t[0] + " " + ChatColor.GREEN.toString();
+                for (int i = 3; i < t.length; i ++){
+                    str += "[" + t[i] + "] ";
+                }
+                str += ChatColor.GRAY.toString() + "- " + t[2];
+                msg.add(str);
+            }
+        }
+        for (String s:msg){
+            sender.sendMessage(s);
+        }
     }
 }

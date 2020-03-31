@@ -81,6 +81,7 @@ device $100
  /es set [shopid] time [time]  设置红石开启时间，只能用于device牌子(evershop.set.time/evershop.admin.time)
  /es advanced 切换高级模式（高级功能比如交易商店需要）(evershop.advance)
  /es inspect 切换查看模式 （点击牌子不会交易，只查看信息）(evershop.inspect)
+ /es help 帮助（与/es相同）
 ```
 
 ### 商店流程（防bug)

@@ -94,11 +94,11 @@ public class ShopLogic {
             }
         });
     }
-    public static void registerBlock(final Player p, Block block, Action action){
+    public static boolean registerBlock(final Player p, Block block, Action action){
 
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (action == Action.RIGHT_CLICK_BLOCK && !player.advanced){
-            return;
+            return false;
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
 
@@ -107,7 +107,7 @@ public class ShopLogic {
             if (linkable_container.contains(block.getType())){
                 if (!player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
                     p.sendMessage("You can't link redstone components and inventory at the same time");
-                    return;
+                    return true;
                 }
                 player.reg_is_container = true;
                 Container container = (Container) block.getState();
@@ -118,12 +118,12 @@ public class ShopLogic {
                     if (player.reg1.contains(loc2)){
                         player.reg1.remove(loc2);
                         p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
-                        return;
+                        return true;
                     }
                     if (player.reg2.contains(loc2)){
                         player.reg2.remove(loc2);
                         p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
-                        return;
+                        return true;
                     }
                 }else{
                     loc = block.getLocation();
@@ -131,12 +131,12 @@ public class ShopLogic {
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
                     p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
-                    return;
+                    return true;
                 }
                 if (player.reg2.contains(loc)){
                     player.reg2.remove(loc);
                     p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
-                    return;
+                    return true;
                 }
                 if (action == Action.RIGHT_CLICK_BLOCK)
                     player.reg2.add(loc);
@@ -148,7 +148,7 @@ public class ShopLogic {
             else if (linkable_redstone.contains(block.getType())){
                 if (player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
                     p.sendMessage("You can't link redstone components and inventory at the same time");
-                    return;
+                    return true;
                 }
                 player.reg_is_container = false;
                 Location loc = block.getLocation();
@@ -166,20 +166,20 @@ public class ShopLogic {
                 int a = TransactionLogic.getId(line);
                 if (a == 0) {
                     p.sendMessage("The sign does not contain an available action!");
-                    return;
+                    return true;
                 }
                 if (player.reg1.size() == 0){
                     p.sendMessage("You should register items first!");
-                    return;
+                    return true;
                 }
                 if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
                     p.sendMessage("Shop type and your selection is not match!");
-                    return;
+                    return true;
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
                     p.sendMessage("You should put some items in the chest first!");
-                    return;
+                    return true;
                 }
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, () -> {
@@ -194,6 +194,7 @@ public class ShopLogic {
                 });
             }
         }
+        return true;
     }
 
     public static HashSet<ItemStack> getReg1(PlayerInfo player){

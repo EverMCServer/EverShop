@@ -50,7 +50,8 @@ public class InteractEvent implements Listener{
             }
         }
         if (event.getMaterial() == ShopLogic.getLinkMaterial()){
-            ShopLogic.registerBlock(event.getPlayer(), clicked, event.getAction());
+            boolean ret = ShopLogic.registerBlock(event.getPlayer(), clicked, event.getAction());
+            event.setCancelled(ret);
         } 
     }
 
@@ -90,7 +91,7 @@ public class InteractEvent implements Listener{
             DataLogic.removeShop(event.getBlockPlaced().getLocation());
         }
         if (event.getBlockPlaced().getType() == Material.CHEST || event.getBlockPlaced().getType() == Material.TRAPPED_CHEST){
-            // TODO - check if generates a double chest. -> cancel the event
+            // TODO - check if generates a double chest. -> cancel the event (or update shop?)
         }
     }
 
