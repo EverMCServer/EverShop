@@ -63,10 +63,30 @@ device $100
 
 红色： 缺货
 
+### 指令
+
+/evershop 或 /es
+
+```
+ /es reload  重载(evershop.admin.op)
+ /es list [name or uuid] 查看商店列表(evershop.list/evershop.list.others)
+ /es info 查看视线指向商店信息(evershop.info/evershop.info.others)
+ /es info shopid 查看指定商店信息(evershop.info/evershop.info.others)
+ /es log [shopid] 查看购买记录(evershop.info/evershop.info.others)
+ /es set [shopid] permission type [none/blacklist/whitelist] 设置使用权限类型(evershop.set.perm/evershop.admin.perm)
+ /es set [shopid] permission allow u:<username>/g:<groupname> 设置白名单用户/组(evershop.set.perm/evershop.admin.perm)
+ /es set [shopid] permission deny u:<username>/g:<groupname> 设置黑名单用户/组(evershop.set.perm/evershop.admin.perm)
+ /es set [shopid] text [1-4] [text]  设置牌子显示内容(evershop.set.text) {注意检测第一行内容}
+ /es set [shopid] price [price]  设置商店价格(evershop.set.price) {注意修改牌子内容}
+ /es set [shopid] time [time]  设置红石开启时间，只能用于device牌子(evershop.set.time)
+ /es advanced 切换高级模式（高级功能比如交易商店需要）(evershop.advance)
+ /es inspect 切换查看模式 （点击牌子不会交易，只查看信息）(evershop.inspect)
+```
+
 ### 商店流程（防bug)
 
 * 所有商店数据存数据库
 * 箱子破坏，撤销商店
-* 放置牌子，检测位置上是否有未删除的商店
+* 放置牌子，检测位置上是否有未删除的商店? -> 增加修改牌子信息方法， setline?
 * 防止箱子，检测位置上是否有未删除的箱子
 * 牌子破坏，撤销商店
