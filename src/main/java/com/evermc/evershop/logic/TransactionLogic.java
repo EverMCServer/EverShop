@@ -131,6 +131,7 @@ public enum TransactionLogic {
 
     public static void doTransaction(ShopInfo si, Player p){
         TransactionInfo ti = new TransactionInfo(si, p);
+        si.setSignState(ti.shopHasItems());
         switch(getEnum(ti.getAction())){
             case BUY:
             if (!ti.shopHasItems()){
@@ -148,8 +149,56 @@ public enum TransactionLogic {
             ti.shopRemoveItems();
             ti.playerGiveItems();
             ti.playerPayMoney();
+            ti.shopGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have bought " + si.items + "!");
+            p.sendMessage("you have bought " + ti.getItemsOut() + "!");
+            break;
+
+            case SELL:
+            if (!ti.playerHasItems()){
+                p.sendMessage("not enough items");
+                break;
+            }
+            if (!ti.shopCanHold()){
+                p.sendMessage("shop cannot hold");
+                break;
+            }
+            if (!ti.shopHasMoney()){
+                p.sendMessage("insufficient money");
+                break;
+            }
+            ti.playerRemoveItems();
+            ti.shopGiveItems();
+            ti.shopPayMoney();
+            ti.playerGiveMoney();
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have sell " + ti.getItemsIn() + "!");
+            break;
+
+            case IBUY:
+            if (!ti.playerCanHold()){
+                p.sendMessage("cannot hold");
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                p.sendMessage("insufficient money");
+                break;
+            }
+            ti.playerGiveItems();
+            ti.playerPayMoney();
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have bought " + ti.getItemsOut() + "!");
+            break;
+
+            case ISELL:
+            if (!ti.playerHasItems()){
+                p.sendMessage("not enough items");
+                break;
+            }
+            ti.playerRemoveItems();
+            ti.playerGiveMoney();
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have sell " + ti.getItemsIn() + "!");
             break;
             default:
             LogUtil.log(Level.SEVERE, "Not Implemented!");

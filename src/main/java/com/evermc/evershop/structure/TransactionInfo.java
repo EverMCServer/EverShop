@@ -1,5 +1,6 @@
 package com.evermc.evershop.structure;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -242,15 +243,90 @@ public class TransactionInfo{
         return;
     }
 
+    public void playerRemoveItems(){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+            LogUtil.log(Level.SEVERE, "Not supported.");
+            return;
+        }
+        HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
+        ItemStack[] iss = playerInv.getStorageContents();
+        for (int i = 0; i < iss.length; i++){
+            ItemStack is = iss[i];
+            if (is == null) continue;
+            for (ItemStack its : it.keySet()){
+                if (its.isSimilar(is)){
+                    if (it.get(its) > is.getAmount()){
+                        it.put(its, it.get(its) - is.getAmount());
+                        iss[i] = null;
+                    } else {
+                        if (it.get(its) < is.getAmount())
+                            is.setAmount(is.getAmount() - it.get(its));
+                        else 
+                            iss[i] = null;
+                        it.remove(its);
+                    }
+                    break;
+                }
+            }
+        }
+        playerInv.setStorageContents(iss);
+        return;
+    }
+
+    public void shopGiveItems(){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+            LogUtil.log(Level.SEVERE, "Not supported.");
+            return;
+        }
+        Collection<ItemStack> items = new HashSet<ItemStack>();
+        for (ItemStack is : this.itemsIn.keySet()){
+            items.add(is.clone());
+        }
+        for (Inventory iv : shopIn){
+            HashMap<Integer, ItemStack> ret = 
+                iv.addItem(items.toArray(new ItemStack[items.size()]));
+            if (ret.size() == 0)return;
+            items = ret.values();
+        }
+    }
+
     public void playerGiveItems(){
         if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
             LogUtil.log(Level.SEVERE, "Not supported.");
             return;
         }
-        this.playerInv.addItem(this.itemsOut.keySet().toArray(new ItemStack[this.itemsOut.keySet().size()]));
+        Collection<ItemStack> items = new HashSet<ItemStack>();
+        for (ItemStack is : this.itemsOut.keySet()){
+            items.add(is.clone());
+        }
+        HashMap<Integer, ItemStack> ret = 
+            this.playerInv.addItem(items.toArray(new ItemStack[items.size()]));
+        if (ret.size() != 0){
+            LogUtil.log(Level.SEVERE, "playerGiveItems():"+ret);
+        }
     }
 
     public void playerPayMoney(){
         TaxLogic.withdraw(this.player, this.price);
+    }
+
+    public void playerGiveMoney(){
+        TaxLogic.deposit(this.player, this.price);
+    }
+
+    public void shopPayMoney(){
+        TaxLogic.withdraw(this.owner, this.price);
+    }
+
+    public void shopGiveMoney(){
+        TaxLogic.deposit(this.owner, this.price);
+    }
+
+    public Set<ItemStack> getItemsOut(){
+        return this.itemsOut.keySet();
+    }
+
+    public Set<ItemStack> getItemsIn(){
+        return this.itemsIn.keySet();
     }
 }

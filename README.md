@@ -6,6 +6,9 @@
 
 - [ ] 完成所有SignShop具有的功能
   - [x] buy
+  - [x] sell
+  - [x] ibuy
+  - [x] isell
 - [x] 使用MySQL/SQLite存储商店信息
 - [x] 更加容易输入的牌子格式
 - [x] 可以链接按钮

@@ -211,18 +211,14 @@ public class ShopInfo {
 
     @SuppressWarnings("unchecked")
     public HashSet<SerializableLocation> getAllTargets(){
+        HashSet<SerializableLocation> ret = new HashSet<SerializableLocation>();
         if (TransactionLogic.targetCount(this.action_id) == 1){
-            HashSet<SerializableLocation> ret = new HashSet<SerializableLocation>();
             ret.addAll((HashSet<SerializableLocation>)this.targets);
-            return ret;
         } else if (TransactionLogic.targetCount(this.action_id) == 2){
-            HashSet<SerializableLocation> ret = new HashSet<SerializableLocation>();
             ret.addAll((HashSet<SerializableLocation>)((ArrayList<HashSet<SerializableLocation>>)this.targets).get(0));
             ret.addAll((HashSet<SerializableLocation>)((ArrayList<HashSet<SerializableLocation>>)this.targets).get(1));
-            return ret;
-        }else{
-            return null;
         }
+        return ret;
     }
 
     @SuppressWarnings("unchecked")
