@@ -2,6 +2,7 @@ package com.evermc.evershop;
 
 import java.util.logging.Level;
 
+import com.evermc.evershop.event.CommandEvent;
 import com.evermc.evershop.event.InteractEvent;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.DataLogic;
@@ -36,6 +37,7 @@ public class EverShop extends JavaPlugin {
         VaultHandler.setupPermissions();
 
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
+        Bukkit.getPluginCommand("evershop").setExecutor(new CommandEvent());
         if (!DataLogic.init(this)){
             LogUtil.log(Level.SEVERE, "Fail to start DataLogic! Check your database config.");
             getServer().getPluginManager().disablePlugin(this);

@@ -73,6 +73,7 @@ public class InteractEvent implements Listener{
         if (!ShopLogic.isLinkableBlock(event.getBlock().getType())){
             return;
         }
+        // TODO - check sign on a block
         event.setCancelled(true);
         if (event.getPlayer().getInventory().getItemInMainHand().getType() != ShopLogic.getLinkMaterial()){
             ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
