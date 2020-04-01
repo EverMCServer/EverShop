@@ -200,6 +200,76 @@ public enum TransactionLogic {
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             p.sendMessage("you have sell " + ti.getItemsIn() + "!");
             break;
+
+            case ITRADE:
+            if (!ti.playerHasItems()){
+                p.sendMessage("not enough items");
+                break;
+            }
+            if (!ti.playerCanHold()){
+                p.sendMessage("cannot hold");
+                break;
+            }
+            if (ti.getPrice() > 0){
+                if (!ti.playerHasMoney()){
+                    p.sendMessage("insufficient money");
+                    break;
+                }
+            }
+            ti.playerRemoveItems();
+            ti.playerGiveItems();
+            if (ti.getPrice() < 0){
+                ti.playerGiveMoney();
+            } else if (ti.getPrice() > 0){
+                ti.playerPayMoney();
+            }
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have trade " + ti.getItemsIn() + "!");
+            break;
+
+            case TRADE:
+            if (!ti.playerHasItems()){
+                p.sendMessage("not enough items");
+                break;
+            }
+            if (!ti.shopHasItems()){
+                p.sendMessage("sold out");
+                break;
+            }
+            if (!ti.shopCanHold()){
+                p.sendMessage("shop cannot hold");
+                break;
+            }
+            if (!ti.playerCanHold()){
+                p.sendMessage("cannot hold");
+                break;
+            }
+            if (ti.getPrice() < 0){
+                if (!ti.shopHasMoney()){
+                    p.sendMessage("insufficient money");
+                    break;
+                }
+            } else if (ti.getPrice() > 0){
+                if (!ti.playerHasMoney()){
+                    p.sendMessage("insufficient money");
+                    break;
+                }
+            }
+            ti.playerRemoveItems();
+            ti.shopRemoveItems();
+            ti.playerGiveItems();
+            ti.shopGiveItems();
+            if (ti.getPrice() < 0){
+                ti.shopPayMoney();
+                ti.playerGiveMoney();
+            } else if (ti.getPrice() > 0){
+                ti.playerPayMoney();
+                ti.shopGiveMoney();
+            }
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            p.sendMessage("you have trade " + ti.getItemsIn() + "!");
+            break;
+
             default:
             LogUtil.log(Level.SEVERE, "Not Implemented!");
         }

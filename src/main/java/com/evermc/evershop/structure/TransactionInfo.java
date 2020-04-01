@@ -322,6 +322,10 @@ public class TransactionInfo{
         TaxLogic.deposit(this.owner, this.price);
     }
 
+    public int getPrice(){
+        return this.price;
+    }
+
     public Set<ItemStack> getItemsOut(){
         return this.itemsOut.keySet();
     }

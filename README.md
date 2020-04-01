@@ -9,6 +9,8 @@
   - [x] sell
   - [x] ibuy
   - [x] isell
+  - [x] itrade
+  - [x] trade
 - [x] 使用MySQL/SQLite存储商店信息
 - [x] 更加容易输入的牌子格式
 - [x] 可以链接按钮
