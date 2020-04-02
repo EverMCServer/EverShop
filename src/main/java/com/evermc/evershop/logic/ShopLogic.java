@@ -193,8 +193,9 @@ public class ShopLogic {
                     p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
                 });
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
     public static HashSet<ItemStack> getReg1(PlayerInfo player){

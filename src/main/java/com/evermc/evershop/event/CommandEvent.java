@@ -1,11 +1,22 @@
 package com.evermc.evershop.event;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.util.SerializableLocation;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -53,7 +64,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             show_usage(sender);
             return true;
         } else if (args.length == 1){
-            if ("advanced".startsWith(args[0])){
+            if ("advanced".startsWith(args[0]) && sender.hasPermission("evershop.advanced")){
                 if (sender instanceof Player){
                     if (PlayerLogic.isAdvanced((Player)sender)){
                         PlayerLogic.setAdvanced((Player)sender, false);
@@ -65,11 +76,29 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 } else {
                     sender.sendMessage("this command must be executed by players");
                 }
-            } else if ("info".startsWith(args[0])){
-                
+                return true;
+            } else if ("help".startsWith(args[0])){
+                show_usage(sender);
+                return true;
+            } else if ("info".startsWith(args[0]) && sender.hasPermission("evershop.info")){
+                if (sender instanceof Player){
+                    show_info((Player)sender);
+                } else {
+                    sender.sendMessage("use '" + label + " info [shopid]' instead");
+                }
+                return true;
+            } else if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
+                // TODO - inspect mode
+                sender.sendMessage("TODO");
+                return true;
+            } else if ("list".startsWith(args[0]) && sender.hasPermission("evershop.list")){
+                // TODO - list
+                sender.sendMessage("TODO");
+                return true;
             }
         }
-        return true;
+        show_usage(sender, _args);
+        return false;
     }
 
     // use naive if-else check since few commands available
@@ -157,6 +186,15 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         return ret;
     }
 
+    private void show_usage(CommandSender sender, String[] cmds){
+        String cmd = "";
+        for (String a:cmds){
+            cmd += a + " ";
+        }
+        sender.sendMessage("Unknown command: " + cmd);
+        show_usage(sender);
+    }
+
     private void show_usage(CommandSender sender){
         ArrayList<String> msg = new ArrayList<String>();
         msg.add("EverShop help:");
@@ -173,5 +211,43 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         for (String s:msg){
             sender.sendMessage(s);
         }
+    }
+
+    private void show_info(final Player player){
+        Block b = player.getTargetBlockExact(3);
+        if (b != null && b.getState() != null && b.getState() instanceof Sign){
+            Sign sign = (Sign)b.getState();
+            if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
+                final Location loc = b.getLocation();
+                Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
+                    final ShopInfo si = DataLogic.getShopInfo(loc);
+                    Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayer(player)){
+                            player.sendMessage("no permission");
+                            return;
+                        } else {
+                            show_info(player, si);
+                            return;
+                        }
+                    });
+                });
+                return;
+            }
+        }
+        player.sendMessage("please look at a actived shop sign");
+    }
+
+    private void show_info(final Player player, final ShopInfo si){
+        // TODO - tellraw
+        ArrayList<String> msg = new ArrayList<String>();
+        msg.add("===== Shop #" + si.id + " Infomation =====");
+        msg.add("Owner: " + PlayerLogic.getPlayerInfo(si.player_id).name);
+        msg.add("Type: " + TransactionLogic.getName(si.action_id));
+        msg.add("Location: " + SerializableLocation.toLocation(si.world_id, si.x, si.y, si.z));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        msg.add("Create time: " + df.format(new Date(((long)si.epoch)*1000)));
+        msg.add("Containers: " + si.targets);
+        msg.add("Items: " + si.items);
+        for (String a:msg)player.sendMessage(a);
     }
 }
