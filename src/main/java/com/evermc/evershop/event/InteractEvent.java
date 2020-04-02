@@ -6,7 +6,6 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
-import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
@@ -44,6 +43,12 @@ public class InteractEvent implements Listener{
             return;
         }
         if (event.getAction() != Action.LEFT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_BLOCK){
+            return;
+        }
+        if (event.getMaterial() == ShopLogic.getDestroyMaterial()){
+            return;
+        }
+        if (event.getPlayer().isSneaking()){
             return;
         }
         Block clicked = event.getClickedBlock();
@@ -113,8 +118,8 @@ public class InteractEvent implements Listener{
                     final Location right = dci.getRightSide().getLocation();
                     if (!right.equals(loc)){
                         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                            ShopInfo[] si = DataLogic.getBlockInfo(right);
-                            if (si != null){
+                            int count = DataLogic.getBlockLinkedCount(right);
+                            if (count > 0){
                                 Bukkit.getScheduler().runTask(plugin, () -> {
                                     p.sendMessage("You can't place this");
                                     if (loc.getBlock().getState() == null || !(loc.getBlock().getState() instanceof Container)){

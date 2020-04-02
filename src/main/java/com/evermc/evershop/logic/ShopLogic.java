@@ -264,14 +264,14 @@ public class ShopLogic {
         }
         pendingRemoveBlocks.add(loc);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            ShopInfo si = DataLogic.getShopInfo(loc);
-            if (si == null){
+            int pl = DataLogic.getShopOwner(loc);
+            if (pl == 0){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
                     loc.getBlock().breakNaturally();
                 });
             } else {
-                if (si.player_id == PlayerLogic.getPlayer(p)
+                if (pl == PlayerLogic.getPlayer(p)
                      || ( p.hasPermission("evershop.admin.remove")
                          && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
                     ){
@@ -304,7 +304,7 @@ public class ShopLogic {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             // first, check attached signs
-            ShopInfo[] sis = DataLogic.getShopInfo(locs);
+            int[] sis = DataLogic.getShopOwner(locs);
             if (sis != null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     p.sendMessage("you cannot break this block because there are shops attached on it");

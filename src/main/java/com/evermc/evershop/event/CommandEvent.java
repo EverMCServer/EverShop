@@ -30,8 +30,8 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         {"help",     "evershop",          "show help"},
         {"info",     "evershop.info",     "view shop info", "shopid"},
         {"inspect",  "evershop.inspect",  "toggle inspect mode"},
-        {"list",     "evershop.list",     "list shops", "player"},
-        {"log",      "evershop.info",     "show shop transaction logs", "shopid"},
+        {"list",     "evershop.list",     "list shops", "player", "page"},
+        {"log",      "evershop.info",     "show shop transaction logs", "shopid", "page"},
         {"reload",   "evershop.admin.op", "reload the plugin"},
         {"set",      "evershop.set",      "set shop attributes", "..."}
     };
@@ -84,16 +84,17 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 if (sender instanceof Player){
                     show_info((Player)sender);
                 } else {
-                    sender.sendMessage("use '" + label + " info [shopid]' instead");
+                    sender.sendMessage("use '" + label + " " + args[0] + " [shopid]' instead");
                 }
                 return true;
             } else if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
                 // TODO - inspect mode
-                sender.sendMessage("TODO");
-                return true;
             } else if ("list".startsWith(args[0]) && sender.hasPermission("evershop.list")){
-                // TODO - list
-                sender.sendMessage("TODO");
+                if (sender instanceof Player){
+                    show_list((Player)sender, 0);
+                } else {
+                    sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
+                }
                 return true;
             }
         }
@@ -249,5 +250,30 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         msg.add("Containers: " + si.targets);
         msg.add("Items: " + si.items);
         for (String a:msg)player.sendMessage(a);
+    }
+
+    private void show_list(final Player player, int _page){
+        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), () -> {
+            int count = DataLogic.getShopListLength(player);
+            if (count == 0){
+                Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                    player.sendMessage("No shops found!");
+                });
+                return;
+            }
+            int page = _page;
+            if (_page*10 >= count) page = (count-1)/10;
+            ShopInfo[] sis = DataLogic.getShopList(player, page);
+            final ArrayList<String> msg = new ArrayList<String>();
+            msg.add("===== " + player.getName() + "'s shops =====");
+            msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
+            for (ShopInfo si : sis){
+                msg.add(" #" + si.id + "  " + TransactionLogic.getName(si.action_id) + " shop, at "
+                     + DataLogic.getWorld(si.world_id).getName() + ":" + si.x + "," + si.y + "," + si.z);
+            }
+            Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                for (String s:msg) player.sendMessage(s);
+            });
+        });
     }
 }

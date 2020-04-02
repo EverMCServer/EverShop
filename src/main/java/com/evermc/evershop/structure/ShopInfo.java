@@ -57,6 +57,7 @@ public class ShopInfo {
             this.id = 0;
             return;
         }
+        if (targets != null && items != null)
         try{
             // handle targets
             BukkitObjectInputStream in  = new BukkitObjectInputStream(new ByteArrayInputStream( targets ));

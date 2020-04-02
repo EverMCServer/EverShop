@@ -1,6 +1,7 @@
 package com.evermc.evershop.logic;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.evermc.evershop.util.SerializableLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
 public class DataLogic{
@@ -307,6 +309,28 @@ public class DataLogic{
         }
     }
 
+    public static int getBlockLinkedCount(Location loc){
+        String query = "SELECT shops FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        List<Object[]> ret = SQL.query(query, 1);
+        if (ret.size() == 0){
+            return 0;
+        }
+        String shopstr = (String)ret.get(0)[0];
+        if (shopstr == null || shopstr == ""){
+            return 0;
+        }
+        int retval = 0;
+        for (String str : shopstr.split(",")){
+            int shop = Integer.parseInt(str);
+            ShopInfo t = getShopInfo(shop);
+            if (t != null){
+                retval ++;
+            }
+        }
+        return retval;
+    }
+
     public static ShopInfo getShopInfo(Location loc){
         String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
         + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
@@ -316,6 +340,19 @@ public class DataLogic{
         }
         Object[] k = ret.get(0);
         return new ShopInfo(k);
+    }
+
+    public static int getShopOwner(Location loc){
+        String query = "SELECT player_id FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        Object[] ret = SQL.queryFirst(query, 1);
+        if (ret == null){
+            return 0;
+        }
+        if (ret[0] instanceof Integer) return (int)ret[0];
+        else if (ret[0] instanceof Long) return (int)(long)ret[0];
+        LogUtil.log(Level.SEVERE, "getShopOwner(" + loc + "): retval="+ret[0]);
+        return 0;
     }
 
     public static ShopInfo[] getShopInfo(Location[] locs){
@@ -338,6 +375,37 @@ public class DataLogic{
         return result.toArray(new ShopInfo[result.size()]);
     }
 
+    public static int[] getShopOwner(Location[] locs){
+        if (locs == null || locs.length == 0) return null;
+        String query = "SELECT player_id FROM `" + SQL.getPrefix() + "shop` WHERE ";
+        for (Location loc:locs){
+            query += "(`world_id` = '" + DataLogic.getWorldId(loc.getWorld()) + "' AND `x` = '" + 
+                loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "') OR ";
+        }
+        query = query.substring(0, query.length() - 4);
+
+        List<Object[]> ret = SQL.query(query, 1);
+        if (ret.size() == 0){
+            return null;
+        }
+        HashSet<Integer> result = new HashSet<Integer>();
+        for (Object[] k : ret){
+            if (k[0] instanceof Integer) result.add((int)k[0]);
+            else if (k[0] instanceof Long) result.add((int)(long)k[0]);
+            else LogUtil.log(Level.SEVERE, "getShopOwner(): retval="+k[0]);
+        }
+        if (result.size() > 0){
+            int[] retval = new int[result.size()];
+            int i = 0;
+            for (Integer in:result){
+                retval[i] = in;
+                i++;
+            }
+            return retval;
+        }
+        return null;
+    }
+
     public static ShopInfo getShopInfo(int shopid){
         String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE id = '" + shopid + "'";
         List<Object[]> ret = SQL.query(query, 12);
@@ -346,6 +414,33 @@ public class DataLogic{
         }
         Object[] k = ret.get(0);
         return new ShopInfo(k);
+    }
+
+    public static int getShopListLength(Player player){
+        int player_id = PlayerLogic.getPlayer(player);
+        String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + player_id + "'";
+        Object[] ret = SQL.queryFirst(query, 1);
+        if (ret[0] instanceof Integer) return (int)ret[0];
+        else if (ret[0] instanceof Long) return (int)(long)ret[0];
+        LogUtil.log(Level.SEVERE, "getShopListLength(" + player.getName()+ "): retval="+ret[0]);
+        return 0;
+    }
+
+    // only basic infomation will be returned!
+    public static ShopInfo[] getShopList(Player player, int page){
+        int player_id = PlayerLogic.getPlayer(player);
+        String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null FROM `" + SQL.getPrefix() + 
+                "shop` WHERE player_id = '" + player_id + "' ORDER BY `epoch` DESC LIMIT 10 OFFSET " + page*10;
+
+        List<Object[]> ret = SQL.query(query, 12);
+        if (ret.size() == 0){
+            return null;
+        }
+        ArrayList<ShopInfo> result = new ArrayList<ShopInfo>();
+        for (Object[] k : ret){
+            result.add(new ShopInfo(k));
+        }
+        return result.toArray(new ShopInfo[result.size()]);
     }
 
     public static byte[] toBlob(Object object){
