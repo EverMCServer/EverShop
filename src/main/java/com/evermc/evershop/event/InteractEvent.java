@@ -1,15 +1,23 @@
 package com.evermc.evershop.event;
 
+import java.util.logging.Level;
+
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
+import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,6 +27,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 
 public class InteractEvent implements Listener{
     
@@ -61,24 +70,28 @@ public class InteractEvent implements Listener{
         if (event.isCancelled()){
             return;
         }
-        // TODO - op break
-        if (event.getBlock().getState() instanceof Sign && event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
+        Block b = event.getBlock();
+        BlockState bs = b.getState();
+        if ((bs instanceof Sign || ShopLogic.isLinkableBlock(b.getType())) && event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
+            // player is creating shop, cancel
             event.setCancelled(true);
             return;
         }
-        if (event.getBlock().getState() instanceof Sign && ((Sign)event.getBlock().getState()).getLine(0).length() > 0 && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
+        if (bs instanceof Sign && ((Sign)event.getBlock().getState()).getLine(0).length() > 0 && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
+            // try break an active shop, check it
             event.setCancelled(true);
-            if (event.getPlayer().getGameMode() == GameMode.SURVIVAL)
+            if (event.getPlayer().getGameMode() == GameMode.SURVIVAL || event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
                 ShopLogic.tryBreakShop(event.getBlock().getLocation(), event.getPlayer());
-        }
-        if (!ShopLogic.isLinkableBlock(event.getBlock().getType())){
             return;
         }
-        // TODO - check sign on a block
-        event.setCancelled(true);
-        if (event.getPlayer().getInventory().getItemInMainHand().getType() != ShopLogic.getLinkMaterial()){
-            ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer());
+        Location[] signs = ShopLogic.getAttachedSign(b);
+        if (signs == null && !ShopLogic.isLinkableBlock(b.getType())){
+            // no sign attached, and not a linkable block, break directly
+            return;
         }
+        // has sign attached or is a linkable block, check it
+        event.setCancelled(true);
+        ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer(), signs);
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
@@ -91,7 +104,31 @@ public class InteractEvent implements Listener{
             DataLogic.removeShop(event.getBlockPlaced().getLocation());
         }
         if (event.getBlockPlaced().getType() == Material.CHEST || event.getBlockPlaced().getType() == Material.TRAPPED_CHEST){
-            // TODO - check if generates a double chest. -> cancel the event (or update shop?)
+            final Location loc = event.getBlockPlaced().getLocation();
+            final Player p = event.getPlayer();
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                BlockState bs = loc.getBlock().getState();
+                if (bs != null && bs instanceof Container && ((Container)bs).getInventory() instanceof DoubleChestInventory){
+                    DoubleChestInventory dci = (DoubleChestInventory)((Container)bs).getInventory();
+                    final Location right = dci.getRightSide().getLocation();
+                    if (!right.equals(loc)){
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                            ShopInfo[] si = DataLogic.getBlockInfo(right);
+                            if (si != null){
+                                Bukkit.getScheduler().runTask(plugin, () -> {
+                                    p.sendMessage("You can't place this");
+                                    if (loc.getBlock().getState() == null || !(loc.getBlock().getState() instanceof Container)){
+                                        LogUtil.log(Level.SEVERE, "DoubleChest detect: " + loc + " should be a chest, but actually " + 
+                                            loc.getBlock().getType() + ", database lag? Player name=" + p.getName() + ", uuid=" + p.getUniqueId());
+                                    } else {
+                                        loc.getBlock().breakNaturally();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }, 1);
         }
     }
 

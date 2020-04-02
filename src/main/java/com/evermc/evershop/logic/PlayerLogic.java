@@ -68,9 +68,8 @@ public class PlayerLogic {
             }
             return player;
         } else {
-            // this should not happen because all players will be cached at start.
             PlayerInfo pi = fetchPlayerSync(p);
-            LogUtil.log(Level.WARNING, "fetchPlayerSync: Player: [" + p.getUniqueId() + " | " + p.getName() + "], PlayerInfo: " + pi);
+            LogUtil.log(Level.WARNING, "Add new Player: [" + p.getUniqueId() + " | " + p.getName() + "], PlayerInfo: " + pi);
             return pi;
         }
 

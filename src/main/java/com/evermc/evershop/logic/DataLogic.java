@@ -250,7 +250,6 @@ public class DataLogic{
 
     public static void removeShop(final Location loc){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            // TODO - remove the corresponding record in chests? Since shopid is auto incremental, it will nor reuse id, then remove is not necessary. 
             String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
              + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
             SQL.exec(query);
@@ -276,7 +275,6 @@ public class DataLogic{
             for (SerializableLocation sloc : shop.getAllTargets()){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
-                // TODO - if insert failed, revert all of the changes?
                 SQL.insert(query);
             }
             Bukkit.getScheduler().runTask(plugin, afterSave);
@@ -318,6 +316,26 @@ public class DataLogic{
         }
         Object[] k = ret.get(0);
         return new ShopInfo(k);
+    }
+
+    public static ShopInfo[] getShopInfo(Location[] locs){
+        if (locs == null || locs.length == 0) return null;
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE ";
+        for (Location loc:locs){
+            query += "(`world_id` = '" + DataLogic.getWorldId(loc.getWorld()) + "' AND `x` = '" + 
+                loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "') OR ";
+        }
+        query = query.substring(0, query.length() - 4);
+
+        List<Object[]> ret = SQL.query(query, 12);
+        if (ret.size() == 0){
+            return null;
+        }
+        HashSet<ShopInfo> result = new HashSet<ShopInfo>();
+        for (Object[] k : ret){
+            result.add(new ShopInfo(k));
+        }
+        return result.toArray(new ShopInfo[result.size()]);
     }
 
     public static ShopInfo getShopInfo(int shopid){

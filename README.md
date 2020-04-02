@@ -86,6 +86,35 @@ device $100
  /es help 帮助（与/es相同）
 ```
 
+### 权限
+
+玩家权限
+
+```
+evershop.advanced    切换高级模式
+evershop.info        查看商店信息
+evershop.inspect     切换inspect模式
+evershop.list        自己的商店列表
+evershop.set         商店设置参数权限
+evershop.set.perm    设置使用权限
+evershop.set.text    修改牌子文字
+evershop.set.price   修改价格
+evershop.set.time    设置红石开启时长
+```
+
+管理权限
+
+```
+evershop.admin.op       op
+evershop.admin.remove   强制删除商店
+evershop.info.others    查看他人商店信息
+evershop.list.others    查看他人商店列表
+evershop.admin.perm     设置他人使用权限
+evershop.admin.text     修改他人牌子文字
+evershop.admin.price    修改他人价格
+evershop.admin.time     设置他人红石开启时长
+```
+
 ### 商店流程（防bug)
 
 * 所有商店数据存数据库

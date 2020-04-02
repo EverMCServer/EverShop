@@ -15,6 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -270,7 +271,10 @@ public class ShopLogic {
                     loc.getBlock().breakNaturally();
                 });
             } else {
-                if (si.player_id == PlayerLogic.getPlayer(p)){
+                if (si.player_id == PlayerLogic.getPlayer(p)
+                     || ( p.hasPermission("evershop.admin.remove")
+                         && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
+                    ){
                     Bukkit.getScheduler().runTask(plugin, ()->{
                         pendingRemoveBlocks.remove(loc);
                         DataLogic.removeShop(loc);
@@ -285,8 +289,9 @@ public class ShopLogic {
             }
         });
     }
-    public static void tryBreakBlock(final Location lo, final Player p){
+    public static void tryBreakBlock(final Location lo, final Player p, final Location[] locs){
         final Location loc;
+        final Material blocktype = lo.getBlock().getType();
         if (lo.getBlock().getState() instanceof Container && ((Container) lo.getBlock().getState()).getInventory().getSize() == 54){
             loc = ((DoubleChestInventory)((Container) lo.getBlock().getState()).getInventory()).getLeftSide().getLocation();
         }else{
@@ -296,8 +301,26 @@ public class ShopLogic {
             return;
         }
         pendingRemoveBlocks.add(loc);
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            ShopInfo[] si = DataLogic.getBlockInfo(loc);
+            // first, check attached signs
+            ShopInfo[] sis = DataLogic.getShopInfo(locs);
+            if (sis != null){
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    p.sendMessage("you cannot break this block because there are shops attached on it");
+                    pendingRemoveBlocks.remove(loc);
+                });
+                return;
+            }
+            // second, check if block has connected to shops
+            if (!isLinkableBlock(blocktype)){
+                // not a linkable block, break it
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    pendingRemoveBlocks.remove(loc);
+                    lo.getBlock().breakNaturally();
+                });
+            }
+            final ShopInfo[] si = DataLogic.getBlockInfo(loc);
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
@@ -324,4 +347,19 @@ public class ShopLogic {
             }
         });
     }
+    public static Location[] getAttachedSign(Block b){
+        BlockFace[] iter = {BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST};
+        HashSet<Location> ret = new HashSet<Location>();
+        for (BlockFace i : iter){
+            if ((b.getRelative(i).getBlockData() instanceof org.bukkit.block.data.type.WallSign) &&
+                ((org.bukkit.block.data.type.WallSign)b.getRelative(i).getBlockData()).getFacing() == i){
+                    ret.add(b.getRelative(i).getLocation());
+                }
+        }
+        if (b.getRelative(BlockFace.UP).getBlockData() instanceof org.bukkit.block.data.type.Sign){
+            ret.add(b.getRelative(BlockFace.UP).getLocation());
+        }
+        return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
+    }
+
 }
