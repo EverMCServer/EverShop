@@ -16,6 +16,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -331,18 +332,30 @@ public class ShopLogic {
                     pendingRemoveBlocks.remove(loc);
                     String str = "You cannot break this! It's locked by ";
                     int count = 0;
+                    int tcount = 0;
                     for (ShopInfo sii : si){
-                        if (sii.player_id == PlayerLogic.getPlayer(p)){
-                            str += "shop at (" + sii.x +"," + sii.y + "," + sii.z + "), ";
-                        }else{
-                            count++;
+                        BlockState bs = DataLogic.getWorld(sii.world_id).getBlockAt(sii.x, sii.y, sii.z).getState();
+                        if (bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167){
+                            if (sii.player_id == PlayerLogic.getPlayer(p)){
+                                str += "shop at (" + sii.x +"," + sii.y + "," + sii.z + "), ";
+                            }else{
+                                count++;
+                            }
+                            tcount ++;
+                        } else {
+                            // detect unavailable shops (have shop info but no signs)
+                            DataLogic.removeShop(sii.id);
                         }
                     }
                     if (count > 0){
                         str += "" + count + " shops of other player.  ";
                     }
-                    str = str.substring(0, str.length() - 2);
-                    p.sendMessage(str);
+                    if (tcount == 0){
+                        lo.getBlock().breakNaturally();
+                    }else{
+                        str = str.substring(0, str.length() - 2);
+                        p.sendMessage(str);
+                    }
                 });
             }
         });

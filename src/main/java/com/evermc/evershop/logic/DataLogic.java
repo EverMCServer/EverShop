@@ -258,6 +258,13 @@ public class DataLogic{
         });
     }
 
+    public static void removeShop(final int shopid){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `id` = '" + shopid + "'";
+            SQL.exec(query);
+        });
+    }
+
     public static void saveShop(final ShopInfo shop, final Runnable afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.epoch + "', '"
