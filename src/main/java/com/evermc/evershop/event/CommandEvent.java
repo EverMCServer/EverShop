@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -273,6 +274,12 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 for (String s:msg) player.sendMessage(s);
+                for (ShopInfo si : sis){
+                    BlockState bs = DataLogic.getWorld(si.world_id).getBlockAt(si.x, si.y, si.z).getState();
+                    if (!(bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167)){
+                        DataLogic.removeShop(si.id);
+                    }
+                }
             });
         });
     }
