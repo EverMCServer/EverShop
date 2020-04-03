@@ -19,3 +19,25 @@ evershop:
       - 出售
       - 卖
     SELL: 收购
+  tax:
+    consumption_tax:
+      type: by_transaction_progressive # none, static, by_balance, by_transaction_static, by_transaction_progressive
+      tiers: 
+        "0": 0.01
+        "10": 0.02
+        "20": 0.03
+        "50": 0.04
+        "100": 0.06
+        "500": 0.08
+        "1000": 0.1
+    income_tax:
+      type: by_balance
+      tiers:
+        "0": 0
+        "100": 0.01
+        "1000": 0.02
+        "2000": 0.03
+        "5000": 0.04
+        "10000": 0.05
+        "20000": 0.07
+        "50000": 0.1
