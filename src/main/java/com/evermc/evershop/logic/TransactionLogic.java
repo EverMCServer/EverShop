@@ -132,6 +132,7 @@ public enum TransactionLogic {
     public static void doTransaction(ShopInfo si, Player p){
         TransactionInfo ti = new TransactionInfo(si, p);
         si.setSignState(ti.shopHasItems());
+        String[] ite;
         switch(getEnum(ti.getAction())){
             case BUY:
             if (!ti.shopHasItems()){
@@ -151,7 +152,8 @@ public enum TransactionLogic {
             ti.playerPayMoney();
             ti.shopGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have bought " + ti.getItemsOut() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have bought " + ite[0] + " for " + ite[1] +"!");
             break;
 
             case SELL:
@@ -172,7 +174,8 @@ public enum TransactionLogic {
             ti.shopPayMoney();
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have sell " + ti.getItemsIn() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have sell " + ite[0] + " for " + ite[1] +"!");
             break;
 
             case IBUY:
@@ -187,7 +190,8 @@ public enum TransactionLogic {
             ti.playerGiveItems();
             ti.playerPayMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have bought " + ti.getItemsOut() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have bought " + ite[0] + " for " + ite[1] +"!");
             break;
 
             case ISELL:
@@ -198,7 +202,8 @@ public enum TransactionLogic {
             ti.playerRemoveItems();
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have sell " + ti.getItemsIn() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have sell " + ite[0] + " for " + ite[1] +"!");
             break;
 
             case ITRADE:
@@ -224,7 +229,8 @@ public enum TransactionLogic {
                 ti.playerPayMoney();
             }
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have trade " + ti.getItemsIn() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have trade " + ite[0] + " for " + ite[1] +"!");
             break;
 
             case TRADE:
@@ -267,7 +273,8 @@ public enum TransactionLogic {
                 ti.shopGiveMoney();
             }
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
-            p.sendMessage("you have trade " + ti.getItemsIn() + "!");
+            ite = ShopLogic.itemToString(si,p);
+            p.sendMessage("you have trade " + ite[0] + " for " + ite[1] +"!");
             break;
 
             default:

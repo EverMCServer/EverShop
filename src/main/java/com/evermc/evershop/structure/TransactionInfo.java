@@ -151,7 +151,7 @@ public class TransactionInfo{
 
     // Only checks if player has itemsIn 
     public boolean playerHasItems(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.ITRADE.id() && this.action_id != TransactionLogic.TRADE.id()){
             return true;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
@@ -244,7 +244,7 @@ public class TransactionInfo{
     }
 
     public void playerRemoveItems(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id() && this.action_id != TransactionLogic.ITRADE.id()){
             LogUtil.log(Level.SEVERE, "Not supported.");
             return;
         }
@@ -291,7 +291,7 @@ public class TransactionInfo{
     }
 
     public void playerGiveItems(){
-        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id() && this.action_id != TransactionLogic.ITRADE.id()){
             LogUtil.log(Level.SEVERE, "Not supported.");
             return;
         }
@@ -311,7 +311,10 @@ public class TransactionInfo{
     }
 
     public void playerGiveMoney(){
+        if (this.price >= 0)
         TaxLogic.deposit(this.player, this.price);
+        else 
+        TaxLogic.deposit(this.player, -this.price);
     }
 
     public void shopPayMoney(){

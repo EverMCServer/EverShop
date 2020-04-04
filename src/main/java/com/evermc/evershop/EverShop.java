@@ -4,15 +4,17 @@ import java.util.logging.Level;
 
 import com.evermc.evershop.event.CommandEvent;
 import com.evermc.evershop.event.InteractEvent;
+import com.evermc.evershop.handler.TranslationHandler;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
-import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import static com.evermc.evershop.util.LogUtil.log;
 
 public class EverShop extends JavaPlugin {
 
@@ -30,22 +32,25 @@ public class EverShop extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         if (!VaultHandler.setupEconomy() ) {
-            LogUtil.log(Level.SEVERE, "Disabled due to no Vault dependency found!");
+            log(Level.SEVERE, "Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
+        } else {
+            log(Level.INFO, "Hooked Vault-" + getServer().getPluginManager().getPlugin("Vault").getDescription().getVersion());
         }
         VaultHandler.setupPermissions();
 
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
         Bukkit.getPluginCommand("evershop").setExecutor(new CommandEvent());
         if (!DataLogic.init(this)){
-            LogUtil.log(Level.SEVERE, "Fail to start DataLogic! Check your database config.");
+            log(Level.SEVERE, "Fail to start DataLogic! Check your database config.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         PlayerLogic.init(this);
         ShopLogic.init(this);
         TransactionLogic.init(this);
+        TranslationHandler.init(this);
     }  
 
     public static EverShop getInstance() {

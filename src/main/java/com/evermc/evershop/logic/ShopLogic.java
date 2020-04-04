@@ -1,5 +1,6 @@
 package com.evermc.evershop.logic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import static com.evermc.evershop.handler.TranslationHandler.tr;
 
 public class ShopLogic {
 
@@ -81,8 +84,9 @@ public class ShopLogic {
             if (si == null) return;
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
-                final String str = "This shop " + TransactionLogic.getName(si.action_id) +
-                si.items + " for $" + si.price + "!";
+                String[] t = itemToString(si, p);
+                final String str = "This shop " + TransactionLogic.getName(si.action_id) + " " +
+                t[0] + " for " + t[1] + "!";
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
@@ -96,6 +100,42 @@ public class ShopLogic {
             }
         });
     }
+
+    public static String[] itemToString(ShopInfo si, Player p){
+        String[] ret = new String[2];
+        if (TransactionLogic.itemsetCount(si.action_id) == 2){
+            // trade shop
+            ArrayList<HashSet<ItemStack>> items = si.getDoubleItems();
+            ret[0] = "";
+            for (ItemStack is : items.get(0)){
+                ret[0] += tr(is,p) + ", ";
+            }
+            ret[0] = ret[0].substring(0, ret[0].length() - 2);
+            ret[1] = "";
+            for (ItemStack is : items.get(1)){
+                ret[1] += tr(is,p) + ", ";
+            }
+            ret[1] = ret[1].substring(0, ret[1].length() - 2);
+            if (si.price > 0){
+                ret[1] += " + $" +si.price;
+            } else if (si.price < 0){
+                ret[0] += " + $" + (-si.price);
+            }
+        } else if (TransactionLogic.itemsetCount(si.action_id) == 1){
+            // buy
+            HashSet<ItemStack> items = si.getAllItems();
+            ret[0] = "";
+            for (ItemStack is : items){
+                ret[0] += tr(is,p) + ", ";
+            }
+            ret[0] = ret[0].substring(0, ret[0].length() - 2);
+            ret[1] = "$" + si.price;
+        } else {
+            ret[1] = "$" + si.price;
+        }
+        return ret;
+    }
+
     public static boolean registerBlock(final Player p, Block block, Action action){
 
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
@@ -119,12 +159,12 @@ public class ShopLogic {
                     Location loc2 = ((DoubleChestInventory)container.getInventory()).getRightSide().getLocation();
                     if (player.reg1.contains(loc2)){
                         player.reg1.remove(loc2);
-                        p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                        p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
                         return true;
                     }
                     if (player.reg2.contains(loc2)){
                         player.reg2.remove(loc2);
-                        p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                        p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
                         return true;
                     }
                 }else{
@@ -132,19 +172,19 @@ public class ShopLogic {
                 }
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
-                    p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                    p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
                     return true;
                 }
                 if (player.reg2.contains(loc)){
                     player.reg2.remove(loc);
-                    p.sendMessage("unlinked, cur:" + getRegisteredContents(player));
+                    p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
                     return true;
                 }
                 if (action == Action.RIGHT_CLICK_BLOCK)
                     player.reg2.add(loc);
                 else 
                     player.reg1.add(loc);
-                p.sendMessage("linked " + block.getType() + ", cur:" + getRegisteredContents(player));
+                p.sendMessage("linked " + block.getType() + ", cur:" + getRegisteredContents(p));
             }
 
             else if (linkable_redstone.contains(block.getType())){
@@ -190,7 +230,8 @@ public class ShopLogic {
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
-                    p.sendMessage("You have created a " + TransactionLogic.getName(newshop.action_id) + " shop, price is " + newshop.price);
+                    String[] t = itemToString(newshop, p);
+                    p.sendMessage("You have created a shop " + TransactionLogic.getName(newshop.action_id) + " " + t[0] + " for " + t[1]);
                 }, () -> {
                     p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
                 });
@@ -250,11 +291,28 @@ public class ShopLogic {
         return items;
     }
 
-    private static String getRegisteredContents(PlayerInfo player){
+    private static String getRegisteredContents(Player p){
         String result = "";
-        HashSet<ItemStack> items = getReg1(player);
-        for (ItemStack isc : items){
-            result += "" + isc.getType() + "x" + isc.getAmount() + ";";
+        PlayerInfo player = PlayerLogic.getPlayerInfo(p);
+        if (!player.advanced){
+            HashSet<ItemStack> items = getReg1(player);
+            for (ItemStack isc : items){
+                result += tr(isc, p) + ", ";
+            }
+            result = result.substring(0, result.length() - 2);
+        } else {
+            result += "Main type: ";
+            HashSet<ItemStack> items = getReg1(player);
+            for (ItemStack isc : items){
+                result += tr(isc, p) + ", ";
+            }
+            result = result.substring(0, result.length() - 2);
+            result += "; Sub type: ";
+            items = getReg2(player);
+            for (ItemStack isc : items){
+                result += tr(isc, p) + ", ";
+            }
+            result = result.substring(0, result.length() - 2);
         }
         return result;
     }

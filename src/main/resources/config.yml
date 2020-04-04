@@ -13,6 +13,7 @@ evershop:
       prefix: es_
   linkMaterial: redstone
   destroyMaterial: golden_axe
+  language: zh_CN # or null to use the same language with client
   #TODO change to lang files
   alias:
     BUY: 
