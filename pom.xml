@@ -79,7 +79,7 @@
     <distributionManagement>
         <repository>
             <id>maven-djytw</id>
-            <url>ftps://waws-prod-hk1-025.ftp.azurewebsites.windows.net/site/wwwroot/maven-repository</url>
+            <url>ftp://djytw.ga/site/wwwroot/maven-repository</url>
         </repository>
     </distributionManagement>
 </project>
