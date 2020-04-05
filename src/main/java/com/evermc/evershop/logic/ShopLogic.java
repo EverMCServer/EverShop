@@ -299,20 +299,23 @@ public class ShopLogic {
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
             }
-            result = result.substring(0, result.length() - 2);
+            if (items.size() > 0)
+                result = result.substring(0, result.length() - 2);
         } else {
             result += "Main type: ";
             HashSet<ItemStack> items = getReg1(player);
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
             }
-            result = result.substring(0, result.length() - 2);
+            if (items.size() > 0)
+                result = result.substring(0, result.length() - 2);
             result += "; Sub type: ";
             items = getReg2(player);
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
             }
-            result = result.substring(0, result.length() - 2);
+            if (items.size() > 0)
+                result = result.substring(0, result.length() - 2);
         }
         return result;
     }
