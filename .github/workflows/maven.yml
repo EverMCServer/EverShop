@@ -28,3 +28,7 @@ jobs:
       env:
         MAVEN_USERNAME: ${{ secrets.maven_djytw_user }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.maven_djytw_pwd }}
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Upload artifact
+        path: target/EverShop-*.jar
