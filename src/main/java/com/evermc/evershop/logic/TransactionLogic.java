@@ -12,6 +12,8 @@ import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.entity.Player;
 
+import static com.evermc.evershop.handler.TranslationHandler.tr;
+
 public enum TransactionLogic {
     
     //
@@ -136,15 +138,15 @@ public enum TransactionLogic {
         switch(getEnum(ti.getAction())){
             case BUY:
             if (!ti.shopHasItems()){
-                p.sendMessage("sold out");
+                p.sendMessage(tr("shop sold out", p));
                 break;
             }
             if (!ti.playerCanHold()){
-                p.sendMessage("cannot hold");
+                p.sendMessage(tr("player cannot hold", p));
                 break;
             }
             if (!ti.playerHasMoney()){
-                p.sendMessage("insufficient money");
+                p.sendMessage(tr("player insufficient money", p));
                 break;
             }
             ti.shopRemoveItems();
@@ -153,20 +155,20 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have bought " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have bought %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             case SELL:
             if (!ti.playerHasItems()){
-                p.sendMessage("not enough items");
+                p.sendMessage(tr("player not enough items", p));
                 break;
             }
             if (!ti.shopCanHold()){
-                p.sendMessage("shop cannot hold");
+                p.sendMessage(tr("shop cannot hold", p));
                 break;
             }
             if (!ti.shopHasMoney()){
-                p.sendMessage("insufficient money");
+                p.sendMessage(tr("shop insufficient money", p));
                 break;
             }
             ti.playerRemoveItems();
@@ -175,49 +177,49 @@ public enum TransactionLogic {
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have sell " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have sell %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             case IBUY:
             if (!ti.playerCanHold()){
-                p.sendMessage("cannot hold");
+                p.sendMessage(tr("player cannot hold", p));
                 break;
             }
             if (!ti.playerHasMoney()){
-                p.sendMessage("insufficient money");
+                p.sendMessage(tr("player insufficient money", p));
                 break;
             }
             ti.playerGiveItems();
             ti.playerPayMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have bought " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have bought %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             case ISELL:
             if (!ti.playerHasItems()){
-                p.sendMessage("not enough items");
+                p.sendMessage(tr("player not enough items", p));
                 break;
             }
             ti.playerRemoveItems();
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have sell " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have sell %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             case ITRADE:
             if (!ti.playerHasItems()){
-                p.sendMessage("not enough items");
+                p.sendMessage(tr("player not enough items", p));
                 break;
             }
             if (!ti.playerCanHold()){
-                p.sendMessage("cannot hold");
+                p.sendMessage(tr("player cannot hold", p));
                 break;
             }
             if (ti.getPrice() > 0){
                 if (!ti.playerHasMoney()){
-                    p.sendMessage("insufficient money");
+                    p.sendMessage(tr("player insufficient money", p));
                     break;
                 }
             }
@@ -230,34 +232,34 @@ public enum TransactionLogic {
             }
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have trade " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have trade %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             case TRADE:
             if (!ti.playerHasItems()){
-                p.sendMessage("not enough items");
+                p.sendMessage(tr("player not enough items", p));
                 break;
             }
             if (!ti.shopHasItems()){
-                p.sendMessage("sold out");
+                p.sendMessage(tr("shop sold out", p));
                 break;
             }
             if (!ti.shopCanHold()){
-                p.sendMessage("shop cannot hold");
+                p.sendMessage(tr("shop cannot hold", p));
                 break;
             }
             if (!ti.playerCanHold()){
-                p.sendMessage("cannot hold");
+                p.sendMessage(tr("player cannot hold", p));
                 break;
             }
             if (ti.getPrice() < 0){
                 if (!ti.shopHasMoney()){
-                    p.sendMessage("insufficient money");
+                    p.sendMessage(tr("shop insufficient money", p));
                     break;
                 }
             } else if (ti.getPrice() > 0){
                 if (!ti.playerHasMoney()){
-                    p.sendMessage("insufficient money");
+                    p.sendMessage(tr("player insufficient money", p));
                     break;
                 }
             }
@@ -274,7 +276,7 @@ public enum TransactionLogic {
             }
             DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
             ite = ShopLogic.itemToString(si,p);
-            p.sendMessage("you have trade " + ite[0] + " for " + ite[1] +"!");
+            p.sendMessage(tr("you have trade %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
             default:

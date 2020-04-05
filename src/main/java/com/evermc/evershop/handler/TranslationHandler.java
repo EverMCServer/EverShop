@@ -1,5 +1,9 @@
 package com.evermc.evershop.handler;
 
+import java.io.File;
+import java.net.URI;
+import java.util.Formatter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -10,6 +14,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -32,6 +38,42 @@ public class TranslationHandler {
     private static String lang;
     private static boolean force_tr;
     private static boolean enabled;
+    private static HashMap<String, HashMap<String, String>> tr_dicts = new HashMap<String, HashMap<String, String>>();
+
+    public static void init(EverShop plugin){
+
+        lang = plugin.getConfig().getString("evershop.language");
+        if (lang == null) force_tr = false;
+        else force_tr = true;
+
+        // LangUtils
+        Plugin tr = plugin.getServer().getPluginManager().getPlugin("LangUtils");
+        if (tr == null){
+            log(Level.WARNING, "LangUtils plugin not found, disable item translation.");
+            enabled = false;
+        } else {
+            PluginDescriptionFile desc = tr.getDescription();
+            log(Level.INFO, "Hooked LangUtils-" + desc.getVersion());
+            enabled = true;
+        }
+
+        // i18n
+        String[] i18n_files = {"zh_cn.yml", "en_us.yml"};
+        for (String n:i18n_files){
+            if (!new File(plugin.getDataFolder(), "i18n/" + n).exists())
+                plugin.saveResource("i18n/" + n, false);
+        }
+        File  i18n_dir;
+        i18n_dir = new File(plugin.getDataFolder(), "i18n");
+        for (File f : i18n_dir.listFiles()){
+            HashMap<String, String> dict = new HashMap<String, String>();
+            FileConfiguration conf = YamlConfiguration.loadConfiguration(f);
+            for (String key: conf.getKeys(false)){
+                dict.put(key, conf.getString(key));
+            }
+            tr_dicts.put(f.getName().split("\\.")[0] , dict);
+        }
+    }
 
     enum ColorTr{
         black       (0x1E1B1B),
@@ -98,24 +140,29 @@ public class TranslationHandler {
             return PotionDuration.valueOf(pt.name()).dur;
         }
     }
-    public static void init(EverShop plugin){
 
-        lang = plugin.getConfig().getString("evershop.language");
-        if (lang == null) force_tr = false;
-        else force_tr = true;
+    public static String tr(String str, Player p, Object...args){
+        return tr(str, force_tr?lang:p.getLocale(), args);
+    }
 
-        Plugin tr = plugin.getServer().getPluginManager().getPlugin("LangUtils");
-        if (tr == null){
-            log(Level.WARNING, "LangUtils plugin not found, disable item translation.");
-            enabled = false;
+    public static String tr(String str, String lang, Object...args){
+        String s;
+        if (tr_dicts.containsKey(lang)){
+            s = tr_dicts.get(lang).get(str);
         } else {
-            PluginDescriptionFile desc = tr.getDescription();
-            log(Level.INFO, "Hooked LangUtils-" + desc.getVersion());
-            enabled = true;
+            s = tr_dicts.get("en_us").get(str);
         }
+        if (s != null)
+            return String.format(s, args);
+        else 
+            return String.format(str, args);
     }
 
     public static String tr(ItemStack is, Player p){
+        return tr(is, force_tr?lang:p.getLocale());
+    }
+
+    public static String tr(Material is, Player p){
         return tr(is, force_tr?lang:p.getLocale());
     }
 
@@ -224,6 +271,10 @@ public class TranslationHandler {
             ret += _tr("enchantment.minecraft." + e.getKey().getKey(), lang) + " " + binaryToRoman(enchant.get(e)) + ", ";
         }
         return ret.substring(0, ret.length()-2) + ")";
+    }
+
+    public static String tr(Material is, String lang){
+        return LanguageHelper.getItemName(new ItemStack(is), lang);
     }
 
     public static String binaryToRoman(int binary) {

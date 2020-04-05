@@ -28,6 +28,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 
+import static com.evermc.evershop.handler.TranslationHandler.tr;
+
 public class InteractEvent implements Listener{
     
     private EverShop plugin;
@@ -121,7 +123,7 @@ public class InteractEvent implements Listener{
                             int count = DataLogic.getBlockLinkedCount(right);
                             if (count > 0){
                                 Bukkit.getScheduler().runTask(plugin, () -> {
-                                    p.sendMessage("You can't place this");
+                                    p.sendMessage(tr("You cant place this", p));
                                     if (loc.getBlock().getState() == null || !(loc.getBlock().getState() instanceof Container)){
                                         LogUtil.log(Level.SEVERE, "DoubleChest detect: " + loc + " should be a chest, but actually " + 
                                             loc.getBlock().getType() + ", database lag? Player name=" + p.getName() + ", uuid=" + p.getUniqueId());

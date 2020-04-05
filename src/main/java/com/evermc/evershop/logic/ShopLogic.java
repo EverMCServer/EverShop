@@ -57,7 +57,8 @@ public class ShopLogic {
         Material.DARK_OAK_BUTTON,
         Material.JUNGLE_BUTTON,
         Material.OAK_BUTTON,
-        Material.SPRUCE_BUTTON
+        Material.SPRUCE_BUTTON,
+        Material.STONE_BUTTON
     );
     
     public static void init(EverShop _plugin){
@@ -81,12 +82,20 @@ public class ShopLogic {
     public static void accessShop(final Player p, final Location loc, final Action action){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             ShopInfo si = DataLogic.getShopInfo(loc);
-            if (si == null) return;
+            if (si == null) {
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (loc.getBlock().getState() instanceof Sign){
+                        Sign sign = (Sign)loc.getBlock().getState();
+                        sign.setLine(0, ChatColor.stripColor(sign.getLine(0)));
+                        sign.update();
+                    }
+                });
+                return;
+            }
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
                 String[] t = itemToString(si, p);
-                final String str = "This shop " + TransactionLogic.getName(si.action_id) + " " +
-                t[0] + " for " + t[1] + "!";
+                final String str = tr("This shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(si.action_id), t[0], t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
@@ -148,7 +157,7 @@ public class ShopLogic {
 
             if (linkable_container.contains(block.getType())){
                 if (!player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
-                    p.sendMessage("You can't link redstone components and inventory at the same time");
+                    p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
                     return true;
                 }
                 player.reg_is_container = true;
@@ -159,12 +168,14 @@ public class ShopLogic {
                     Location loc2 = ((DoubleChestInventory)container.getInventory()).getRightSide().getLocation();
                     if (player.reg1.contains(loc2)){
                         player.reg1.remove(loc2);
-                        p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
+                        p.sendMessage(tr("unlinked this",p));
+                        p.sendMessage(getRegisteredContents(p));
                         return true;
                     }
                     if (player.reg2.contains(loc2)){
                         player.reg2.remove(loc2);
-                        p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
+                        p.sendMessage(tr("unlinked this",p));
+                        p.sendMessage(getRegisteredContents(p));
                         return true;
                     }
                 }else{
@@ -172,34 +183,39 @@ public class ShopLogic {
                 }
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
-                    p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
+                    p.sendMessage(tr("unlinked this",p));
+                    p.sendMessage(getRegisteredContents(p));
                     return true;
                 }
                 if (player.reg2.contains(loc)){
                     player.reg2.remove(loc);
-                    p.sendMessage("unlinked, cur:" + getRegisteredContents(p));
+                    p.sendMessage(tr("unlinked this",p));
+                    p.sendMessage(getRegisteredContents(p));
                     return true;
                 }
                 if (action == Action.RIGHT_CLICK_BLOCK)
                     player.reg2.add(loc);
                 else 
                     player.reg1.add(loc);
-                p.sendMessage("linked " + block.getType() + ", cur:" + getRegisteredContents(p));
+                    p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
+                    p.sendMessage(getRegisteredContents(p));
             }
 
             else if (linkable_redstone.contains(block.getType())){
                 if (player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
-                    p.sendMessage("You can't link redstone components and inventory at the same time");
+                    p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
                     return true;
                 }
                 player.reg_is_container = false;
                 Location loc = block.getLocation();
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
-                    p.sendMessage("unlinked " + block.getType());
+                    p.sendMessage(tr("unlinked this",p));
+                    p.sendMessage(getRegisteredContents(p));
                 }else{
                     player.reg1.add(block.getLocation());
-                    p.sendMessage("linked " + block.getType());
+                    p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
+                    p.sendMessage(getRegisteredContents(p));
                 }
             }
 
@@ -207,20 +223,20 @@ public class ShopLogic {
                 String line = ((Sign)block.getState()).getLine(0);
                 int a = TransactionLogic.getId(line);
                 if (a == 0) {
-                    p.sendMessage("The sign does not contain an available action!");
+                    p.sendMessage(tr("The sign does not contain an available action!", p));
                     return true;
                 }
                 if (player.reg1.size() == 0){
-                    p.sendMessage("You should register items first!");
+                    p.sendMessage(tr("You should register items first!", p));
                     return true;
                 }
                 if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
-                    p.sendMessage("Shop type and your selection is not match!");
+                    p.sendMessage(tr("Shop type and your selection is not match!", p));
                     return true;
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
-                    p.sendMessage("You should put some items in the chest first!");
+                    p.sendMessage(tr("You should put some items in the chest first!", p));
                     return true;
                 }
                 final Sign sign = (Sign)block.getState();
@@ -231,9 +247,9 @@ public class ShopLogic {
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
                     String[] t = itemToString(newshop, p);
-                    p.sendMessage("You have created a shop " + TransactionLogic.getName(newshop.action_id) + " " + t[0] + " for " + t[1]);
+                    p.sendMessage(tr("You have created a shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(newshop.action_id), t[0], t[1]));
                 }, () -> {
-                    p.sendMessage("Failed to create shop, maybe you put too many items in the shop.");
+                    p.sendMessage(tr("Failed to create shop, maybe you put too many items in the shop", p));
                 });
             }
             return true;
@@ -292,9 +308,10 @@ public class ShopLogic {
     }
 
     private static String getRegisteredContents(Player p){
-        String result = "";
+        String result;
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (!player.advanced){
+            result = tr("Current selection:", p);
             HashSet<ItemStack> items = getReg1(player);
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
@@ -302,14 +319,15 @@ public class ShopLogic {
             if (items.size() > 0)
                 result = result.substring(0, result.length() - 2);
         } else {
-            result += "Main type: ";
+            result = tr("Main selection:", p);
             HashSet<ItemStack> items = getReg1(player);
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
             }
             if (items.size() > 0)
                 result = result.substring(0, result.length() - 2);
-            result += "; Sub type: ";
+            result += "\n";
+            result += tr("Sub selection:", p);
             items = getReg2(player);
             for (ItemStack isc : items){
                 result += tr(isc, p) + ", ";
@@ -345,7 +363,7 @@ public class ShopLogic {
                 } else {
                     Bukkit.getScheduler().runTask(plugin, ()->{
                         pendingRemoveBlocks.remove(loc);
-                        p.sendMessage("You cannot break this!");
+                        p.sendMessage(tr("You cannot break this!", p));
                     });
                 }
             }
@@ -369,7 +387,7 @@ public class ShopLogic {
             int[] sis = DataLogic.getShopOwner(locs);
             if (sis != null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    p.sendMessage("you cannot break this block because there are shops attached on it");
+                    p.sendMessage(tr("you cannot break this block because there are shops attached on it", p));
                     pendingRemoveBlocks.remove(loc);
                 });
                 return;
@@ -391,14 +409,14 @@ public class ShopLogic {
             } else {
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
-                    String str = "You cannot break this! It's locked by ";
+                    String loc_str = "";
                     int count = 0;
                     int tcount = 0;
                     for (ShopInfo sii : si){
                         BlockState bs = DataLogic.getWorld(sii.world_id).getBlockAt(sii.x, sii.y, sii.z).getState();
                         if (bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167){
                             if (sii.player_id == PlayerLogic.getPlayer(p)){
-                                str += "shop at (" + sii.x +"," + sii.y + "," + sii.z + "), ";
+                                loc_str += "(" + sii.x +"," + sii.y + "," + sii.z + "), ";
                             }else{
                                 count++;
                             }
@@ -408,14 +426,14 @@ public class ShopLogic {
                             DataLogic.removeShop(sii.id);
                         }
                     }
+                    String other_str = "";
                     if (count > 0){
-                        str += "" + count + " shops of other player.  ";
+                        other_str = tr("%1$s shops of other player", p, count);
                     }
                     if (tcount == 0){
                         lo.getBlock().breakNaturally();
                     }else{
-                        str = str.substring(0, str.length() - 2);
-                        p.sendMessage(str);
+                        p.sendMessage(tr("You cannot break this! Its locked by %1$s %2$s", p, loc_str, other_str));
                     }
                 });
             }
