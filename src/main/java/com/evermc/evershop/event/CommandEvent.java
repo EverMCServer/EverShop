@@ -4,11 +4,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.SerializableLocation;
 
@@ -64,7 +67,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         if (args.length == 0){
             show_usage(sender);
             return true;
-        } else if (args.length == 1){
+        } else {
             if ("advanced".startsWith(args[0]) && sender.hasPermission("evershop.advanced")){
                 if (sender instanceof Player){
                     if (PlayerLogic.isAdvanced((Player)sender)){
@@ -78,24 +81,74 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                     sender.sendMessage("this command must be executed by players");
                 }
                 return true;
+
             } else if ("help".startsWith(args[0])){
                 show_usage(sender);
                 return true;
+
             } else if ("info".startsWith(args[0]) && sender.hasPermission("evershop.info")){
-                if (sender instanceof Player){
-                    show_info((Player)sender);
+                if (args.length == 1){
+                    if (sender instanceof Player){
+                        show_info((Player)sender);
+                    } else {
+                        sender.sendMessage("use '" + label + " " + args[0] + " [shopid]'");
+                    }
                 } else {
-                    sender.sendMessage("use '" + label + " " + args[0] + " [shopid]' instead");
+                    try{
+                        int shopid = Integer.parseInt(args[1]);
+                        show_info(sender, shopid);
+                    } catch (Exception e){
+                        sender.sendMessage("Invalid shopid: " + args[1]);
+                    }
                 }
                 return true;
+
             } else if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
                 // TODO - inspect mode
+
             } else if ("list".startsWith(args[0]) && sender.hasPermission("evershop.list")){
-                if (sender instanceof Player){
-                    show_list((Player)sender, 0);
+                int page = 0;
+                String player = "";
+                if (args.length == 1){
+                    if (sender instanceof Player){
+                        player = ((Player)sender).getUniqueId().toString();
+                    } else {
+                        sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
+                    }
+                } else if (args.length == 2){
+                    if (Pattern.matches("\\d+", args[1])){
+                        if (sender instanceof Player){
+                            player = ((Player)sender).getUniqueId().toString();
+                            try{
+                                page = Integer.parseInt(args[1]);
+                            } catch (Exception e){}
+                        } else {
+                            sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
+                        }
+                    } else {
+                        if (sender.hasPermission("evershop.list.others")){
+                            player = args[1];
+                        } else {
+                            show_usage(sender);
+                            return true;
+                        }
+                    }
                 } else {
-                    sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
+                    if (sender.hasPermission("evershop.list.others")){
+                        player = args[1];
+                    } else {
+                        show_usage(sender);
+                    }
+                    if (!Pattern.matches("\\d+", args[2])){
+                        show_usage(sender);
+                        return true;
+                    } else {
+                        try{
+                            page = Integer.parseInt(args[2]);
+                        } catch (Exception e){}
+                    }
                 }
+                show_list(sender, player, page);
                 return true;
             }
         }
@@ -239,7 +292,23 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         player.sendMessage("please look at a actived shop sign");
     }
 
-    private void show_info(final Player player, final ShopInfo si){
+    private void show_info(final CommandSender player, final int shopid){
+        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
+            final ShopInfo si = DataLogic.getShopInfo(shopid);
+            Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayer((Player)player)){
+                    player.sendMessage("no permission");
+                    return;
+                } else {
+                    show_info(player, si);
+                    return;
+                }
+            });
+        });
+        return;
+    }
+
+    private void show_info(final CommandSender player, final ShopInfo si){
         // TODO - tellraw
         ArrayList<String> msg = new ArrayList<String>();
         msg.add("===== Shop #" + si.id + " Infomation =====");
@@ -253,27 +322,45 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         for (String a:msg)player.sendMessage(a);
     }
 
-    private void show_list(final Player player, int _page){
+    private void show_list(final CommandSender sender, final String player, int _page){
+        final PlayerInfo pi;
+        UUID uuid = null;
+        try{
+            uuid = UUID.fromString(player); 
+        } catch (IllegalArgumentException e){}
+        if (uuid == null){
+            pi = PlayerLogic.getPlayerInfo(player);
+            if (pi == null) {
+                sender.sendMessage("No player named " + player + " found!");
+                return;
+            }
+        } else {
+            pi = PlayerLogic.getPlayerInfo(uuid);
+            if (pi == null) {
+                sender.sendMessage("No uuid " + uuid + " found!");
+                return;
+            }
+        }
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), () -> {
-            int count = DataLogic.getShopListLength(player);
+            int count = DataLogic.getShopListLength(pi);
             if (count == 0){
                 Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                    player.sendMessage("No shops found!");
+                    sender.sendMessage("No shops found!");
                 });
                 return;
             }
             int page = _page;
             if (_page*10 >= count) page = (count-1)/10;
-            ShopInfo[] sis = DataLogic.getShopList(player, page);
+            ShopInfo[] sis = DataLogic.getShopList(pi.id, page);
             final ArrayList<String> msg = new ArrayList<String>();
-            msg.add("===== " + player.getName() + "'s shops =====");
+            msg.add("===== " + pi.name + "'s shops =====");
             msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
             for (ShopInfo si : sis){
                 msg.add(" #" + si.id + "  " + TransactionLogic.getName(si.action_id) + " shop, at "
                      + DataLogic.getWorld(si.world_id).getName() + ":" + si.x + "," + si.y + "," + si.z);
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                for (String s:msg) player.sendMessage(s);
+                for (String s:msg) sender.sendMessage(s);
                 for (ShopInfo si : sis){
                     BlockState bs = DataLogic.getWorld(si.world_id).getBlockAt(si.x, si.y, si.z).getState();
                     if (!(bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167)){

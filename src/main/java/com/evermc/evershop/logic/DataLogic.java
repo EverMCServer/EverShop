@@ -14,6 +14,7 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.LiteDataSource;
 import com.evermc.evershop.database.MySQLDataSource;
 import com.evermc.evershop.database.SQLDataSource;
+import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.SerializableLocation;
@@ -424,18 +425,21 @@ public class DataLogic{
     }
 
     public static int getShopListLength(Player player){
-        int player_id = PlayerLogic.getPlayer(player);
-        String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + player_id + "'";
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(player);
+        return getShopListLength(pi);
+    }
+
+    public static int getShopListLength(PlayerInfo pi){
+        String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + pi.id + "'";
         Object[] ret = SQL.queryFirst(query, 1);
         if (ret[0] instanceof Integer) return (int)ret[0];
         else if (ret[0] instanceof Long) return (int)(long)ret[0];
-        LogUtil.log(Level.SEVERE, "getShopListLength(" + player.getName()+ "): retval="+ret[0]);
+        LogUtil.log(Level.SEVERE, "getShopListLength(" + pi.name+ "): retval="+ret[0]);
         return 0;
     }
 
     // only basic infomation will be returned!
-    public static ShopInfo[] getShopList(Player player, int page){
-        int player_id = PlayerLogic.getPlayer(player);
+    public static ShopInfo[] getShopList(int player_id, int page){
         String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null FROM `" + SQL.getPrefix() + 
                 "shop` WHERE player_id = '" + player_id + "' ORDER BY `epoch` DESC LIMIT 10 OFFSET " + page*10;
 

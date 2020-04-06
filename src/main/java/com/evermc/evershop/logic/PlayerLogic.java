@@ -13,6 +13,7 @@ import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class PlayerLogic {
@@ -20,21 +21,24 @@ public class PlayerLogic {
     private static EverShop plugin;
     private static Map<UUID, PlayerInfo> cachedPlayers;
     private static Map<Integer, PlayerInfo> cachedPlayerId;
+    private static Map<String, PlayerInfo> cachedPlayerName;
     
     static {
         plugin = null;
         cachedPlayerId = null;
         cachedPlayers = null;
+        cachedPlayerName = null;
     }
 
     public static void init(EverShop _plugin){
         plugin = _plugin;
         cachedPlayers = new ConcurrentHashMap<UUID, PlayerInfo>();
         cachedPlayerId = new ConcurrentHashMap<Integer, PlayerInfo>();
+        cachedPlayerName = new ConcurrentHashMap<String, PlayerInfo>();
         getAllPlayers();
     }
 
-    public static int getPlayer(Player p){
+    public static int getPlayer(OfflinePlayer p){
         return getPlayerInfo(p).id;
     }
 
@@ -49,11 +53,27 @@ public class PlayerLogic {
         }
     }
 
+    public static PlayerInfo getPlayerInfo(String playername){
+        if (cachedPlayerName.containsKey(playername)){
+            return cachedPlayerName.get(playername);
+        } else {
+            return null;
+        }
+    }
+
+    public static PlayerInfo getPlayerInfo(UUID uuid){
+        if (cachedPlayers.containsKey(uuid)){
+            return cachedPlayers.get(uuid);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * get playerinfo from @param player 
      * if currrent name is different with cached name, update the cache
      */
-    public static PlayerInfo getPlayerInfo(Player p){
+    public static PlayerInfo getPlayerInfo(OfflinePlayer p){
         UUID uuid = p.getUniqueId();
         String name = p.getName();
         if (cachedPlayers.containsKey(uuid)){
@@ -64,6 +84,7 @@ public class PlayerLogic {
                 player.name = name;
                 cachedPlayers.put(uuid, player);
                 cachedPlayerId.put(player.id, player);
+                cachedPlayerName.put(player.name, player);
                 fetchPlayer(p);
             }
             return player;
@@ -89,7 +110,7 @@ public class PlayerLogic {
         });
     }
 
-    private static PlayerInfo fetchPlayerSync(Player p){
+    private static PlayerInfo fetchPlayerSync(OfflinePlayer p){
 
         UUID uuid = p.getUniqueId();
         String name = p.getName();
@@ -117,6 +138,7 @@ public class PlayerLogic {
         pi.reg2 = new CopyOnWriteArraySet<Location>();
         cachedPlayers.put(pi.uuid, pi);
         cachedPlayerId.put(pi.id, pi);
+        cachedPlayerName.put(pi.name, pi);
 
         LogUtil.log(Level.INFO, "Load " + pi);
 
@@ -142,13 +164,14 @@ public class PlayerLogic {
         pi.reg2 = new CopyOnWriteArraySet<Location>();
         cachedPlayers.put(pi.uuid, pi);
         cachedPlayerId.put(pi.id, pi);
+        cachedPlayerName.put(pi.name, pi);
 
         LogUtil.log(Level.INFO, "Load " + pi);
 
         return pi;
     }
 
-    private static void fetchPlayer(Player p){
+    private static void fetchPlayer(OfflinePlayer p){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             fetchPlayerSync(p);
         });
@@ -177,6 +200,7 @@ public class PlayerLogic {
                 pi.reg2 = new CopyOnWriteArraySet<Location>();
                 cachedPlayers.put(pi.uuid, pi);
                 cachedPlayerId.put(pi.id, pi);
+                cachedPlayerName.put(pi.name, pi);
             }
     
             LogUtil.log(Level.INFO, "Load " + cachedPlayers.size() + " players.");
