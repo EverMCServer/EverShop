@@ -1,8 +1,6 @@
 package com.evermc.evershop.handler;
 
 import java.io.File;
-import java.net.URI;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -274,7 +272,8 @@ public class TranslationHandler {
     }
 
     public static String tr(Material is, String lang){
-        return LanguageHelper.getItemName(new ItemStack(is), lang);
+        if (enabled) return LanguageHelper.getItemName(new ItemStack(is),lang);
+        else return is.toString();
     }
 
     public static String binaryToRoman(int binary) {
