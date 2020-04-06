@@ -150,6 +150,22 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 }
                 show_list(sender, player, page);
                 return true;
+            } else if ("log".startsWith(args[0]) && sender.hasPermission("evershop.info")){
+                if (args.length == 1){
+                    if (sender instanceof Player){
+                        show_log((Player)sender);
+                    } else {
+                        sender.sendMessage("use '" + label + " " + args[0] + " [shopid]'");
+                    }
+                } else {
+                    try{
+                        int shopid = Integer.parseInt(args[1]);
+                        show_log(sender, shopid);
+                    } catch (Exception e){
+                        sender.sendMessage("Invalid shopid: " + args[1]);
+                    }
+                }
+                return true;
             }
         }
         show_usage(sender, _args);
@@ -308,8 +324,72 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         return;
     }
 
+    private void show_log(final Player player){
+        Block b = player.getTargetBlockExact(3);
+        if (b != null && b.getState() != null && b.getState() instanceof Sign){
+            Sign sign = (Sign)b.getState();
+            if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
+                final Location loc = b.getLocation();
+                Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
+                    final ShopInfo si = DataLogic.getShopInfo(loc);
+                    Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayer(player)){
+                            player.sendMessage("no permission");
+                            return;
+                        } else {
+                            show_log(player, si);
+                            return;
+                        }
+                    });
+                });
+                return;
+            }
+        }
+        player.sendMessage("please look at a actived shop sign");
+    }
+
+    private void show_log(final CommandSender player, final int shopid){
+        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
+            final ShopInfo si = DataLogic.getShopInfo(shopid);
+            Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayer((Player)player)){
+                    player.sendMessage("no permission");
+                    return;
+                } else {
+                    show_log(player, si);
+                    return;
+                }
+            });
+        });
+        return;
+    }
+
+    private void show_log(final CommandSender player, final ShopInfo si){
+        if (si == null){
+            player.sendMessage("shop not found");
+            return;
+        }
+        int[][] re = DataLogic.getTransaction(si.id);
+        if (re == null){
+            player.sendMessage("no logs");
+            return;
+        }
+        ArrayList<String> msg = new ArrayList<String>();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        msg.add("===== Shop #" + si.id + " Transactions =====");
+        for (int i = 0; i < re.length; i++){
+            PlayerInfo pi = PlayerLogic.getPlayerInfo(re[i][0]);
+            msg.add(" - " + pi==null?"Unknown":pi.name + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
+        }
+        for (String a:msg)player.sendMessage(a);
+    }
+
     private void show_info(final CommandSender player, final ShopInfo si){
         // TODO - tellraw
+        if (si == null){
+            player.sendMessage("shop not found");
+            return;
+        }
         ArrayList<String> msg = new ArrayList<String>();
         msg.add("===== Shop #" + si.id + " Infomation =====");
         msg.add("Owner: " + PlayerLogic.getPlayerInfo(si.player_id).name);

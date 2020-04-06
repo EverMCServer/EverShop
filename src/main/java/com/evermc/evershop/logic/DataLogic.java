@@ -357,10 +357,9 @@ public class DataLogic{
         if (ret == null){
             return 0;
         }
-        if (ret[0] instanceof Integer) return (int)ret[0];
-        else if (ret[0] instanceof Long) return (int)(long)ret[0];
-        LogUtil.log(Level.SEVERE, "getShopOwner(" + loc + "): retval="+ret[0]);
-        return 0;
+        int r = toInt(ret[0]);
+        if (r == 0)LogUtil.log(Level.SEVERE, "getShopOwner(" + loc + ")");
+        return r;
     }
 
     public static ShopInfo[] getShopInfo(Location[] locs){
@@ -472,5 +471,30 @@ public class DataLogic{
         String query = "INSERT INTO `" + SQL.getPrefix() + "transaction` VALUES (null, '" + shopid + "', '" 
         + playerid + "', '" + time + "', '1') " + SQL.ON_DUPLICATE("shop_id,player_id,time")+ " count = count + 1";
         SQL.insert(query);
+    }
+
+    public static int[][] getTransaction(int shopid){
+        String query = "SELECT player_id, time, count FROM `" + SQL.getPrefix() + 
+                "transaction` WHERE shop_id = '" + shopid + "' ORDER BY `time` DESC LIMIT 10";
+
+        List<Object[]> ret = SQL.query(query, 3);
+        if (ret.size() == 0){
+            return null;
+        }
+        int [][] retval = new int[ret.size()][3];
+        for (int i = 0; i < ret.size(); i ++){
+            Object[] k = ret.get(i);
+            retval[i][0] = toInt(k[0]);
+            retval[i][1] = toInt(k[1]);
+            retval[i][2] = toInt(k[2]);
+        }
+        return retval;
+    }
+
+    private static int toInt(Object k){
+        if (k instanceof Integer) return (int)k;
+        else if (k instanceof Long) return (int)k;
+        LogUtil.log(Level.SEVERE, "toInt : " + k);
+        return 0;
     }
 }

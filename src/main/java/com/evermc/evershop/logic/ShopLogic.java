@@ -430,6 +430,7 @@ public class ShopLogic {
                     if (count > 0){
                         other_str = tr("%1$s shops of other player", p, count);
                     }
+                    if (loc_str.length() > 2) loc_str = loc_str.substring(0, loc_str.length() - 2);
                     if (tcount == 0){
                         lo.getBlock().breakNaturally();
                     }else{
