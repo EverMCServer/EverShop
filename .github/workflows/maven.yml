@@ -28,14 +28,27 @@ jobs:
       id: cb-1-14-4
       uses: actions/cache@v1
       with:
-        path: ~/.m2/repository/org/bukkit/craftbukkit/1.14.4-R0.1-SNAPSHOT
-        key: ${{ runner.os }}-maven-${{ hashFiles('*.jar') }}
+        path: ~/.m2/repository/org/spigotmc/spigot/1.14.4-R0.1-SNAPSHOT
+        key: ${{ runner.os }}-maven-CB1.14.4
     # build cb 1.14
     - name: Build CraftBukkit-1.14.4
       if: steps.cb-1-14-4.outputs.cache-hit != 'true'
       run: |
         wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
         java -jar BuildTools.jar --rev 1.14.4
+    # cb 1.15 cache
+    - name: Find cache of CraftBukkit 1.15.2
+      id: cb-1-15-2
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository/org/spigotmc/spigot/1.15.2-R0.1-SNAPSHOT
+        key: ${{ runner.os }}-maven-CB1.15.2
+    # build cb 1.15
+    - name: Build CraftBukkit-1.15.2
+      if: steps.cb-1-15-2.outputs.cache-hit != 'true'
+      run: |
+        wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+        java -jar BuildTools.jar --rev 1.15.2
     # build master
     - name: Build & deploy EverShop
       run: mvn clean deploy 
