@@ -284,7 +284,10 @@ public enum TransactionLogic {
                 p.sendMessage(tr("player insufficient money", p));
                 break;
             }
+            ti.playerPayMoney();
+            ti.shopGiveMoney();
             ti.toggleRS();
+            p.sendMessage(tr("you have toggled switches!", p));
             break;
 
 

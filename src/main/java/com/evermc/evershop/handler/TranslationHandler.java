@@ -11,6 +11,7 @@ import com.meowj.langutils.lang.LanguageHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -164,6 +165,10 @@ public class TranslationHandler {
         return tr(is, force_tr?lang:p.getLocale());
     }
 
+    public static String tr(Location loc, Player p){
+        return tr(loc, force_tr?lang:p.getLocale());
+    }
+
     public static String tr(ItemStack is, String lang){
         String txtcolor = ChatColor.YELLOW.toString();
         String enccolor = ChatColor.LIGHT_PURPLE.toString();
@@ -274,6 +279,10 @@ public class TranslationHandler {
     public static String tr(Material is, String lang){
         if (enabled) return LanguageHelper.getItemName(new ItemStack(is),lang);
         else return is.toString();
+    }
+
+    public static String tr(Location loc, String lang){
+        return "(" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + ")";
     }
 
     public static String binaryToRoman(int binary) {

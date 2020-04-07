@@ -11,6 +11,7 @@
   - [x] isell
   - [x] itrade
   - [x] trade
+  - [x] toggle
 - [x] 使用MySQL/SQLite存储商店信息
 - [x] 更加容易输入的牌子格式
 - [x] 可以链接按钮
@@ -21,6 +22,7 @@
 - [ ] hook wg， 防止链接他人箱子
 - [ ] 限制牌子加入限制玩家和用户组功能，改为命令实现
 - [x] 可以跨箱子购买物品（需要购买AB，箱子1有A, 箱子2有B，可以直接购买，signshop无法购买）
+- [x] 跨世界设置
 
 ## 详细
 
@@ -84,6 +86,8 @@ device $100
  /es advanced 切换高级模式（高级功能比如交易商店需要）(evershop.advance)
  /es inspect 切换查看模式 （点击牌子不会交易，只查看信息）(evershop.inspect)
  /es help 帮助（与/es相同）
+ /es selection 查看当前选中的方块位置
+ /es clear 清除选择
 ```
 
 ### 权限
@@ -100,6 +104,8 @@ evershop.set.perm    设置使用权限
 evershop.set.text    修改牌子文字
 evershop.set.price   修改价格
 evershop.set.time    设置红石开启时长
+evershop.create.[type] 创建type类型商店
+evershop.multiworld  创建跨世界商店
 ```
 
 管理权限

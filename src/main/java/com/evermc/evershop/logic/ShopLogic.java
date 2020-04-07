@@ -15,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -156,49 +157,56 @@ public class ShopLogic {
             // TODO: WorldGuard Check if block is not Sign
 
             if (linkable_container.contains(block.getType())){
-                if (!player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
-                    p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
-                    return true;
+                if (player.reg1.size()!=0 || player.reg2.size()!=0) {
+                    if (!player.reg_is_container){
+                        p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
+                        return true;
+                    }
+                    Location selected_loc;
+                    if (player.reg1.iterator().hasNext()){
+                        selected_loc = player.reg1.iterator().next();
+                    } else {
+                        selected_loc = player.reg2.iterator().next();
+                    }
+                    if (!p.hasPermission("evershop.multiworld") && !block.getLocation().getWorld().equals(selected_loc.getWorld())){
+                        p.sendMessage(tr("You cant make multi-world shops", p));
+                        return true;
+                    }
                 }
+                
                 player.reg_is_container = true;
                 Container container = (Container) block.getState();
                 Location loc;
                 if (container.getInventory().getSize() == 54){
                     loc = ((DoubleChestInventory)container.getInventory()).getLeftSide().getLocation();
                     Location loc2 = ((DoubleChestInventory)container.getInventory()).getRightSide().getLocation();
-                    if (player.reg1.contains(loc2)){
+                    if (player.reg1.contains(loc2) || player.reg2.contains(loc2)){
                         player.reg1.remove(loc2);
-                        p.sendMessage(tr("unlinked this",p));
-                        p.sendMessage(getRegisteredContents(p));
-                        return true;
-                    }
-                    if (player.reg2.contains(loc2)){
                         player.reg2.remove(loc2);
                         p.sendMessage(tr("unlinked this",p));
-                        p.sendMessage(getRegisteredContents(p));
+                        String content = getRegisteredContents(p);
+                        if (content != null) p.sendMessage(content);
                         return true;
                     }
                 }else{
                     loc = block.getLocation();
                 }
-                if (player.reg1.contains(loc)){
+                if (player.reg1.contains(loc) || player.reg2.contains(loc)){
                     player.reg1.remove(loc);
-                    p.sendMessage(tr("unlinked this",p));
-                    p.sendMessage(getRegisteredContents(p));
-                    return true;
-                }
-                if (player.reg2.contains(loc)){
                     player.reg2.remove(loc);
                     p.sendMessage(tr("unlinked this",p));
-                    p.sendMessage(getRegisteredContents(p));
+                    String content = getRegisteredContents(p);
+                    if (content != null) p.sendMessage(content);
                     return true;
                 }
-                if (action == Action.RIGHT_CLICK_BLOCK)
+                if (action == Action.RIGHT_CLICK_BLOCK){
                     player.reg2.add(loc);
-                else 
+                } else { 
                     player.reg1.add(loc);
-                    p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
-                    p.sendMessage(getRegisteredContents(p));
+                }
+                p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
+                String content = getRegisteredContents(p);
+                if (content != null) p.sendMessage(content);
             }
 
             else if (linkable_redstone.contains(block.getType())){
@@ -211,11 +219,13 @@ public class ShopLogic {
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
                     p.sendMessage(tr("unlinked this",p));
-                    p.sendMessage(getRegisteredContents(p));
+                    String content = getRegisteredContents(p);
+                    if (content != null) p.sendMessage(content);
                 }else{
                     player.reg1.add(block.getLocation());
                     p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
-                    p.sendMessage(getRegisteredContents(p));
+                    String content = getRegisteredContents(p);
+                    if (content != null) p.sendMessage(content);
                 }
             }
 
@@ -233,6 +243,27 @@ public class ShopLogic {
                 if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
                     p.sendMessage(tr("Shop type and your selection is not match!", p));
                     return true;
+                }
+                if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(a).name().toLowerCase())){
+                    p.sendMessage(tr("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(a)));
+                    return true;
+                }
+                if (!p.hasPermission("evershop.multiworld")){
+                    World w = null;
+                    for (Location l : player.reg1){
+                        if (w == null) w = l.getWorld();
+                        else if (!w.equals(l.getWorld())){
+                            p.sendMessage(tr("You cant make multi-world shops", p));
+                            return true;
+                        }
+                    }
+                    for (Location l : player.reg2){
+                        if (w == null) w = l.getWorld();
+                        else if (!w.equals(l.getWorld())){
+                            p.sendMessage(tr("You cant make multi-world shops", p));
+                            return true;
+                        }
+                    }
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
@@ -308,6 +339,32 @@ public class ShopLogic {
     }
 
     private static String getRegisteredContents(Player p){
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
+        if (pi.reg_is_container){
+            if (getReg1(pi).size() != 0 && (!pi.advanced || getReg2(pi).size() != 0)){
+                return getRegisteredInventoryContents(p);
+            }
+        } else {
+            if (pi.reg1.size() != 0){
+                return getRegisteredRedstoneTargets(p);
+            }
+        }
+        return null;
+    }
+
+    private static String getRegisteredRedstoneTargets(Player p){
+        String result = tr("Current selection:", p);
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
+        for (Location l : pi.reg1){
+            Material m = l.getBlock().getType();
+            if (linkable_redstone.contains(m)){
+                result += tr(m, p) + "@" + tr(l, p) + ", ";
+            } 
+        }
+        return result;
+    }
+
+    private static String getRegisteredInventoryContents(Player p){
         String result;
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (!player.advanced){
