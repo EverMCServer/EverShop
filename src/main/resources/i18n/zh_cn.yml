@@ -1,5 +1,6 @@
 'you have sell %1$s for %2$s!': '你出售了%1$s，获得了%2$s！'
 'you have bought %1$s for %2$s!': '你消费%2$s购买了%1$s！'
+'you have toggled switches!': '你改变了开关状态!'
 'You cant place this': '你不能放置这个方块'
 'player cannot hold': '你背包放不下了!'
 'player insufficient money': '你没钱了!'
@@ -21,3 +22,6 @@
 'You cannot break this! Its locked by %1$s %2$s': '你不能破坏这个！他被%1$s %2$s锁定'
 '%1$s shops of other player': '%1$s个别人的商店.'
 'Current selection:': '当前的选择:'
+'Repaircost: %1$s': '附魔惩罚: %1$s级'
+'You cant make multi-world shops': '你没有权限创建跨世界商店'
+'You do not have permission to create a %1$s shop': '你没有权限创建%1$s商店'

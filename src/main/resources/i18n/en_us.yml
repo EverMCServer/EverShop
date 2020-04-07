@@ -1,5 +1,6 @@
 'you have sell %1$s for %2$s!': 'You have sell %1$s for %2$s!'
 'you have bought %1$s for %2$s!': 'You have bought %1$s for %2$s!'
+'you have toggled switches!': 'You have toggled switches!'
 'You cant place this': 'You can''t place this!'
 'player cannot hold': 'You cannot take more!'
 'player insufficient money': 'You don''t have enough money!'
@@ -21,3 +22,6 @@
 'You cannot break this! Its locked by %1$s %2$s': 'You cannot break this! It''s locked by %1$s %2$s'
 '%1$s shops of other player': '%1$s shops of other player.'
 'Current selection:': 'Current selection:'
+'Repaircost: %1$s': 'RepairCost: %1$s'
+'You cant make multi-world shops': 'You can''t make multi-world shops'
+'You do not have permission to create a %1$s shop': 'You do not have permission to create a %1$s shop'

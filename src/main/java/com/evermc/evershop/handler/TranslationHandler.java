@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.potion.PotionData;
@@ -193,10 +194,16 @@ public class TranslationHandler {
         }
 
         if (is.getEnchantments().size() > 0){
+            if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
+                ret += durcolor + "[" + tr("Repaircost: %1$s", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+            }
             ret += enccolor + tr(is.getEnchantments(), lang);
         }
 
         if (is.hasItemMeta() && is.getItemMeta() instanceof EnchantmentStorageMeta){
+            if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
+                ret += durcolor + "[" + tr("Repaircost: %1$s", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+            }
             if (((EnchantmentStorageMeta)is.getItemMeta()).hasStoredEnchants()){
                 ret += enccolor + tr(((EnchantmentStorageMeta)is.getItemMeta()).getStoredEnchants(), lang);
             }
