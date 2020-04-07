@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TaxLogic;
 import com.evermc.evershop.logic.TransactionLogic;
@@ -350,13 +351,27 @@ public class TransactionInfo{
     }
 
     public void toggleRS(){
-        for (Location lo : this.rsComponents){
+        for (final Location lo : this.rsComponents){
             BlockData bs = lo.getBlock().getBlockData();
             if (bs instanceof Powerable){
-                Powerable sw = (Powerable)bs;
-                sw.setPowered(!sw.isPowered());
-                lo.getBlock().setBlockData(sw);
-                RedstoneUtil.applyPhysics(lo.getBlock());
+                final Powerable sw = (Powerable)bs;
+                if (lo.getBlock().getType().name().endsWith("_BUTTON")){
+                    sw.setPowered(true);
+                    lo.getBlock().setBlockData(sw);
+                    RedstoneUtil.applyPhysics(lo.getBlock());
+                    Bukkit.getScheduler().runTaskLater(EverShop.getInstance(), () -> {
+                        BlockData bsn = lo.getBlock().getBlockData();
+                        if (bsn instanceof Powerable){
+                            ((Powerable)bsn).setPowered(false);
+                            lo.getBlock().setBlockData(bsn);
+                            RedstoneUtil.applyPhysics(lo.getBlock());
+                        }
+                    }, 20); // TODO - set duration
+                } else {
+                    sw.setPowered(!sw.isPowered());
+                    lo.getBlock().setBlockData(sw);
+                    RedstoneUtil.applyPhysics(lo.getBlock());
+                }
             }
         }
     }

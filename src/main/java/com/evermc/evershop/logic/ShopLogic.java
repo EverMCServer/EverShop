@@ -10,6 +10,7 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
+import com.evermc.evershop.util.RedstoneUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,6 +22,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.Switch;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -96,7 +98,7 @@ public class ShopLogic {
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
                 String[] t = itemToString(si, p);
-                final String str = tr("This shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(si.action_id), t[0], t[1]);
+                final String str = tr("This shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(si.action_id), t[0] == null? "" : t[0] , t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
@@ -278,7 +280,7 @@ public class ShopLogic {
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
                     String[] t = itemToString(newshop, p);
-                    p.sendMessage(tr("You have created a shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(newshop.action_id), t[0], t[1]));
+                    p.sendMessage(tr("You have created a shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(newshop.action_id), t[0] == null? "": t[0] , t[1]));
                 }, () -> {
                     p.sendMessage(tr("Failed to create shop, maybe you put too many items in the shop", p));
                 });
@@ -426,7 +428,7 @@ public class ShopLogic {
             }
         });
     }
-    public static void tryBreakBlock(final Location lo, final Player p, final Location[] locs){
+    public static void tryBreakBlock(final Location lo, final Player p, final Location[] locs, final Location[] blocs){
         final Location loc;
         final Material blocktype = lo.getBlock().getType();
         if (lo.getBlock().getState() instanceof Container && ((Container) lo.getBlock().getState()).getInventory().getSize() == 54){
@@ -440,7 +442,7 @@ public class ShopLogic {
         pendingRemoveBlocks.add(loc);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            // first, check attached signs
+            // first, check attached blocks
             int[] sis = DataLogic.getShopOwner(locs);
             if (sis != null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
@@ -448,6 +450,18 @@ public class ShopLogic {
                     pendingRemoveBlocks.remove(loc);
                 });
                 return;
+            }
+            if (blocs != null){
+                for (Location loca : blocs){
+                    int count = DataLogic.getBlockLinkedCount(loca);
+                    if (count > 0){
+                        Bukkit.getScheduler().runTask(plugin, ()->{
+                            p.sendMessage(tr("you cannot break this block because there are shops attached on it", p));
+                            pendingRemoveBlocks.remove(loc);
+                        });
+                        return;
+                    }
+                }
             }
             // second, check if block has connected to shops
             if (!isLinkableBlock(blocktype)){
@@ -497,6 +511,7 @@ public class ShopLogic {
             }
         });
     }
+
     public static Location[] getAttachedSign(Block b){
         BlockFace[] iter = {BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST};
         HashSet<Location> ret = new HashSet<Location>();
@@ -508,6 +523,24 @@ public class ShopLogic {
         }
         if (b.getRelative(BlockFace.UP).getBlockData() instanceof org.bukkit.block.data.type.Sign){
             ret.add(b.getRelative(BlockFace.UP).getLocation());
+        }
+        return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
+    }
+
+    public static Location[] getAttachedBlock(Block b){
+        BlockFace[] iter = {BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST};
+        HashSet<Location> ret = new HashSet<Location>();
+        for (BlockFace i : iter){
+            if ((b.getRelative(i).getBlockData() instanceof Switch) && RedstoneUtil.getAttachedFace(b.getRelative(i)) == i.getOppositeFace()){
+                ret.add(b.getRelative(i).getLocation());
+                continue;
+            }
+        }
+        if (b.getRelative(BlockFace.UP).getBlockData() instanceof Switch && RedstoneUtil.getAttachedFace(b.getRelative(BlockFace.UP)) == BlockFace.DOWN){
+            ret.add(b.getRelative(BlockFace.UP).getLocation());
+        }
+        if (b.getRelative(BlockFace.DOWN).getBlockData() instanceof Switch && RedstoneUtil.getAttachedFace(b.getRelative(BlockFace.DOWN)) == BlockFace.UP){
+            ret.add(b.getRelative(BlockFace.DOWN).getLocation());
         }
         return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
     }

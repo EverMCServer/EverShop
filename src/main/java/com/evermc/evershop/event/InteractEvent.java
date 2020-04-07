@@ -92,13 +92,14 @@ public class InteractEvent implements Listener{
             return;
         }
         Location[] signs = ShopLogic.getAttachedSign(b);
-        if (signs == null && !ShopLogic.isLinkableBlock(b.getType())){
+        Location[] lblocks = ShopLogic.getAttachedBlock(b);
+        if (signs == null && lblocks == null && !ShopLogic.isLinkableBlock(b.getType())){
             // no sign attached, and not a linkable block, break directly
             return;
         }
         // has sign attached or is a linkable block, check it
         event.setCancelled(true);
-        ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer(), signs);
+        ShopLogic.tryBreakBlock(event.getBlock().getLocation(), event.getPlayer(), signs, lblocks);
     }
 
     @EventHandler (priority = EventPriority.NORMAL)
