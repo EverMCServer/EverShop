@@ -29,7 +29,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.m2/repository/org/spigotmc/
-        key: ${{ runner.os }}-maven-CB
+        key: ${{ runner.os }}-maven-CraftBukkit
     # build cb 
     - name: Build CraftBukkit
       if: steps.cb-cache.outputs.cache-hit != 'true'
