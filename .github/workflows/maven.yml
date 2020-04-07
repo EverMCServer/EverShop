@@ -23,11 +23,21 @@ jobs:
         server-id: maven-djytw
         server-username: MAVEN_USERNAME
         server-password: MAVEN_CENTRAL_TOKEN
-    - name: Get Buildtools
-      run: wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
-    - name: Build Spigot
-      run: java -jar BuildTools.jar --rev 1.14.4
-    - name: Publish to Apache Maven Central
+    # cb 1.14 cache
+    - name: Find cache of CraftBukkit 1.14.4
+      id: cb-1-14-4
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository/org/bukkit/craftbukkit/1.14.4-R0.1-SNAPSHOT
+        key: ${{ runner.os }}-maven-${{ hashFiles('*.jar') }}
+    # build cb 1.14
+    - name: Build CraftBukkit-1.14.4
+      if: steps.cb-1-14-4.outputs.cache-hit != 'true'
+      run: |
+        wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+        java -jar BuildTools.jar --rev 1.14.4
+    # build master
+    - name: Build & deploy EverShop
       run: mvn clean deploy 
       env:
         MAVEN_USERNAME: ${{ secrets.maven_djytw_user }}
