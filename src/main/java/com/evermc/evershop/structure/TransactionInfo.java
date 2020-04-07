@@ -11,13 +11,19 @@ import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TaxLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.util.LogUtil;
+import com.evermc.evershop.util.RedstoneUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.Powerable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -28,15 +34,16 @@ import org.bukkit.inventory.ItemStack;
  * getState() is 10x slower than all other API, so we cache all Inventories when start a transaction.
  */
 public class TransactionInfo{
-    final private HashSet<Inventory> shopOut;
-    final private HashSet<Inventory> shopIn;
+    private HashSet<Inventory> shopOut;
+    private HashSet<Inventory> shopIn;
     private Inventory playerInv;
-    final private HashMap<ItemStack, Integer> itemsOut;
-    final private HashMap<ItemStack, Integer> itemsIn;
+    private HashMap<ItemStack, Integer> itemsOut;
+    private HashMap<ItemStack, Integer> itemsIn;
     private Player player;
     private OfflinePlayer owner;
     private int price;
     private int action_id;
+    private HashSet<Location> rsComponents;
 
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
@@ -44,39 +51,47 @@ public class TransactionInfo{
         this.owner = Bukkit.getOfflinePlayer(PlayerLogic.getPlayerInfo(si.player_id).uuid);
         this.price = si.price;
         this.action_id = si.action_id;
-        // targets
-        if (TransactionLogic.targetCount(si.action_id) == 2){
-            shopOut = new HashSet<Inventory>();
-            shopIn = new HashSet<Inventory>();
-            addAllTargets(shopOut, si.getDoubleTargets().get(0));
-            addAllTargets(shopIn, si.getDoubleTargets().get(1));
-        } else if (si.action_id == TransactionLogic.BUY.id()){
-            shopOut = new HashSet<Inventory>();
-            shopIn = null;
-            addAllTargets(shopOut, si.getAllTargets());
-        } else if (si.action_id == TransactionLogic.SELL.id()){
-            shopOut = null;
-            shopIn = new HashSet<Inventory>();
-            addAllTargets(shopIn, si.getAllTargets());
+        
+        if (TransactionLogic.itemsetCount(si.action_id) == 0){
+            //redstone components
+            HashSet<SerializableLocation> locs = si.getAllTargets();
+            rsComponents = new HashSet<Location>();
+            for (SerializableLocation lo : locs){
+                rsComponents.add(lo.toLocation());
+            }
         } else {
-            shopOut = null; shopIn = null;
-        }
-        // items
-        if (TransactionLogic.itemsetCount(si.action_id) == 2){
-            itemsOut = new HashMap<ItemStack, Integer>();
-            itemsIn = new HashMap<ItemStack, Integer>();
-            addAllItems(itemsOut, si.getDoubleItems().get(0));
-            addAllItems(itemsIn, si.getDoubleItems().get(1));
-        } else if (si.action_id == TransactionLogic.BUY.id() || si.action_id == TransactionLogic.IBUY.id() ){
-            itemsOut = new HashMap<ItemStack, Integer>();
-            addAllItems(itemsOut, si.getAllItems());
-            itemsIn = null;
-        } else if (si.action_id == TransactionLogic.SELL.id() || si.action_id == TransactionLogic.ISELL.id()){
-            itemsOut = null;
-            itemsIn = new HashMap<ItemStack, Integer>();
-            addAllItems(itemsIn, si.getAllItems());
-        } else {
-            itemsOut = null; itemsIn = null;
+            // targets
+            if (TransactionLogic.targetCount(si.action_id) == 2){
+                shopOut = new HashSet<Inventory>();
+                shopIn = new HashSet<Inventory>();
+                addAllTargets(shopOut, si.getDoubleTargets().get(0));
+                addAllTargets(shopIn, si.getDoubleTargets().get(1));
+            } else if (si.action_id == TransactionLogic.BUY.id()){
+                shopOut = new HashSet<Inventory>();
+                shopIn = null;
+                addAllTargets(shopOut, si.getAllTargets());
+            } else if (si.action_id == TransactionLogic.SELL.id()){
+                shopOut = null;
+                shopIn = new HashSet<Inventory>();
+                addAllTargets(shopIn, si.getAllTargets());
+            } else {
+                shopOut = null; shopIn = null;
+            }
+            // items
+            if (TransactionLogic.itemsetCount(si.action_id) == 2){
+                itemsOut = new HashMap<ItemStack, Integer>();
+                itemsIn = new HashMap<ItemStack, Integer>();
+                addAllItems(itemsOut, si.getDoubleItems().get(0));
+                addAllItems(itemsIn, si.getDoubleItems().get(1));
+            } else if (si.action_id == TransactionLogic.BUY.id() || si.action_id == TransactionLogic.IBUY.id() ){
+                itemsOut = new HashMap<ItemStack, Integer>();
+                addAllItems(itemsOut, si.getAllItems());
+                itemsIn = null;
+            } else if (si.action_id == TransactionLogic.SELL.id() || si.action_id == TransactionLogic.ISELL.id()){
+                itemsOut = null;
+                itemsIn = new HashMap<ItemStack, Integer>();
+                addAllItems(itemsIn, si.getAllItems());
+            }
         }
     }
 
@@ -335,5 +350,17 @@ public class TransactionInfo{
 
     public Set<ItemStack> getItemsIn(){
         return this.itemsIn.keySet();
+    }
+
+    public void toggleRS(){
+        for (Location lo : this.rsComponents){
+            BlockData bs = lo.getBlock().getBlockData();
+            if (bs instanceof Powerable){
+                Powerable sw = (Powerable)bs;
+                sw.setPowered(!sw.isPowered());
+                lo.getBlock().setBlockData(sw);
+                RedstoneUtil.applyPhysics(lo.getBlock());
+            }
+        }
     }
 }

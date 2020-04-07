@@ -279,6 +279,15 @@ public enum TransactionLogic {
             p.sendMessage(tr("you have trade %1$s for %2$s!", p, ite[0], ite[1]));
             break;
 
+            case TOGGLE:
+            if (!ti.playerHasMoney()){
+                p.sendMessage(tr("player insufficient money", p));
+                break;
+            }
+            ti.toggleRS();
+            break;
+
+
             default:
             LogUtil.log(Level.SEVERE, "Not Implemented!");
         }
