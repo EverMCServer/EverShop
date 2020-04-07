@@ -28,7 +28,7 @@ jobs:
       id: cb-cache
       uses: actions/cache@v1
       with:
-        path: ~/.m2/repository/org/spigotmc/spigot/
+        path: ~/.m2/repository/org/spigotmc/
         key: ${{ runner.os }}-maven-CB
     # build cb 
     - name: Build CraftBukkit
