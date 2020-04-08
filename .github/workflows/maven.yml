@@ -46,6 +46,8 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: Upload artifact
-        path: |
-          target/EverShop-1.0.jar
-          target/EverShop-1.0.jar
+        path: target/EverShop-1.0.jar
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Upload artifact
+        path: target/EverShop-1.0-Hikari.jar
