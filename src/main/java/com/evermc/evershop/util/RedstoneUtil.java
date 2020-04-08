@@ -3,6 +3,8 @@ package com.evermc.evershop.util;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Switch;
+import org.bukkit.block.data.type.Switch.Face;
 
 import static com.evermc.evershop.util.LogUtil.log;
 
@@ -29,13 +31,22 @@ public class RedstoneUtil {
             log(Level.SEVERE, "RedstoneUtil:updateBlock() Unsupported version: " + bukkitVersion);
         }
     }
-    @SuppressWarnings("deprecation")
-    public static BlockFace getAttachedFace(Block attachable) {
-        org.bukkit.material.MaterialData md = attachable.getState().getData();
-        if (md instanceof org.bukkit.material.Attachable){
-            return ((org.bukkit.material.Attachable)md).getAttachedFace();
+    
+    public static BlockFace getAttachedFace(Block block){
+        if (block.getBlockData() instanceof Switch){
+            return getAttachedFace((Switch)block.getBlockData());
         }
         return null;
+    }
+
+    public static BlockFace getAttachedFace(Switch switc) {
+        if (switc.getFace() == Face.CEILING){
+            return BlockFace.UP;
+        } else if (switc.getFace() == Face.FLOOR){
+            return BlockFace.DOWN;
+        } else {
+            return switc.getFacing().getOppositeFace();
+        }
     }
 }
 
