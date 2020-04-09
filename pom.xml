@@ -32,8 +32,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
+            <!-- CraftBukkit dependency, you have to run spigot BuildTools to get this to your local maven repo-->
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
             <version>1.14.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
@@ -59,13 +60,6 @@
             <artifactId>LangUtils</artifactId>
             <!-- 1.14 = 2.2  1.15 = 2.3  -->
             <version>2.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- CraftBukkit dependency, you have to run spigot BuildTools to get this to your local maven repo-->
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.14.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
