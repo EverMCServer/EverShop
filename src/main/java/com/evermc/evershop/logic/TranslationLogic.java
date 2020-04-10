@@ -41,6 +41,7 @@ import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.Repairable;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
@@ -139,6 +140,37 @@ public class TranslationLogic {
         }
     }
 
+    enum PotionTypeEnum{
+        AWKWARD("awkward"),
+        FIRE_RESISTANCE("fire_resistance"),
+        HARM("harming"),
+        HEAL("healing"),
+        INCREASE_DAMAGE("strength"),
+        INVISIBILITY("invisibility"),
+        JUMP("leaping"),
+        LUCK("luck"),
+        MUNDANE("mundane"),
+        NIGHT_VISION("night_vision"),
+        POISON("poison"),
+        REGENERATION("regeneration"),
+        SLOW("slowness"),
+        SLOW_FALLING("slow_falling"),
+        SPEED("swiftness"),
+        THICK("thick"),
+        TURTLE_MASTER("turtle_master"),
+        UNCRAFTABLE("empty"),
+        WATER("water"),
+        WATER_BREATHING("water_breathing"),
+        WEAKNESS("weakness");
+        private String hash;
+        PotionTypeEnum(String hash){
+            this.hash = hash;
+        }
+        public static String getHash(PotionType pt){
+            return PotionTypeEnum.valueOf(pt.name()).hash;
+        }
+    }
+
     public static String getLocale(Player p, boolean isMsg){
         String lang = p.getLocale();
         if (isMsg){
@@ -198,14 +230,14 @@ public class TranslationLogic {
 
         if (is.getEnchantments().size() > 0){
             if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
-                ret += durcolor + "[" + tr("Repaircost: %1$s", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+                ret += durcolor + "[" + _tr("container.repair.cost", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
             }
             ret += enccolor + tr(is.getEnchantments(), lang);
         }
 
         if (is.hasItemMeta() && is.getItemMeta() instanceof EnchantmentStorageMeta){
             if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
-                ret += durcolor + "[" + tr("Repaircost: %1$s", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+                ret += durcolor + "[" + _tr("container.repair.cost", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
             }
             if (((EnchantmentStorageMeta)is.getItemMeta()).hasStoredEnchants()){
                 ret += enccolor + tr(((EnchantmentStorageMeta)is.getItemMeta()).getStoredEnchants(), lang);
@@ -263,7 +295,12 @@ public class TranslationLogic {
             if (is.getType() == Material.LINGERING_POTION){
                 dur /= 4;
             }
-            ret += String.format("(%02d:%02d)", dur/1200, dur/20%60);
+            if (is.getType() == Material.TIPPED_ARROW){
+                dur /= 8;
+            }
+            if (dur > 0) {
+                ret += String.format("(%02d:%02d)", dur/1200, dur/20%60);
+            }
 
             for(PotionEffect pe : ((PotionMeta)is.getItemMeta()).getCustomEffects()){
                 ret += attrcolor +" (";
@@ -360,6 +397,15 @@ public class TranslationLogic {
     }
 
     private static String _tr(ItemStack is, String lang){
+        if (is.hasItemMeta() && is.getItemMeta() instanceof SkullMeta){
+            if (((SkullMeta)is.getItemMeta()).hasOwner()) {
+                return String.format(_tr("block.minecraft.player_head.named", lang, ((SkullMeta)is.getItemMeta()).getOwningPlayer().getName()));
+            }
+        }
+        if (is.hasItemMeta() && is.getItemMeta() instanceof PotionMeta){
+            PotionType pt = ((PotionMeta)is.getItemMeta()).getBasePotionData().getType();
+            return _tr("item.minecraft." + is.getType().name().toLowerCase() + ".effect." + PotionTypeEnum.getHash(pt), lang);
+        }
         return tr(is.getType(), lang);
     }
 
