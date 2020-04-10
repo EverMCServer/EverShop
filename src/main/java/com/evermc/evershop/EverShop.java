@@ -4,12 +4,12 @@ import java.util.logging.Level;
 
 import com.evermc.evershop.event.CommandEvent;
 import com.evermc.evershop.event.InteractEvent;
-import com.evermc.evershop.handler.TranslationHandler;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.logic.TranslationLogic;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -50,7 +50,7 @@ public class EverShop extends JavaPlugin {
         PlayerLogic.init(this);
         ShopLogic.init(this);
         TransactionLogic.init(this);
-        TranslationHandler.init(this);
+        TranslationLogic.init(this);
     }  
 
     public static EverShop getInstance() {

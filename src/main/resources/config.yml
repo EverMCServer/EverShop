@@ -23,7 +23,7 @@ evershop:
   # WARNING: all languages except en_us will cause the plugin download language files from mojang, because we 
   #   cannot distribute them. If you want to avoid downloading, you can download the language files manually, 
   #   and put them in plugins/EverShop/i18n/items folder, before you add entries here and start your server.
-  item_translation: [en_us]
+  item_translation: [en_us,zh_cn]
   
   # Available translations for transaction messages
   #   The plugin will use all files from plugins/EverShop/i18n/msgs to translate transaction messages, so you don't

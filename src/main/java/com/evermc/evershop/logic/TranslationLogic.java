@@ -1,13 +1,28 @@
-package com.evermc.evershop.handler;
+package com.evermc.evershop.logic;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.meowj.langutils.lang.LanguageHelper;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -31,18 +46,38 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
+import static com.evermc.evershop.util.LogUtil.severe;
+import static com.evermc.evershop.util.LogUtil.info;
+import static com.evermc.evershop.util.LogUtil.warn;
 import static com.evermc.evershop.util.LogUtil.log;
 
-public class TranslationHandler {
+public class TranslationLogic {
 
     private static String lang;
     private static boolean force_tr;
     private static boolean enabled;
     private static HashMap<String, HashMap<String, String>> tr_dicts = new HashMap<String, HashMap<String, String>>();
+    private static HashMap<String, Map<String, String>> item_dicts = new HashMap<String, Map<String, String>>();
+    private static String default_translation = null;
 
-    public static void init(EverShop plugin){
+    public static boolean init(EverShop plugin){
 
-        lang = plugin.getConfig().getString("evershop.language");
+        List<String> item_translation = plugin.getConfig().getStringList("evershop.item_translation");
+        if (item_translation.size() == 0) {
+            severe("TranslationLogic: No item translation set. Please check your configuration.");
+            return false;
+        }
+        default_translation = plugin.getConfig().getString("evershop.default_translation");
+        if (default_translation == null) {
+            severe("TranslationLogic: No default translation set. Please check your configuration.");
+            return false;
+        }
+        checkItemLang(plugin, item_translation);
+
+
+
+
+
         if (lang == null) force_tr = false;
         else force_tr = true;
 
@@ -73,6 +108,7 @@ public class TranslationHandler {
             }
             tr_dicts.put(f.getName().split("\\.")[0] , dict);
         }
+        return true;
     }
 
     enum ColorTr{
@@ -355,13 +391,164 @@ public class TranslationHandler {
         if (enabled) 
             return String.format(LanguageHelper.translateToLocal(node,lang),format);
         else{
-            String[] t = node.split("\\.");
-            String ret = t[t.length-1];
-            for (Object o:format){
-                ret += "," + o.toString();
+            URL json = null;
+            try{
+                Enumeration<URL> e = ClassLoader.getSystemResources("assets/minecraft/lang/en_us.json");
+                if (e.hasMoreElements()) json = e.nextElement();
+            } catch (Exception e){}
+            if (json == null){
+                log(Level.SEVERE, "Cannot load en_us.json from server jar, unsupported server?");
+                return null;
             }
-            return ret;
+            try{
+                BufferedReader in = new BufferedReader(new InputStreamReader(json.openStream()));
+                Type type = new TypeToken<Map<String, String>>() {}.getType();
+                Gson gson = new Gson();
+                Map<String, String> map = gson.fromJson(in, type);
+                return String.format(map.get(node),format);
+            }catch(Exception e){}
+            return null;
         }
     }
 
-}   
+    class NMS_Manifest_Root{
+        Object latest;
+        List<NMS_Manifest_Version> versions;
+    }
+    class NMS_Manifest_Version{
+        String id;
+        String type;
+        String url;
+        String time;
+        String releaseTime;
+    }
+
+    private static void checkItemLang(EverShop plugin, final List<String> langs){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            File folder =  new File(plugin.getDataFolder(), "i18n" + File.separator + "items");
+            List<String> fetchList = new ArrayList<String>();
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+            if (!folder.exists()){
+                severe("TranslationLogic: failed to create translation folders.");
+                plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }
+            for (String lang : langs){
+                if (!"en_us".equals(lang)){
+                    File file = new File(folder, lang + ".json");
+                    if (!file.exists()){
+                        fetchList.add(lang);
+                    }
+                }
+            }
+            if (fetchList.size() > 0){
+                info("TranslationLogic: need to fetch [" + String.join(",", fetchList) + "]");
+                fetchItemLang(plugin, fetchList);
+            }
+            loadItemLang(plugin, langs);
+        });
+    }
+    private static void fetchItemLang(EverShop plugin, final List<String> langs){
+        try{
+            Gson gson = new Gson();
+            JsonParser parser = new JsonParser();
+            BufferedReader reader = null;
+            String version = Bukkit.getBukkitVersion().split("-")[0];
+            info("TranslationLogic: Fetching version_manifest...");
+            URL url_1 = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+            reader = new BufferedReader(new InputStreamReader(url_1.openStream()));
+            NMS_Manifest_Root root = gson.fromJson(reader, NMS_Manifest_Root.class);
+            reader.close();
+            URL url_2 = null;
+            for (NMS_Manifest_Version v : root.versions){
+                if (version.equals(v.id)){
+                    url_2 = new URL(v.url);
+                    break;
+                }
+            }
+            if (url_2 == null) {
+                severe("TranslationLogic: Unable to find version information: " + version);
+                throw new Exception();
+            }
+            info("TranslationLogic: Fetching metadata of " + version + "...");
+            reader = new BufferedReader(new InputStreamReader(url_2.openStream()));
+            JsonObject jobj = parser.parse(reader).getAsJsonObject();
+            reader.close();
+            String assetsURL = jobj.getAsJsonObject("assetIndex").get("url").getAsString();
+            if (assetsURL == null){
+                severe("TranslationLogic: Unable to get assets information.");
+                throw new Exception();
+            }
+            URL url_3 = new URL(assetsURL);
+            info("TranslationLogic: Fetching assets information...");
+            reader = new BufferedReader(new InputStreamReader(url_3.openStream()));
+            jobj = parser.parse(reader).getAsJsonObject().getAsJsonObject("objects");
+            reader.close();
+            
+            File folder =  new File(plugin.getDataFolder(), "i18n" + File.separator + "items");
+            for (String lang : langs){
+                JsonObject tObj = jobj.getAsJsonObject("minecraft/lang/" + lang + ".json");
+                if (tObj == null){
+                    severe("TranslationLogic: Not a language: " + lang + ", check your configuration.");
+                    continue;
+                }
+                info("TranslationLogic: Fetching " + lang + "...");
+                String url_4 = null;
+                try{
+                    String hash = tObj.get("hash").getAsString();
+                    url_4 = "http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash;
+                    URL json = new URL(url_4);
+                    File file = new File(folder, lang + ".json");
+                    Files.copy(json.openStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch(Exception e){
+                    severe("Cannot load " + lang + " from mojang, url="+url_4);
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        } catch (Exception e){
+            warn("TranslationLogic: Error when get item translation files from mojang. Please check your config or add these files manually.");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+    }
+    private static void loadItemLang(EverShop plugin, List<String> langs){
+        BufferedReader reader = null;
+        File folder =  new File(plugin.getDataFolder(), "i18n" + File.separator + "items");
+        for (String lang : langs){
+            if ("en_us".equals(lang)){
+                URL json = null;
+                try{
+                    Enumeration<URL> e = ClassLoader.getSystemResources("assets/minecraft/lang/en_us.json");
+                    if (e.hasMoreElements()) json = e.nextElement();
+                    reader = new BufferedReader(new InputStreamReader(json.openStream()));
+                } catch (Exception e){
+                    severe("Cannot load en_us.json from server jar, unsupported server?");
+                    continue;
+                }
+            } else {
+                try{
+                    File file = new File(folder, lang + ".json");
+                    reader = new BufferedReader(new FileReader(file));
+                } catch(Exception e){
+                    e.printStackTrace();
+                    severe("Cannot load " + lang);
+                    continue;
+                }
+            }
+            Type type = new TypeToken<Map<String, String>>() {}.getType();
+            Gson gson = new Gson();
+            Map<String, String> map = gson.fromJson(reader, type);
+            item_dicts.put(lang, map);
+            info("TranslationLogic: " + map.get("language.name") + "/" + lang + " loaded");
+        }
+        info("TranslationLogic: loaded " + item_dicts.size() + " item translations.");
+        if (item_dicts.size() == 0)  {
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+        if (!item_dicts.containsKey(default_translation)) {
+            severe("TranslationLogic: Default language " + default_translation + " is not loaded.");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+    }
+}  

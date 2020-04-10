@@ -29,7 +29,7 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import static com.evermc.evershop.handler.TranslationHandler.tr;
+import static com.evermc.evershop.logic.TranslationLogic.tr;
 
 public class ShopLogic {
 

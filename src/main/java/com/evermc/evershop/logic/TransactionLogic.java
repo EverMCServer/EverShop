@@ -12,7 +12,7 @@ import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.entity.Player;
 
-import static com.evermc.evershop.handler.TranslationHandler.tr;
+import static com.evermc.evershop.logic.TranslationLogic.tr;
 
 public enum TransactionLogic {
     

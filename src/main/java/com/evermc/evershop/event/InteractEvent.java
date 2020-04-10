@@ -28,7 +28,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 
-import static com.evermc.evershop.handler.TranslationHandler.tr;
+import static com.evermc.evershop.logic.TranslationLogic.tr;
 
 public class InteractEvent implements Listener{
     
