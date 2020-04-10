@@ -2,8 +2,11 @@ package com.evermc.evershop.logic;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
@@ -13,14 +16,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.meowj.langutils.lang.LanguageHelper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -40,8 +41,6 @@ import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.Repairable;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
@@ -49,66 +48,29 @@ import org.bukkit.potion.PotionType;
 import static com.evermc.evershop.util.LogUtil.severe;
 import static com.evermc.evershop.util.LogUtil.info;
 import static com.evermc.evershop.util.LogUtil.warn;
-import static com.evermc.evershop.util.LogUtil.log;
 
 public class TranslationLogic {
 
-    private static String lang;
-    private static boolean force_tr;
-    private static boolean enabled;
     private static HashMap<String, HashMap<String, String>> tr_dicts = new HashMap<String, HashMap<String, String>>();
     private static HashMap<String, Map<String, String>> item_dicts = new HashMap<String, Map<String, String>>();
     private static String default_translation = null;
 
-    public static boolean init(EverShop plugin){
+    public static void init(EverShop plugin){
 
         List<String> item_translation = plugin.getConfig().getStringList("evershop.item_translation");
         if (item_translation.size() == 0) {
             severe("TranslationLogic: No item translation set. Please check your configuration.");
-            return false;
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
         }
         default_translation = plugin.getConfig().getString("evershop.default_translation");
         if (default_translation == null) {
             severe("TranslationLogic: No default translation set. Please check your configuration.");
-            return false;
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
         }
+        checkMsgsLang(plugin);
         checkItemLang(plugin, item_translation);
-
-
-
-
-
-        if (lang == null) force_tr = false;
-        else force_tr = true;
-
-        // LangUtils
-        Plugin tr = plugin.getServer().getPluginManager().getPlugin("LangUtils");
-        if (tr == null){
-            log(Level.WARNING, "LangUtils plugin not found, disable item translation.");
-            enabled = false;
-        } else {
-            PluginDescriptionFile desc = tr.getDescription();
-            log(Level.INFO, "Hooked LangUtils-" + desc.getVersion());
-            enabled = true;
-        }
-
-        // i18n
-        String[] i18n_files = {"zh_cn.yml", "en_us.yml"};
-        for (String n:i18n_files){
-            if (!new File(plugin.getDataFolder(), "i18n/" + n).exists())
-                plugin.saveResource("i18n/" + n, false);
-        }
-        File  i18n_dir;
-        i18n_dir = new File(plugin.getDataFolder(), "i18n");
-        for (File f : i18n_dir.listFiles()){
-            HashMap<String, String> dict = new HashMap<String, String>();
-            FileConfiguration conf = YamlConfiguration.loadConfiguration(f);
-            for (String key: conf.getKeys(false)){
-                dict.put(key, conf.getString(key));
-            }
-            tr_dicts.put(f.getName().split("\\.")[0] , dict);
-        }
-        return true;
     }
 
     enum ColorTr{
@@ -177,17 +139,22 @@ public class TranslationLogic {
         }
     }
 
+    public static String getLocale(Player p, boolean isMsg){
+        String lang = p.getLocale();
+        if (isMsg){
+            return tr_dicts.containsKey(lang)?lang:default_translation;
+        } else {
+            return item_dicts.containsKey(lang)?lang:default_translation;
+        }
+    }
+
     public static String tr(String str, Player p, Object...args){
-        return tr(str, force_tr?lang:p.getLocale(), args);
+        return tr(str, getLocale(p, true), args);
     }
 
     public static String tr(String str, String lang, Object...args){
         String s;
-        if (tr_dicts.containsKey(lang)){
-            s = tr_dicts.get(lang).get(str);
-        } else {
-            s = tr_dicts.get("en_us").get(str);
-        }
+        s = tr_dicts.get(lang).get(str);
         if (s != null)
             return String.format(s, args);
         else 
@@ -195,15 +162,15 @@ public class TranslationLogic {
     }
 
     public static String tr(ItemStack is, Player p){
-        return tr(is, force_tr?lang:p.getLocale());
+        return tr(is, getLocale(p, false));
     }
 
     public static String tr(Material is, Player p){
-        return tr(is, force_tr?lang:p.getLocale());
+        return tr(is, getLocale(p, false));
     }
 
     public static String tr(Location loc, Player p){
-        return tr(loc, force_tr?lang:p.getLocale());
+        return tr(loc, getLocale(p, true));
     }
 
     public static String tr(ItemStack is, String lang){
@@ -319,9 +286,19 @@ public class TranslationLogic {
         return ret.substring(0, ret.length()-2) + ")";
     }
 
-    public static String tr(Material is, String lang){
-        if (enabled) return LanguageHelper.getItemName(new ItemStack(is),lang);
-        else return is.toString();
+    public static String tr(Material item, String lang){
+        String name = item.name().toLowerCase();
+        if (name.endsWith("_wall_banner")){
+            name.replace("_wall_banner", "_banner");
+        }
+        if (item_dicts.get(lang).containsKey("item.minecraft." + name)){
+            return item_dicts.get(lang).get("item.minecraft." + name);
+        }
+        if (item_dicts.get(lang).containsKey("block.minecraft." + name)){
+            return item_dicts.get(lang).get("block.minecraft." + name);
+        }
+        warn("TranslationLogic: Unsupported material: " + item);
+        return name;
     }
 
     public static String tr(Location loc, String lang){
@@ -383,31 +360,15 @@ public class TranslationLogic {
     }
 
     private static String _tr(ItemStack is, String lang){
-        if (enabled) return LanguageHelper.getItemName(is,lang);
-        else return is.getType().toString();
+        return tr(is.getType(), lang);
     }
 
     private static String _tr(String node, String lang, Object... format){
-        if (enabled) 
-            return String.format(LanguageHelper.translateToLocal(node,lang),format);
+        if (item_dicts.get(lang).containsKey(node))
+            return String.format(item_dicts.get(lang).get(node), format);
         else{
-            URL json = null;
-            try{
-                Enumeration<URL> e = ClassLoader.getSystemResources("assets/minecraft/lang/en_us.json");
-                if (e.hasMoreElements()) json = e.nextElement();
-            } catch (Exception e){}
-            if (json == null){
-                log(Level.SEVERE, "Cannot load en_us.json from server jar, unsupported server?");
-                return null;
-            }
-            try{
-                BufferedReader in = new BufferedReader(new InputStreamReader(json.openStream()));
-                Type type = new TypeToken<Map<String, String>>() {}.getType();
-                Gson gson = new Gson();
-                Map<String, String> map = gson.fromJson(in, type);
-                return String.format(map.get(node),format);
-            }catch(Exception e){}
-            return null;
+            warn("TranslationLogic: Unknown node: " + node);
+            return "";
         }
     }
 
@@ -431,7 +392,7 @@ public class TranslationLogic {
                 folder.mkdirs();
             }
             if (!folder.exists()){
-                severe("TranslationLogic: failed to create translation folders.");
+                severe("TranslationLogic: failed to create item translation folder.");
                 plugin.getServer().getPluginManager().disablePlugin(plugin);
             }
             for (String lang : langs){
@@ -539,6 +500,12 @@ public class TranslationLogic {
             Type type = new TypeToken<Map<String, String>>() {}.getType();
             Gson gson = new Gson();
             Map<String, String> map = gson.fromJson(reader, type);
+            try{
+                reader.close();
+            } catch (Exception e){
+                e.printStackTrace();
+                warn("TranslationLogic: failed to close " + lang);
+            }
             item_dicts.put(lang, map);
             info("TranslationLogic: " + map.get("language.name") + "/" + lang + " loaded");
         }
@@ -547,7 +514,54 @@ public class TranslationLogic {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
         if (!item_dicts.containsKey(default_translation)) {
-            severe("TranslationLogic: Default language " + default_translation + " is not loaded.");
+            severe("TranslationLogic: Items of default language " + default_translation + " is not loaded.");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+    }
+    
+    private static void checkMsgsLang(EverShop plugin){
+        File folder = new File(plugin.getDataFolder(), "i18n" + File.separator + "msgs");
+        if (!folder.exists()){
+            folder.mkdirs();
+        }
+        if (!folder.exists()){
+            severe("TranslationLogic: failed to create message translation folder.");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+        String[] i18n_files = {"zh_cn.yml", "en_us.yml"};
+        for (String n:i18n_files){
+            File outFile = new File(folder, n);
+            if (!outFile.exists()){
+                try{
+                    InputStream in = plugin.getResource("i18n/" + n);
+                    OutputStream out = new FileOutputStream(outFile);
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    out.close();
+                    in.close();
+                } catch (Exception e){
+                    e.printStackTrace();
+                    severe("TranslationLogic: failed to save message translation " + n);
+                }
+            }
+        }
+        for (File f : folder.listFiles()){
+            HashMap<String, String> dict = new HashMap<String, String>();
+            FileConfiguration conf = YamlConfiguration.loadConfiguration(f);
+            for (String key: conf.getKeys(false)){
+                dict.put(key, conf.getString(key));
+            }
+            tr_dicts.put(f.getName().split("\\.")[0] , dict);
+        }
+        info("TranslationLogic: loaded " + tr_dicts.size() + " message translations.");
+        if (tr_dicts.size() == 0)  {
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+        if (!tr_dicts.containsKey(default_translation)) {
+            severe("TranslationLogic: Messages of default language " + default_translation + " is not loaded.");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
     }

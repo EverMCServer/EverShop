@@ -6,8 +6,6 @@ author: djytw
 load: POSTWORLD
 depend:
   - Vault
-softdepend:
-  - LanguageUtils
 api-version: 1.14
 
 commands:
