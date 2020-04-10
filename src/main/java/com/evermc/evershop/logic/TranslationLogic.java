@@ -143,17 +143,17 @@ public class TranslationLogic {
     enum PotionTypeEnum{
         AWKWARD("awkward"),
         FIRE_RESISTANCE("fire_resistance"),
-        HARM("harming"),
-        HEAL("healing"),
-        INCREASE_DAMAGE("strength"),
+        INSTANT_DAMAGE("harming"),
+        INSTANT_HEAL("healing"),
+        STRENGTH("strength"),
         INVISIBILITY("invisibility"),
         JUMP("leaping"),
         LUCK("luck"),
         MUNDANE("mundane"),
         NIGHT_VISION("night_vision"),
         POISON("poison"),
-        REGENERATION("regeneration"),
-        SLOW("slowness"),
+        REGEN("regeneration"),
+        SLOWNESS("slowness"),
         SLOW_FALLING("slow_falling"),
         SPEED("swiftness"),
         THICK("thick"),
@@ -162,6 +162,7 @@ public class TranslationLogic {
         WATER("water"),
         WATER_BREATHING("water_breathing"),
         WEAKNESS("weakness");
+    
         private String hash;
         PotionTypeEnum(String hash){
             this.hash = hash;
