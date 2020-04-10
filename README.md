@@ -23,6 +23,13 @@
 - [ ] 限制牌子加入限制玩家和用户组功能，改为命令实现
 - [x] 可以跨箱子购买物品（需要购买AB，箱子1有A, 箱子2有B，可以直接购买，signshop无法购买）
 - [x] 跨世界设置
+- [x] 集成物品名翻译功能
+
+## 如果你想测试
+
+本体：可以在[github actions](https://github.com/EverMCServer/EverShop/actions)中下载最新的artifact， 或者在[maven](http://maven-djytw.azurewebsites.net/maven-repository/com/evermc/evershop/EverShop/1.0/)里下载。如果需要使用mysql， 需要下载带-Hikari的jar，只用sqlite的话下载另外一个小的就好。
+
+依赖： Vault，以及一个经济插件（比如EssentialsX?）
 
 ## 详细
 
