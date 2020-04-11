@@ -231,14 +231,14 @@ public class TranslationLogic {
 
         if (is.getEnchantments().size() > 0){
             if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
-                ret += durcolor + "[" + _tr("container.repair.cost", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+                ret += _tr((Repairable)is.getItemMeta(), lang);
             }
             ret += enccolor + tr(is.getEnchantments(), lang);
         }
 
         if (is.hasItemMeta() && is.getItemMeta() instanceof EnchantmentStorageMeta){
             if (is.hasItemMeta() && is.getItemMeta() instanceof Repairable){
-                ret += durcolor + "[" + _tr("container.repair.cost", lang, ((Repairable)is.getItemMeta()).getRepairCost()) + "]";
+                ret += _tr((Repairable)is.getItemMeta(), lang);
             }
             if (((EnchantmentStorageMeta)is.getItemMeta()).hasStoredEnchants()){
                 ret += enccolor + tr(((EnchantmentStorageMeta)is.getItemMeta()).getStoredEnchants(), lang);
@@ -360,6 +360,20 @@ public class TranslationLogic {
             }
         }
         return roman;
+    }
+
+    public static String _tr(Repairable rp, String lang){
+        String str = "";
+        if (rp.getRepairCost() > 34) {
+            str = ChatColor.DARK_RED.toString();
+        } else {
+            str = ChatColor.GREEN.toString();
+        }
+        if (rp.getRepairCost() > 38) {
+            return str + "[" + _tr("container.repair.cost", lang, _tr("container.repair.expensive", lang)) + "]";
+        } else {
+            return str + "[" + _tr("container.repair.cost", lang, rp.getRepairCost()) + "]";
+        }
     }
 
     private static String _tr(FireworkEffect effect, String lang){
