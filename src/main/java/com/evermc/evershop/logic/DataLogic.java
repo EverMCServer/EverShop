@@ -270,7 +270,7 @@ public class DataLogic{
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.epoch + "', '"
              + shop.action_id + "', '" + shop.player_id + "', '" + shop.world_id + "', '" + shop.x + "', '"
-             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?, '')";
+             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?, '" + shop.extra + "')";
             byte[] targets = toBlob(shop.targets);
             byte[] items = toBlob(shop.items);
             if (targets.length >= 65535 || items.length >= 65535){

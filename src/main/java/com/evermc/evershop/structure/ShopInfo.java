@@ -173,8 +173,7 @@ public class ShopInfo {
         if (action_id != TransactionLogic.ITRADE.id() && action_id != TransactionLogic.TRADE.id())
             price = Math.abs(price);
         this.price = price;
-        // TODO - init extra info when creating shopinfo
-        this.extra = "";
+        this.extra = new ExtraInfo().toJSON();
         if (TransactionLogic.targetCount(action_id) == 1){
             HashSet<SerializableLocation> _targets = new HashSet<SerializableLocation>();
             for (Location loca : pi.reg1){
