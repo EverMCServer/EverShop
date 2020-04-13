@@ -7,6 +7,7 @@ import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
+import com.evermc.evershop.util.NBTUtil;
 import com.evermc.evershop.util.RedstoneUtil;
 import com.evermc.evershop.util.TranslationUtil;
 
@@ -52,6 +53,7 @@ public class EverShop extends JavaPlugin {
         TransactionLogic.init(this);
         TranslationUtil.init(this);
         RedstoneUtil.init();
+        NBTUtil.init();
     }  
 
     public static EverShop getInstance() {
