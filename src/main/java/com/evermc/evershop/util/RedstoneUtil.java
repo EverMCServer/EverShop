@@ -12,11 +12,49 @@ import java.lang.reflect.Method;
 
 public class RedstoneUtil {
 
-    private static Object NMS_World = null;
-    private static Method NMS_World_applyPhysics = null;
     private static Method CB_Block_getNMS = null;
     private static Method CB_Block_getPosition = null;
-    private static Method NMS_Block_getBlock = null;
+    private static Method CB_World_getHandle = null;
+    private static Method NMS_IBlockData_getBlock = null;
+    private static Method NMS_World_applyPhysics = null;
+
+    private static Class <?> CB_Block = null;
+    private static Class <?> CB_World = null;
+    private static Class <?> NMS_Block = null;
+    private static Class <?> NMS_BlockPosition = null;
+    private static Class <?> NMS_IBlockData = null;
+    private static Class <?> NMS_World = null;
+    
+    private static boolean enable = false;
+
+    public static void init(){
+        try {
+            NMS_Block = ReflectionUtil.NMSClass("Block");
+            NMS_BlockPosition = ReflectionUtil.NMSClass("BlockPosition");
+            NMS_IBlockData = ReflectionUtil.NMSClass("IBlockData");
+            NMS_World = ReflectionUtil.NMSClass("World");
+
+            CB_Block = ReflectionUtil.CBClass("block.CraftBlock");
+            CB_World = ReflectionUtil.CBClass("CraftWorld");
+
+            NMS_IBlockData_getBlock = NMS_IBlockData.getMethod("getBlock");
+            NMS_World_applyPhysics = NMS_World.getMethod("applyPhysics", NMS_BlockPosition, NMS_Block);
+
+            CB_Block_getNMS = CB_Block.getMethod("getNMS");
+            CB_Block_getPosition = CB_Block.getMethod("getPosition");
+            CB_World_getHandle = CB_World.getMethod("getHandle");
+
+            enable = true;
+        } catch (Exception e){
+            e.printStackTrace();
+            String bukkitVersion = Bukkit.getBukkitVersion();
+            severe("RedstoneUtil:init() Unsupported version: " + bukkitVersion + ", disable restone related shops.");
+        }
+    }
+
+    public static boolean isEnabled(){
+        return enable;
+    }
 
     public static void applyPhysics(Block lever){
         BlockFace bf = getAttachedFace(lever);
@@ -26,36 +64,13 @@ public class RedstoneUtil {
         Block attached = lever.getRelative(bf);
         updateBlock(attached);
     }
-    public static void updateBlock(Block bukkitBlock){
-
+    public static void updateBlock(Block bukkit_Block){
         try{
-
-            if (CB_Block_getNMS == null) {
-                CB_Block_getNMS = bukkitBlock.getClass().getMethod("getNMS");
-            }
-            Object iBlockData = CB_Block_getNMS.invoke(bukkitBlock);
-
-            if (CB_Block_getPosition == null) {
-                CB_Block_getPosition = bukkitBlock.getClass().getMethod("getPosition");
-            }
-            Object nmsPosition = CB_Block_getPosition.invoke(bukkitBlock);
-
-            if (NMS_Block_getBlock == null) {
-                NMS_Block_getBlock = iBlockData.getClass().getMethod("getBlock");
-            }
-            Object nmsBlock = NMS_Block_getBlock.invoke(iBlockData);
-
-            Class<?> nmsBlockClass = nmsBlock.getClass();
-            while (!nmsBlockClass.getName().endsWith("Block")){
-                nmsBlockClass = nmsBlockClass.getSuperclass();
-            }
-            if (NMS_World == null){
-                NMS_World = bukkitBlock.getWorld().getClass().getMethod("getHandle").invoke(bukkitBlock.getWorld());
-                NMS_World_applyPhysics = NMS_World.getClass().getSuperclass().getMethod("applyPhysics",nmsPosition.getClass(), nmsBlockClass);
-            }
-            
-            NMS_World_applyPhysics.invoke(NMS_World, nmsPosition, nmsBlock);
-            
+            Object NMS_World_Object = CB_World_getHandle.invoke(bukkit_Block.getWorld());
+            Object NMS_BlockPosition_Object = CB_Block_getPosition.invoke(bukkit_Block);
+            Object NMS_IBlockData_Object = CB_Block_getNMS.invoke(bukkit_Block);
+            Object NMS_Block_Object = NMS_IBlockData_getBlock.invoke(NMS_IBlockData_Object);
+            NMS_World_applyPhysics.invoke(NMS_World_Object, NMS_BlockPosition_Object, NMS_Block_Object);
         } catch (Exception e){
             e.printStackTrace();
             String bukkitVersion = Bukkit.getBukkitVersion();

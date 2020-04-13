@@ -9,6 +9,7 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.LogUtil;
+import com.evermc.evershop.util.RedstoneUtil;
 
 import org.bukkit.entity.Player;
 
@@ -280,6 +281,10 @@ public enum TransactionLogic {
             break;
 
             case TOGGLE:
+            if (!RedstoneUtil.isEnabled()) {
+                p.sendMessage(tr("redstone shops disabled", p));
+                break;
+            }
             if (!ti.playerHasMoney()){
                 p.sendMessage(tr("player insufficient money", p));
                 break;
