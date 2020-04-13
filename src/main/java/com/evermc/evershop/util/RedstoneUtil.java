@@ -6,9 +6,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.FaceAttachable.AttachedFace;
 import org.bukkit.block.data.type.Switch;
 
-import static com.evermc.evershop.util.LogUtil.log;
-
-import java.util.logging.Level;
+import static com.evermc.evershop.util.LogUtil.severe;
 
 public class RedstoneUtil {
     public static void applyPhysics(Block lever){
@@ -29,7 +27,7 @@ public class RedstoneUtil {
             org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock cBlock = (org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock)b;
             cWorld.getHandle().applyPhysics(cBlock.getPosition(), cBlock.getNMS().getBlock());
         } else {
-            log(Level.SEVERE, "RedstoneUtil:updateBlock() Unsupported version: " + bukkitVersion);
+            severe("RedstoneUtil:updateBlock() Unsupported version: " + bukkitVersion);
         }
     }
     
@@ -40,13 +38,24 @@ public class RedstoneUtil {
         return null;
     }
 
+    @SuppressWarnings("deprecation")
     public static BlockFace getAttachedFace(Switch switc) {
-        if (switc.getAttachedFace() == AttachedFace.CEILING){
-            return BlockFace.UP;
-        } else if (switc.getAttachedFace() == AttachedFace.FLOOR){
-            return BlockFace.DOWN;
-        } else {
-            return switc.getFacing().getOppositeFace();
+        try{
+            if (switc.getAttachedFace() == AttachedFace.CEILING){
+                return BlockFace.UP;
+            } else if (switc.getAttachedFace() == AttachedFace.FLOOR){
+                return BlockFace.DOWN;
+            } else {
+                return switc.getFacing().getOppositeFace();
+            }
+        }catch(NoSuchMethodError e){
+            if (switc.getFace() == org.bukkit.block.data.type.Switch.Face.CEILING){
+                return BlockFace.UP;
+            } else if (switc.getFace() == org.bukkit.block.data.type.Switch.Face.FLOOR){
+                return BlockFace.DOWN;
+            } else {
+                return switc.getFacing().getOppositeFace();
+            }
         }
     }
 }
