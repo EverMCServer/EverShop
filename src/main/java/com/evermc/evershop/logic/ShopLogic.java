@@ -3,6 +3,7 @@ package com.evermc.evershop.logic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.RedstoneUtil;
+import com.evermc.evershop.util.TranslationUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,7 +31,11 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import static com.evermc.evershop.logic.TranslationLogic.tr;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+
+import static com.evermc.evershop.util.TranslationUtil.send;
+import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public class ShopLogic {
 
@@ -97,12 +103,15 @@ public class ShopLogic {
             }
             if (action == Action.LEFT_CLICK_BLOCK){
                 // TODO - check perm
-                String[] t = itemToString(si, p);
-                final String str = tr("This shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(si.action_id), t[0] == null? "" : t[0] , t[1]);
+                BaseComponent[] t = itemToString(si);
+                final BaseComponent str = TranslationUtil.tr("%1$s shop %2$s %3$s for %4$s!", p, 
+                    PlayerLogic.getPlayerInfo(si.player_id).name, 
+                    tr(TransactionLogic.getEnum(si.action_id).name() + "_AS_OWNER", p), 
+                    t[0] == null? "" : t[0] , t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
-                    p.sendMessage(str);
+                    p.spigot().sendMessage(str);
                 });
             } else {
                 // TODO - check perm
@@ -113,37 +122,59 @@ public class ShopLogic {
         });
     }
 
-    public static String[] itemToString(ShopInfo si, Player p){
-        String[] ret = new String[2];
+    public static BaseComponent[] itemToString(ShopInfo si){
+        BaseComponent[] ret = new BaseComponent[2];
         if (TransactionLogic.itemsetCount(si.action_id) == 2){
             // trade shop
             ArrayList<HashSet<ItemStack>> items = si.getDoubleItems();
-            ret[0] = "";
-            for (ItemStack is : items.get(0)){
-                ret[0] += tr(is,p) + ", ";
+            ret[0] = new TextComponent();
+            Iterator<ItemStack> it = items.get(0).iterator();
+            while(it.hasNext()){
+                ItemStack is = it.next();
+                ret[0].addExtra(TranslationUtil.tr(is));
+                if (it.hasNext()){
+                    ret[0].addExtra(", ");
+                }
             }
-            ret[0] = ret[0].substring(0, ret[0].length() - 2);
-            ret[1] = "";
-            for (ItemStack is : items.get(1)){
-                ret[1] += tr(is,p) + ", ";
+            ret[1] = new TextComponent();
+            it = items.get(1).iterator();
+            while(it.hasNext()){
+                ItemStack is = it.next();
+                ret[1].addExtra(TranslationUtil.tr(is));
+                if (it.hasNext()){
+                    ret[1].addExtra(", ");
+                }
             }
-            ret[1] = ret[1].substring(0, ret[1].length() - 2);
             if (si.price > 0){
-                ret[1] += " + $" +si.price;
+                TextComponent tc = new TextComponent("$" +si.price);
+                tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+                ret[1].addExtra(" + ");
+                ret[1].addExtra(tc);
             } else if (si.price < 0){
-                ret[0] += " + $" + (-si.price);
+                TextComponent tc = new TextComponent("$" + (-si.price));
+                tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+                ret[0].addExtra(" + ");
+                ret[0].addExtra(tc);
             }
         } else if (TransactionLogic.itemsetCount(si.action_id) == 1){
             // buy
             HashSet<ItemStack> items = si.getAllItems();
-            ret[0] = "";
-            for (ItemStack is : items){
-                ret[0] += tr(is,p) + ", ";
+            ret[0] = new TextComponent();
+            Iterator<ItemStack> it = items.iterator();
+            while(it.hasNext()){
+                ItemStack is = it.next();
+                ret[0].addExtra(TranslationUtil.tr(is));
+                if (it.hasNext()){
+                    ret[0].addExtra(", ");
+                }
             }
-            ret[0] = ret[0].substring(0, ret[0].length() - 2);
-            ret[1] = "$" + si.price;
+            TextComponent tc = new TextComponent("$" + si.price);
+            tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+            ret[1] = tc;
         } else {
-            ret[1] = "$" + si.price;
+            TextComponent tc = new TextComponent("$" + si.price);
+            tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+            ret[1] = tc;
         }
         return ret;
     }
@@ -161,7 +192,7 @@ public class ShopLogic {
             if (linkable_container.contains(block.getType())){
                 if (player.reg1.size()!=0 || player.reg2.size()!=0) {
                     if (!player.reg_is_container){
-                        p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
+                        send("You cant link redstone components and inventory at the same time", p);
                         return true;
                     }
                     Location selected_loc;
@@ -171,7 +202,7 @@ public class ShopLogic {
                         selected_loc = player.reg2.iterator().next();
                     }
                     if (!p.hasPermission("evershop.multiworld") && !block.getLocation().getWorld().equals(selected_loc.getWorld())){
-                        p.sendMessage(tr("You cant make multi-world shops", p));
+                        send("You cant make multi-world shops", p);
                         return true;
                     }
                 }
@@ -185,9 +216,9 @@ public class ShopLogic {
                     if (player.reg1.contains(loc2) || player.reg2.contains(loc2)){
                         player.reg1.remove(loc2);
                         player.reg2.remove(loc2);
-                        p.sendMessage(tr("unlinked this",p));
-                        String content = getRegisteredContents(p);
-                        if (content != null) p.sendMessage(content);
+                        send("unlinked this",p);
+                        BaseComponent content = getRegisteredContents(p);
+                        if (content != null) send(content, p);
                         return true;
                     }
                 }else{
@@ -196,9 +227,9 @@ public class ShopLogic {
                 if (player.reg1.contains(loc) || player.reg2.contains(loc)){
                     player.reg1.remove(loc);
                     player.reg2.remove(loc);
-                    p.sendMessage(tr("unlinked this",p));
-                    String content = getRegisteredContents(p);
-                    if (content != null) p.sendMessage(content);
+                    send("unlinked this",p);
+                    BaseComponent content = getRegisteredContents(p);
+                    if (content != null) send(content, p);
                     return true;
                 }
                 if (action == Action.RIGHT_CLICK_BLOCK){
@@ -206,28 +237,28 @@ public class ShopLogic {
                 } else { 
                     player.reg1.add(loc);
                 }
-                p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
-                String content = getRegisteredContents(p);
-                if (content != null) p.sendMessage(content);
+                send("linked %1$s", p, tr(block.getType()));
+                BaseComponent content = getRegisteredContents(p);
+                if (content != null) send(content, p);
             }
 
             else if (linkable_redstone.contains(block.getType())){
                 if (player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
-                    p.sendMessage(tr("You cant link redstone components and inventory at the same time", p));
+                    send("You cant link redstone components and inventory at the same time", p);
                     return true;
                 }
                 player.reg_is_container = false;
                 Location loc = block.getLocation();
                 if (player.reg1.contains(loc)){
                     player.reg1.remove(loc);
-                    p.sendMessage(tr("unlinked this",p));
-                    String content = getRegisteredContents(p);
-                    if (content != null) p.sendMessage(content);
+                    send("unlinked this",p);
+                    BaseComponent content = getRegisteredContents(p);
+                    if (content != null) send(content, p);
                 }else{
                     player.reg1.add(block.getLocation());
-                    p.sendMessage(tr("linked %1$s", p, tr(block.getType(), p)));
-                    String content = getRegisteredContents(p);
-                    if (content != null) p.sendMessage(content);
+                    send("linked %1$s", p, tr(block.getType()));
+                    BaseComponent content = getRegisteredContents(p);
+                    if (content != null) send(content, p);
                 }
             }
 
@@ -235,19 +266,19 @@ public class ShopLogic {
                 String line = ((Sign)block.getState()).getLine(0);
                 int a = TransactionLogic.getId(line);
                 if (a == 0) {
-                    p.sendMessage(tr("The sign does not contain an available action!", p));
+                    send("The sign does not contain an available action!", p);
                     return true;
                 }
                 if (player.reg1.size() == 0){
-                    p.sendMessage(tr("You should register items first!", p));
+                    send("You should register items first!", p);
                     return true;
                 }
                 if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
-                    p.sendMessage(tr("Shop type and your selection is not match!", p));
+                    send("Shop type and your selection is not match!", p);
                     return true;
                 }
                 if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(a).name().toLowerCase())){
-                    p.sendMessage(tr("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(a)));
+                    send("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(a));
                     return true;
                 }
                 if (!p.hasPermission("evershop.multiworld")){
@@ -255,21 +286,21 @@ public class ShopLogic {
                     for (Location l : player.reg1){
                         if (w == null) w = l.getWorld();
                         else if (!w.equals(l.getWorld())){
-                            p.sendMessage(tr("You cant make multi-world shops", p));
+                            send("You cant make multi-world shops", p);
                             return true;
                         }
                     }
                     for (Location l : player.reg2){
                         if (w == null) w = l.getWorld();
                         else if (!w.equals(l.getWorld())){
-                            p.sendMessage(tr("You cant make multi-world shops", p));
+                            send("You cant make multi-world shops", p);
                             return true;
                         }
                     }
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
-                    p.sendMessage(tr("You should put some items in the chest first!", p));
+                    send("You should put some items in the chest first!", p);
                     return true;
                 }
                 final Sign sign = (Sign)block.getState();
@@ -279,10 +310,11 @@ public class ShopLogic {
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
-                    String[] t = itemToString(newshop, p);
-                    p.sendMessage(tr("You have created a shop %1$s %2$s for %3$s!", p, TransactionLogic.getName(newshop.action_id), t[0] == null? "": t[0] , t[1]));
+                    BaseComponent[] t = itemToString(newshop);
+                    send("You have created a shop %1$s %2$s for %3$s!", p, 
+                        tr(TransactionLogic.getEnum(newshop.action_id).name() + "_AS_OWNER", p), t[0] == null? "": t[0] , t[1]);
                 }, () -> {
-                    p.sendMessage(tr("Failed to create shop, maybe you put too many items in the shop", p));
+                    send("Failed to create shop, maybe you put too many items in the shop", p);
                 });
             }
             return true;
@@ -340,7 +372,7 @@ public class ShopLogic {
         return items;
     }
 
-    private static String getRegisteredContents(Player p){
+    private static BaseComponent getRegisteredContents(Player p){
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
         if (pi.reg_is_container){
             if (getReg1(pi).size() != 0 || (pi.advanced && getReg2(pi).size() != 0)){
@@ -354,45 +386,52 @@ public class ShopLogic {
         return null;
     }
 
-    private static String getRegisteredRedstoneTargets(Player p){
-        String result = tr("Current selection:", p);
+    private static BaseComponent getRegisteredRedstoneTargets(Player p){
+        BaseComponent result = tr("Current selection:", p);
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
         for (Location l : pi.reg1){
             Material m = l.getBlock().getType();
             if (linkable_redstone.contains(m)){
-                result += tr(m, p) + "@" + tr(l, p) + ", ";
+                result.addExtra(tr(m));
+                result.addExtra("@" + tr(l) + ", ");
             } 
         }
         return result;
     }
 
-    private static String getRegisteredInventoryContents(Player p){
-        String result;
+    private static BaseComponent getRegisteredInventoryContents(Player p){
+        BaseComponent result;
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (!player.advanced){
             result = tr("Current selection:", p);
-            HashSet<ItemStack> items = getReg1(player);
-            for (ItemStack isc : items){
-                result += tr(isc, p) + ", ";
+            Iterator<ItemStack> it = getReg1(player).iterator();
+            while (it.hasNext()) {
+                ItemStack isc = it.next();
+                result.addExtra(tr(isc));
+                if (it.hasNext()){
+                    result.addExtra(", ");
+                }
             }
-            if (items.size() > 0)
-                result = result.substring(0, result.length() - 2);
         } else {
             result = tr("Main selection:", p);
-            HashSet<ItemStack> items = getReg1(player);
-            for (ItemStack isc : items){
-                result += tr(isc, p) + ", ";
+            Iterator<ItemStack> it = getReg1(player).iterator();
+            while (it.hasNext()) {
+                ItemStack isc = it.next();
+                result.addExtra(tr(isc));
+                if (it.hasNext()){
+                    result.addExtra(", ");
+                }
             }
-            if (items.size() > 0)
-                result = result.substring(0, result.length() - 2);
-            result += "\n";
-            result += tr("Sub selection:", p);
-            items = getReg2(player);
-            for (ItemStack isc : items){
-                result += tr(isc, p) + ", ";
+            result.addExtra("\n");
+            result.addExtra(tr("Sub selection:", p));
+            it = getReg2(player).iterator();
+            while (it.hasNext()) {
+                ItemStack isc = it.next();
+                result.addExtra(tr(isc));
+                if (it.hasNext()){
+                    result.addExtra(", ");
+                }
             }
-            if (items.size() > 0)
-                result = result.substring(0, result.length() - 2);
         }
         return result;
     }
@@ -422,7 +461,7 @@ public class ShopLogic {
                 } else {
                     Bukkit.getScheduler().runTask(plugin, ()->{
                         pendingRemoveBlocks.remove(loc);
-                        p.sendMessage(tr("You cannot break this!", p));
+                        send("You cannot break this!", p);
                     });
                 }
             }
@@ -446,7 +485,7 @@ public class ShopLogic {
             int[] sis = DataLogic.getShopOwner(locs);
             if (sis != null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    p.sendMessage(tr("you cannot break this block because there are shops attached on it", p));
+                    send("you cannot break this block because there are shops attached on it", p);
                     pendingRemoveBlocks.remove(loc);
                 });
                 return;
@@ -456,7 +495,7 @@ public class ShopLogic {
                     int count = DataLogic.getBlockLinkedCount(loca);
                     if (count > 0){
                         Bukkit.getScheduler().runTask(plugin, ()->{
-                            p.sendMessage(tr("you cannot break this block because there are shops attached on it", p));
+                            send("you cannot break this block because there are shops attached on it", p);
                             pendingRemoveBlocks.remove(loc);
                         });
                         return;
@@ -497,7 +536,7 @@ public class ShopLogic {
                             DataLogic.removeShop(sii.id);
                         }
                     }
-                    String other_str = "";
+                    BaseComponent other_str = null;
                     if (count > 0){
                         other_str = tr("%1$s shops of other player", p, count);
                     }
@@ -505,7 +544,7 @@ public class ShopLogic {
                     if (tcount == 0){
                         lo.getBlock().breakNaturally();
                     }else{
-                        p.sendMessage(tr("You cannot break this! Its locked by %1$s %2$s", p, loc_str, other_str));
+                        send("You cannot break this! Its locked by %1$s %2$s", p, loc_str, other_str);
                     }
                 });
             }

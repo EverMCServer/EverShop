@@ -105,7 +105,7 @@ public class PlayerLogic {
             PlayerInfo pi = getPlayerInfo(p);
             pi.advanced = advanced;
             String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`, `advanced`) VALUES ('" + pi.name + "', '"
-            + pi.uuid + "', '" + pi.advanced + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`advanced` = " + pi.advanced;
+            + pi.uuid + "', '" + (pi.advanced?1:0) + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`advanced` = " + (pi.advanced?1:0);
             DataLogic.getSQL().exec(query);
         });
     }
