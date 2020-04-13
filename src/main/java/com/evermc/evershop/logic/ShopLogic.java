@@ -343,7 +343,7 @@ public class ShopLogic {
     private static String getRegisteredContents(Player p){
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
         if (pi.reg_is_container){
-            if (getReg1(pi).size() != 0 && (!pi.advanced || getReg2(pi).size() != 0)){
+            if (getReg1(pi).size() != 0 || (pi.advanced && getReg2(pi).size() != 0)){
                 return getRegisteredInventoryContents(p);
             }
         } else {
