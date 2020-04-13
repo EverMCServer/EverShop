@@ -10,6 +10,7 @@ import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.logic.TranslationLogic;
+import com.evermc.evershop.util.RedstoneUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;

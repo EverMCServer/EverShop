@@ -8,7 +8,16 @@ import org.bukkit.block.data.type.Switch;
 
 import static com.evermc.evershop.util.LogUtil.severe;
 
+import java.lang.reflect.Method;
+
 public class RedstoneUtil {
+
+    private static Object NMS_World = null;
+    private static Method NMS_World_applyPhysics = null;
+    private static Method CB_Block_getNMS = null;
+    private static Method CB_Block_getPosition = null;
+    private static Method NMS_Block_getBlock = null;
+
     public static void applyPhysics(Block lever){
         BlockFace bf = getAttachedFace(lever);
         if (bf == null) {
@@ -17,16 +26,39 @@ public class RedstoneUtil {
         Block attached = lever.getRelative(bf);
         updateBlock(attached);
     }
-    public static void updateBlock(Block b){
+    public static void updateBlock(Block bukkitBlock){
 
-        String bukkitVersion = Bukkit.getBukkitVersion();
+        try{
 
-        // TODO multiple version support
-        if (bukkitVersion.matches("1\\.15\\.[0-9]*-R[0-9]*\\..*")) {
-            org.bukkit.craftbukkit.v1_15_R1.CraftWorld cWorld = (org.bukkit.craftbukkit.v1_15_R1.CraftWorld)b.getWorld();
-            org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock cBlock = (org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock)b;
-            cWorld.getHandle().applyPhysics(cBlock.getPosition(), cBlock.getNMS().getBlock());
-        } else {
+            if (CB_Block_getNMS == null) {
+                CB_Block_getNMS = bukkitBlock.getClass().getMethod("getNMS");
+            }
+            Object iBlockData = CB_Block_getNMS.invoke(bukkitBlock);
+
+            if (CB_Block_getPosition == null) {
+                CB_Block_getPosition = bukkitBlock.getClass().getMethod("getPosition");
+            }
+            Object nmsPosition = CB_Block_getPosition.invoke(bukkitBlock);
+
+            if (NMS_Block_getBlock == null) {
+                NMS_Block_getBlock = iBlockData.getClass().getMethod("getBlock");
+            }
+            Object nmsBlock = NMS_Block_getBlock.invoke(iBlockData);
+
+            Class<?> nmsBlockClass = nmsBlock.getClass();
+            while (!nmsBlockClass.getName().endsWith("Block")){
+                nmsBlockClass = nmsBlockClass.getSuperclass();
+            }
+            if (NMS_World == null){
+                NMS_World = bukkitBlock.getWorld().getClass().getMethod("getHandle").invoke(bukkitBlock.getWorld());
+                NMS_World_applyPhysics = NMS_World.getClass().getSuperclass().getMethod("applyPhysics",nmsPosition.getClass(), nmsBlockClass);
+            }
+            
+            NMS_World_applyPhysics.invoke(NMS_World, nmsPosition, nmsBlock);
+            
+        } catch (Exception e){
+            e.printStackTrace();
+            String bukkitVersion = Bukkit.getBukkitVersion();
             severe("RedstoneUtil:updateBlock() Unsupported version: " + bukkitVersion);
         }
     }
