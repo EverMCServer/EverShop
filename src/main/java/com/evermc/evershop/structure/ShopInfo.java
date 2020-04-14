@@ -1,7 +1,9 @@
 package com.evermc.evershop.structure;
 
 import java.io.ByteArrayInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -19,19 +21,76 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 
 public class ShopInfo {
-    public int id;
-    public int epoch;
-    public int action_id;
-    public int player_id;
-    public int world_id;
-    public int x;
-    public int y;
-    public int z;
-    public int price;
-    public Object targets;
-    public Object items;
-    public String extra;
+    private int id;
+    private int epoch;
+    private int action_id;
+    private int player_id;
+    private int world_id;
+    private int x;
+    private int y;
+    private int z;
+    private int price;
+    private Object targets;
+    private Object items;
+    private String extra;
 
+    public int getId(){
+        return this.id;
+    }
+
+    public int getEpoch(){
+        return this.epoch;
+    }
+
+    public Date getEpochDate(){
+        return new Date(((long)this.epoch)*1000);
+    }
+
+    public String getEpochString(){
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return df.format(new Date(((long)this.epoch)*1000));
+    }
+
+    public int getAction(){
+        return this.action_id;
+    }
+
+    public int getOwnerId(){
+        return this.player_id;
+    }
+
+    public int getWorldID(){
+        return this.world_id;
+    }
+
+    public int getX(){
+        return this.x;
+    }
+
+    public int getY(){
+        return this.y;
+    }
+
+    public int getZ(){
+        return this.z;
+    }
+
+    public int getPrice(){
+        return this.price;
+    }
+
+    public String getExtra(){
+        return this.extra;
+    }
+
+    public Object getTargets(){
+        return this.targets;
+    }
+
+    public Object getItems(){
+        return this.items;
+    }
+    
     // database -> ShopInfo
     public ShopInfo(Object[] data){
 

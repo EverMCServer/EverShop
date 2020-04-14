@@ -46,11 +46,11 @@ public class TransactionInfo{
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
         this.player = p;
-        this.owner = PlayerLogic.getOfflinePlayer(si.player_id);
-        this.price = si.price;
-        this.action_id = si.action_id;
+        this.owner = PlayerLogic.getOfflinePlayer(si.getOwnerId());
+        this.price = si.getPrice();
+        this.action_id = si.getAction();
         
-        if (TransactionLogic.itemsetCount(si.action_id) == 0){
+        if (TransactionLogic.itemsetCount(si.getAction()) == 0){
             //redstone components
             HashSet<SerializableLocation> locs = si.getAllTargets();
             rsComponents = new HashSet<Location>();
@@ -59,16 +59,16 @@ public class TransactionInfo{
             }
         } else {
             // targets
-            if (TransactionLogic.targetCount(si.action_id) == 2){
+            if (TransactionLogic.targetCount(si.getAction()) == 2){
                 shopOut = new HashSet<Inventory>();
                 shopIn = new HashSet<Inventory>();
                 addAllTargets(shopOut, si.getDoubleTargets().get(0));
                 addAllTargets(shopIn, si.getDoubleTargets().get(1));
-            } else if (si.action_id == TransactionLogic.BUY.id()){
+            } else if (si.getAction() == TransactionLogic.BUY.id()){
                 shopOut = new HashSet<Inventory>();
                 shopIn = null;
                 addAllTargets(shopOut, si.getAllTargets());
-            } else if (si.action_id == TransactionLogic.SELL.id()){
+            } else if (si.getAction() == TransactionLogic.SELL.id()){
                 shopOut = null;
                 shopIn = new HashSet<Inventory>();
                 addAllTargets(shopIn, si.getAllTargets());
@@ -76,16 +76,16 @@ public class TransactionInfo{
                 shopOut = null; shopIn = null;
             }
             // items
-            if (TransactionLogic.itemsetCount(si.action_id) == 2){
+            if (TransactionLogic.itemsetCount(si.getAction()) == 2){
                 itemsOut = new HashMap<ItemStack, Integer>();
                 itemsIn = new HashMap<ItemStack, Integer>();
                 addAllItems(itemsOut, si.getDoubleItems().get(0));
                 addAllItems(itemsIn, si.getDoubleItems().get(1));
-            } else if (si.action_id == TransactionLogic.BUY.id() || si.action_id == TransactionLogic.IBUY.id() ){
+            } else if (si.getAction() == TransactionLogic.BUY.id() || si.getAction() == TransactionLogic.IBUY.id() ){
                 itemsOut = new HashMap<ItemStack, Integer>();
                 addAllItems(itemsOut, si.getAllItems());
                 itemsIn = null;
-            } else if (si.action_id == TransactionLogic.SELL.id() || si.action_id == TransactionLogic.ISELL.id()){
+            } else if (si.getAction() == TransactionLogic.SELL.id() || si.getAction() == TransactionLogic.ISELL.id()){
                 itemsOut = null;
                 itemsIn = new HashMap<ItemStack, Integer>();
                 addAllItems(itemsIn, si.getAllItems());

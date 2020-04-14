@@ -105,8 +105,8 @@ public class ShopLogic {
                 // TODO - check perm
                 BaseComponent[] t = itemToString(si);
                 final BaseComponent str = TranslationUtil.tr("%1$s shop %2$s %3$s for %4$s!", p, 
-                    PlayerLogic.getPlayerName(si.player_id), 
-                    tr(TransactionLogic.getEnum(si.action_id).name() + "_AS_OWNER", p), 
+                    PlayerLogic.getPlayerName(si.getOwnerId()), 
+                    tr(TransactionLogic.getEnum(si.getAction()).name() + "_AS_OWNER", p), 
                     t[0] == null? "" : t[0] , t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
@@ -124,7 +124,7 @@ public class ShopLogic {
 
     public static BaseComponent[] itemToString(ShopInfo si){
         BaseComponent[] ret = new BaseComponent[2];
-        if (TransactionLogic.itemsetCount(si.action_id) == 2){
+        if (TransactionLogic.itemsetCount(si.getAction()) == 2){
             // trade shop
             ArrayList<HashSet<ItemStack>> items = si.getDoubleItems();
             ret[0] = new TextComponent();
@@ -145,18 +145,18 @@ public class ShopLogic {
                     ret[1].addExtra(", ");
                 }
             }
-            if (si.price > 0){
-                TextComponent tc = new TextComponent("$" +si.price);
+            if (si.getPrice()> 0){
+                TextComponent tc = new TextComponent("$" +si.getPrice());
                 tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
                 ret[1].addExtra(" + ");
                 ret[1].addExtra(tc);
-            } else if (si.price < 0){
-                TextComponent tc = new TextComponent("$" + (-si.price));
+            } else if (si.getPrice() < 0){
+                TextComponent tc = new TextComponent("$" + (-si.getPrice()));
                 tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
                 ret[0].addExtra(" + ");
                 ret[0].addExtra(tc);
             }
-        } else if (TransactionLogic.itemsetCount(si.action_id) == 1){
+        } else if (TransactionLogic.itemsetCount(si.getAction()) == 1){
             // buy
             HashSet<ItemStack> items = si.getAllItems();
             ret[0] = new TextComponent();
@@ -168,11 +168,11 @@ public class ShopLogic {
                     ret[0].addExtra(", ");
                 }
             }
-            TextComponent tc = new TextComponent("$" + si.price);
+            TextComponent tc = new TextComponent("$" + si.getPrice());
             tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ret[1] = tc;
         } else {
-            TextComponent tc = new TextComponent("$" + si.price);
+            TextComponent tc = new TextComponent("$" + si.getPrice());
             tc.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
             ret[1] = tc;
         }
@@ -312,7 +312,7 @@ public class ShopLogic {
                     PlayerLogic.getPlayerInfo(p).removeRegs();
                     BaseComponent[] t = itemToString(newshop);
                     send("You have created a shop %1$s %2$s for %3$s!", p, 
-                        tr(TransactionLogic.getEnum(newshop.action_id).name() + "_AS_OWNER", p), t[0] == null? "": t[0] , t[1]);
+                        tr(TransactionLogic.getEnum(newshop.getAction()).name() + "_AS_OWNER", p), t[0] == null? "": t[0] , t[1]);
                 }, () -> {
                     send("Failed to create shop, maybe you put too many items in the shop", p);
                 });
@@ -523,17 +523,17 @@ public class ShopLogic {
                     int count = 0;
                     int tcount = 0;
                     for (ShopInfo sii : si){
-                        BlockState bs = DataLogic.getWorld(sii.world_id).getBlockAt(sii.x, sii.y, sii.z).getState();
+                        BlockState bs = DataLogic.getWorld(sii.getWorldID()).getBlockAt(sii.getX(), sii.getY(), sii.getZ()).getState();
                         if (bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167){
-                            if (sii.player_id == PlayerLogic.getPlayerId(p)){
-                                loc_str += "(" + sii.x +"," + sii.y + "," + sii.z + "), ";
+                            if (sii.getOwnerId() == PlayerLogic.getPlayerId(p)){
+                                loc_str += "(" + sii.getX() + "," + sii.getY() + "," + sii.getZ() + "), ";
                             }else{
                                 count++;
                             }
                             tcount ++;
                         } else {
                             // detect unavailable shops (have shop info but no signs)
-                            DataLogic.removeShop(sii.id);
+                            DataLogic.removeShop(sii.getId());
                         }
                     }
                     BaseComponent other_str = null;

@@ -268,11 +268,11 @@ public class DataLogic{
 
     public static void saveShop(final ShopInfo shop, final Runnable afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.epoch + "', '"
-             + shop.action_id + "', '" + shop.player_id + "', '" + shop.world_id + "', '" + shop.x + "', '"
-             + shop.y + "', '" + shop.z + "', '" + shop.price + "', ?, ?, '" + shop.extra + "')";
-            byte[] targets = toBlob(shop.targets);
-            byte[] items = toBlob(shop.items);
+            String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.getEpoch() + "', '"
+             + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() + "', '" + shop.getX() + "', '"
+             + shop.getY() + "', '" + shop.getZ() + "', '" + shop.getPrice()+ "', ?, ?, '" + shop.getExtra()+ "')";
+            byte[] targets = toBlob(shop.getTargets());
+            byte[] items = toBlob(shop.getItems());
             if (targets.length >= 65535 || items.length >= 65535){
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;

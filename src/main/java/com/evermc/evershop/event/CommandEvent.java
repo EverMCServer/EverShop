@@ -293,7 +293,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
                     final ShopInfo si = DataLogic.getShopInfo(loc);
                     Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayerId(player)){
+                        if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
                             player.sendMessage("no permission");
                             return;
                         } else {
@@ -312,7 +312,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayerId((Player)player)){
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
                     player.sendMessage("no permission");
                     return;
                 } else {
@@ -333,7 +333,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
                     final ShopInfo si = DataLogic.getShopInfo(loc);
                     Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayerId(player)){
+                        if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
                             player.sendMessage("no permission");
                             return;
                         } else {
@@ -352,7 +352,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayerId((Player)player)){
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
                     player.sendMessage("no permission");
                     return;
                 } else {
@@ -369,14 +369,14 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             player.sendMessage("shop not found");
             return;
         }
-        int[][] re = DataLogic.getTransaction(si.id);
+        int[][] re = DataLogic.getTransaction(si.getId());
         if (re == null){
             player.sendMessage("no logs");
             return;
         }
         ArrayList<String> msg = new ArrayList<String>();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        msg.add("===== Shop #" + si.id + " Transactions =====");
+        msg.add("===== Shop #" + si.getId() + " Transactions =====");
         for (int i = 0; i < re.length; i++){
             PlayerInfo pi = PlayerLogic.getPlayerInfo(re[i][0]);
             msg.add(" - " + pi==null?"Unknown":pi.getName() + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
@@ -391,14 +391,13 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             return;
         }
         ArrayList<String> msg = new ArrayList<String>();
-        msg.add("===== Shop #" + si.id + " Infomation =====");
-        msg.add("Owner: " + PlayerLogic.getPlayerName(si.player_id));
-        msg.add("Type: " + TransactionLogic.getName(si.action_id));
-        msg.add("Location: " + SerializableLocation.toLocation(si.world_id, si.x, si.y, si.z));
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        msg.add("Create time: " + df.format(new Date(((long)si.epoch)*1000)));
-        msg.add("Containers: " + si.targets);
-        msg.add("Items: " + si.items);
+        msg.add("===== Shop #" + si.getId() + " Infomation =====");
+        msg.add("Owner: " + PlayerLogic.getPlayerName(si.getOwnerId()));
+        msg.add("Type: " + TransactionLogic.getName(si.getAction()));
+        msg.add("Location: " + SerializableLocation.toLocation(si.getWorldID(), si.getX(), si.getY(), si.getZ()));
+        msg.add("Create time: " + si.getEpochString());
+        msg.add("Containers: " + si.getTargets());
+        msg.add("Items: " + si.getItems());
         for (String a:msg)player.sendMessage(a);
     }
 
@@ -436,15 +435,15 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             msg.add("===== " + pi.getName() + "'s shops =====");
             msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
             for (ShopInfo si : sis){
-                msg.add(" #" + si.id + "  " + TransactionLogic.getName(si.action_id) + " shop, at "
-                     + DataLogic.getWorld(si.world_id).getName() + ":" + si.x + "," + si.y + "," + si.z);
+                msg.add(" #" + si.getId() + "  " + TransactionLogic.getName(si.getAction()) + " shop, at "
+                     + DataLogic.getWorld(si.getWorldID()).getName() + ":" + si.getX() + "," + si.getY() + "," + si.getZ());
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 for (String s:msg) sender.sendMessage(s);
                 for (ShopInfo si : sis){
-                    BlockState bs = DataLogic.getWorld(si.world_id).getBlockAt(si.x, si.y, si.z).getState();
+                    BlockState bs = DataLogic.getWorld(si.getWorldID()).getBlockAt(si.getX(), si.getY(), si.getZ()).getState();
                     if (!(bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167)){
-                        DataLogic.removeShop(si.id);
+                        DataLogic.removeShop(si.getId());
                     }
                 }
             });
