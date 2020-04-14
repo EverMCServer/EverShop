@@ -144,8 +144,6 @@ public class InteractEvent implements Listener{
     public void on(PlayerJoinEvent event){
         // Saved player info will be cached at server start.
         // This is used to update playerinfo or add new player info.
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            PlayerLogic.getPlayer(event.getPlayer());
-        });
+        PlayerLogic.updatePlayerInfo(event.getPlayer());
     }
 }

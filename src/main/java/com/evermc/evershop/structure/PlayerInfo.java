@@ -9,13 +9,23 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 
 public class PlayerInfo {
-    public int id;
-    public UUID uuid;
-    public String name;
-    public boolean advanced;
-    public CopyOnWriteArraySet<Location> reg1;
-    public CopyOnWriteArraySet<Location> reg2;
-    public boolean reg_is_container;
+    private int id;
+    private UUID uuid;
+    private String name;
+    private boolean advanced;
+    private CopyOnWriteArraySet<Location> reg1;
+    private CopyOnWriteArraySet<Location> reg2;
+    private boolean reg_is_container;
+
+    public PlayerInfo(int id, UUID uuid, String name, boolean advanced){
+        this.id = id;
+        this.uuid = uuid;
+        this.name = name;
+        this.advanced = advanced;
+        this.reg1 = new CopyOnWriteArraySet<Location>();
+        this.reg2 = new CopyOnWriteArraySet<Location>();
+        this.reg_is_container = false;
+    }
 
     public String toString(){
         return "PlayerInfo{id:" + id + ", uuid:" + uuid + ", name:" + name + ", advanced:" + advanced + "}";
@@ -58,5 +68,50 @@ public class PlayerInfo {
                 }
             }
         }
+    }
+
+    public int getId(){
+        return this.id;
+    }
+
+    public UUID getUUID(){
+        return this.uuid;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public boolean isAdvanced(){
+        return this.advanced;
+    }
+
+    // get advanced as integer 1 or 0
+    public int getAdvanced(){
+        return this.advanced?1:0;
+    }
+
+    public void setAdvanced(boolean advanced){
+        this.advanced = advanced;
+    }
+
+    public boolean isContainer(){
+        return this.reg_is_container;
+    }
+
+    public void setContainer(boolean reg_is_container){
+        this.reg_is_container = reg_is_container;
+    }
+
+    public CopyOnWriteArraySet<Location> getReg1(){
+        return this.reg1;
+    }
+
+    public CopyOnWriteArraySet<Location> getReg2(){
+        return this.reg2;
     }
 }

@@ -46,7 +46,7 @@ public class TransactionInfo{
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
         this.player = p;
-        this.owner = Bukkit.getOfflinePlayer(PlayerLogic.getPlayerInfo(si.player_id).uuid);
+        this.owner = PlayerLogic.getOfflinePlayer(si.player_id);
         this.price = si.price;
         this.action_id = si.action_id;
         

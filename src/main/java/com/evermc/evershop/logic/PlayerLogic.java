@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
@@ -12,23 +11,15 @@ import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.util.LogUtil;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class PlayerLogic {
     
-    private static EverShop plugin;
-    private static Map<UUID, PlayerInfo> cachedPlayers;
-    private static Map<Integer, PlayerInfo> cachedPlayerId;
-    private static Map<String, PlayerInfo> cachedPlayerName;
-    
-    static {
-        plugin = null;
-        cachedPlayerId = null;
-        cachedPlayers = null;
-        cachedPlayerName = null;
-    }
+    private static EverShop plugin = null;
+    private static Map<UUID, PlayerInfo> cachedPlayers = null;
+    private static Map<Integer, PlayerInfo> cachedPlayerId = null;
+    private static Map<String, PlayerInfo> cachedPlayerName = null;
 
     public static void init(EverShop _plugin){
         plugin = _plugin;
@@ -38,8 +29,28 @@ public class PlayerLogic {
         getAllPlayers();
     }
 
-    public static int getPlayer(OfflinePlayer p){
-        return getPlayerInfo(p).id;
+    public static int getPlayerId(OfflinePlayer p){
+        return getPlayerInfo(p).getId();
+    }
+
+    public static boolean isAdvanced(OfflinePlayer p){
+        return getPlayerInfo(p).isAdvanced();
+    }
+
+    public static String getPlayerName(OfflinePlayer p){
+        return getPlayerInfo(p).getName();
+    }
+
+    public static String getPlayerName(int playerid){
+        return getPlayerInfo(playerid).getName();
+    }
+
+    public static UUID getPlayerUUID(int playerid){
+        return getPlayerInfo(playerid).getUUID();
+    }
+
+    public static OfflinePlayer getOfflinePlayer(int playerid){
+        return Bukkit.getOfflinePlayer(getPlayerUUID(playerid));
     }
 
     public static PlayerInfo getPlayerInfo(int playerid){
@@ -69,6 +80,12 @@ public class PlayerLogic {
         }
     }
 
+    public static void updatePlayerInfo(OfflinePlayer p){
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            getPlayerInfo(p);
+        });
+    }
+    
     /**
      * get playerinfo from @param player 
      * if currrent name is different with cached name, update the cache
@@ -79,12 +96,12 @@ public class PlayerLogic {
         if (cachedPlayers.containsKey(uuid)){
             // cache hit, no block
             PlayerInfo player = cachedPlayers.get(uuid);
-            if (!player.name.equals(name)){
+            if (!player.getName().equals(name)){
                 // update cache and db
-                player.name = name;
-                cachedPlayers.put(uuid, player);
-                cachedPlayerId.put(player.id, player);
-                cachedPlayerName.put(player.name, player);
+                player.setName(name);
+                cachedPlayers.put(player.getUUID(), player);
+                cachedPlayerId.put(player.getId(), player);
+                cachedPlayerName.put(player.getName(), player);
                 fetchPlayer(p);
             }
             return player;
@@ -96,16 +113,12 @@ public class PlayerLogic {
 
     }
 
-    public static boolean isAdvanced(Player p){
-        return getPlayerInfo(p).advanced;
-    }
-
     public static void setAdvanced(final Player p, final boolean advanced){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             PlayerInfo pi = getPlayerInfo(p);
-            pi.advanced = advanced;
-            String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`, `advanced`) VALUES ('" + pi.name + "', '"
-            + pi.uuid + "', '" + (pi.advanced?1:0) + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`advanced` = " + (pi.advanced?1:0);
+            pi.setAdvanced(advanced);
+            String query = "INSERT INTO `" + DataLogic.getPrefix() + "player` (`name`, `uuid`, `advanced`) VALUES ('" + pi.getName() + "', '"
+            + pi.getUUID() + "', '" + pi.getAdvanced() + "') " + DataLogic.getSQL().ON_DUPLICATE("uuid")+ "`advanced` = " + pi.getAdvanced();
             DataLogic.getSQL().exec(query);
         });
     }
@@ -125,21 +138,15 @@ public class PlayerLogic {
             return null;
         }
 
-        PlayerInfo pi = new PlayerInfo();
-        pi.id = (Integer)result[0];
-        pi.uuid = UUID.fromString((String)result[2]);
-        pi.name = (String)result[1];
+        boolean advanced;
         if (result[3] instanceof Integer)
-            pi.advanced = ((int)result[3]) != 0;
+            advanced = ((int)result[3]) != 0;
         else
-            pi.advanced = (Boolean)result[3];
-        pi.reg_is_container = false;
-        pi.reg1 = new CopyOnWriteArraySet<Location>();
-        pi.reg2 = new CopyOnWriteArraySet<Location>();
-        cachedPlayers.put(pi.uuid, pi);
-        cachedPlayerId.put(pi.id, pi);
-        cachedPlayerName.put(pi.name, pi);
-
+            advanced = (Boolean)result[3];
+        PlayerInfo pi = new PlayerInfo((Integer)result[0], UUID.fromString((String)result[2]), (String)result[1], advanced);
+        cachedPlayers.put(pi.getUUID(), pi);
+        cachedPlayerId.put(pi.getId(), pi);
+        cachedPlayerName.put(pi.getName(), pi);
         LogUtil.log(Level.INFO, "Load " + pi);
 
         return pi;
@@ -154,18 +161,15 @@ public class PlayerLogic {
             return null;
         }
 
-        PlayerInfo pi = new PlayerInfo();
-        pi.id = (Integer)result[0];
-        pi.uuid = UUID.fromString((String)result[2]);
-        pi.name = (String)result[1];
-        pi.advanced = (Boolean)result[3];
-        pi.reg_is_container = false;
-        pi.reg1 = new CopyOnWriteArraySet<Location>();
-        pi.reg2 = new CopyOnWriteArraySet<Location>();
-        cachedPlayers.put(pi.uuid, pi);
-        cachedPlayerId.put(pi.id, pi);
-        cachedPlayerName.put(pi.name, pi);
-
+        boolean advanced;
+        if (result[3] instanceof Integer)
+            advanced = ((int)result[3]) != 0;
+        else
+            advanced = (Boolean)result[3];
+        PlayerInfo pi = new PlayerInfo((Integer)result[0], UUID.fromString((String)result[2]), (String)result[1], advanced);
+        cachedPlayers.put(pi.getUUID(), pi);
+        cachedPlayerId.put(pi.getId(), pi);
+        cachedPlayerName.put(pi.getName(), pi);
         LogUtil.log(Level.INFO, "Load " + pi);
 
         return pi;
@@ -187,20 +191,15 @@ public class PlayerLogic {
             }
             
             for (Object[] o : result){
-                PlayerInfo pi = new PlayerInfo();
-                pi.id = (Integer)o[0];
-                pi.uuid = UUID.fromString((String)o[2]);
-                pi.name = (String)o[1];
+                boolean advanced;
                 if (o[3] instanceof Integer)
-                    pi.advanced = ((int)o[3]) != 0;
+                    advanced = ((int)o[3]) != 0;
                 else
-                    pi.advanced = (Boolean)o[3];
-                pi.reg_is_container = false;
-                pi.reg1 = new CopyOnWriteArraySet<Location>();
-                pi.reg2 = new CopyOnWriteArraySet<Location>();
-                cachedPlayers.put(pi.uuid, pi);
-                cachedPlayerId.put(pi.id, pi);
-                cachedPlayerName.put(pi.name, pi);
+                    advanced = (Boolean)o[3];
+                PlayerInfo pi = new PlayerInfo((Integer)o[0], UUID.fromString((String)o[2]), (String)o[1], advanced);
+                cachedPlayers.put(pi.getUUID(), pi);
+                cachedPlayerId.put(pi.getId(), pi);
+                cachedPlayerName.put(pi.getName(), pi);
             }
     
             LogUtil.log(Level.INFO, "Load " + cachedPlayers.size() + " players.");

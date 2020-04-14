@@ -157,7 +157,7 @@ public enum TransactionLogic {
             ti.playerGiveItems();
             ti.playerPayMoney();
             ti.shopGiveMoney();
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("BUY_AS_USER", p), ite[0], ite[1]);
             break;
@@ -179,7 +179,7 @@ public enum TransactionLogic {
             ti.shopGiveItems();
             ti.shopPayMoney();
             ti.playerGiveMoney();
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("SELL_AS_USER", p), ite[0], ite[1]);
             break;
@@ -195,7 +195,7 @@ public enum TransactionLogic {
             }
             ti.playerGiveItems();
             ti.playerPayMoney();
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("BUY_AS_USER", p), ite[0], ite[1]);
             break;
@@ -207,7 +207,7 @@ public enum TransactionLogic {
             }
             ti.playerRemoveItems();
             ti.playerGiveMoney();
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("SELL_AS_USER", p), ite[0], ite[1]);
             break;
@@ -234,7 +234,7 @@ public enum TransactionLogic {
             } else if (ti.getPrice() > 0){
                 ti.playerPayMoney();
             }
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("TRADE_AS_USER", p), ite[0], ite[1]);
             break;
@@ -278,7 +278,7 @@ public enum TransactionLogic {
                 ti.playerPayMoney();
                 ti.shopGiveMoney();
             }
-            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayer(p));
+            DataLogic.recordTransaction(si.id, PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
             send("you have %1$s %2$s for %3$s!", p, tr("TRADE_AS_USER", p), ite[0], ite[1]);
             break;

@@ -165,7 +165,7 @@ public class ShopInfo {
         this.id = 0;
         this.epoch = (int)(System.currentTimeMillis()/1000);
         this.action_id = action_id;
-        this.player_id = pi.id;
+        this.player_id = pi.getId();
         this.world_id = DataLogic.getWorldId(shoploc.getWorld());
         this.x = shoploc.getBlockX();
         this.y = shoploc.getBlockY();
@@ -176,21 +176,21 @@ public class ShopInfo {
         this.extra = new ExtraInfo().toJSON();
         if (TransactionLogic.targetCount(action_id) == 1){
             HashSet<SerializableLocation> _targets = new HashSet<SerializableLocation>();
-            for (Location loca : pi.reg1){
+            for (Location loca : pi.getReg1()){
                 _targets.add(new SerializableLocation(loca));
             }
-            for (Location loca : pi.reg2){
+            for (Location loca : pi.getReg2()){
                 _targets.add(new SerializableLocation(loca));
             }
             this.targets = _targets;
         } else if (TransactionLogic.targetCount(action_id) == 2){
             ArrayList<HashSet<SerializableLocation>> _targets = new ArrayList<HashSet<SerializableLocation>>();
             HashSet<SerializableLocation> set1 = new HashSet<SerializableLocation>();
-            for (Location loca : pi.reg1){
+            for (Location loca : pi.getReg1()){
                 set1.add(new SerializableLocation(loca));
             }
             HashSet<SerializableLocation> set2 = new HashSet<SerializableLocation>();
-            for (Location loca : pi.reg2){
+            for (Location loca : pi.getReg2()){
                 set2.add(new SerializableLocation(loca));
             }
             _targets.add(set1);

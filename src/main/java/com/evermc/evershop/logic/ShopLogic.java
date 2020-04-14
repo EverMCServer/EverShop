@@ -105,7 +105,7 @@ public class ShopLogic {
                 // TODO - check perm
                 BaseComponent[] t = itemToString(si);
                 final BaseComponent str = TranslationUtil.tr("%1$s shop %2$s %3$s for %4$s!", p, 
-                    PlayerLogic.getPlayerInfo(si.player_id).name, 
+                    PlayerLogic.getPlayerName(si.player_id), 
                     tr(TransactionLogic.getEnum(si.action_id).name() + "_AS_OWNER", p), 
                     t[0] == null? "" : t[0] , t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
@@ -182,7 +182,7 @@ public class ShopLogic {
     public static boolean registerBlock(final Player p, Block block, Action action){
 
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
-        if (action == Action.RIGHT_CLICK_BLOCK && !player.advanced){
+        if (action == Action.RIGHT_CLICK_BLOCK && !player.isAdvanced()){
             return false;
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
@@ -190,16 +190,16 @@ public class ShopLogic {
             // TODO: WorldGuard Check if block is not Sign
 
             if (linkable_container.contains(block.getType())){
-                if (player.reg1.size()!=0 || player.reg2.size()!=0) {
-                    if (!player.reg_is_container){
+                if (player.getReg1().size()!=0 || player.getReg2().size()!=0) {
+                    if (!player.isContainer()){
                         send("You cant link redstone components and inventory at the same time", p);
                         return true;
                     }
                     Location selected_loc;
-                    if (player.reg1.iterator().hasNext()){
-                        selected_loc = player.reg1.iterator().next();
+                    if (player.getReg1().iterator().hasNext()){
+                        selected_loc = player.getReg1().iterator().next();
                     } else {
-                        selected_loc = player.reg2.iterator().next();
+                        selected_loc = player.getReg2().iterator().next();
                     }
                     if (!p.hasPermission("evershop.multiworld") && !block.getLocation().getWorld().equals(selected_loc.getWorld())){
                         send("You cant make multi-world shops", p);
@@ -207,15 +207,15 @@ public class ShopLogic {
                     }
                 }
                 
-                player.reg_is_container = true;
+                player.setContainer(true);
                 Container container = (Container) block.getState();
                 Location loc;
                 if (container.getInventory().getSize() == 54){
                     loc = ((DoubleChestInventory)container.getInventory()).getLeftSide().getLocation();
                     Location loc2 = ((DoubleChestInventory)container.getInventory()).getRightSide().getLocation();
-                    if (player.reg1.contains(loc2) || player.reg2.contains(loc2)){
-                        player.reg1.remove(loc2);
-                        player.reg2.remove(loc2);
+                    if (player.getReg1().contains(loc2) || player.getReg2().contains(loc2)){
+                        player.getReg1().remove(loc2);
+                        player.getReg2().remove(loc2);
                         send("unlinked this",p);
                         BaseComponent content = getRegisteredContents(p);
                         if (content != null) send(content, p);
@@ -224,18 +224,18 @@ public class ShopLogic {
                 }else{
                     loc = block.getLocation();
                 }
-                if (player.reg1.contains(loc) || player.reg2.contains(loc)){
-                    player.reg1.remove(loc);
-                    player.reg2.remove(loc);
+                if (player.getReg1().contains(loc) || player.getReg2().contains(loc)){
+                    player.getReg1().remove(loc);
+                    player.getReg2().remove(loc);
                     send("unlinked this",p);
                     BaseComponent content = getRegisteredContents(p);
                     if (content != null) send(content, p);
                     return true;
                 }
                 if (action == Action.RIGHT_CLICK_BLOCK){
-                    player.reg2.add(loc);
+                    player.getReg2().add(loc);
                 } else { 
-                    player.reg1.add(loc);
+                    player.getReg1().add(loc);
                 }
                 send("linked %1$s", p, tr(block.getType()));
                 BaseComponent content = getRegisteredContents(p);
@@ -243,19 +243,19 @@ public class ShopLogic {
             }
 
             else if (linkable_redstone.contains(block.getType())){
-                if (player.reg_is_container && (player.reg1.size()!=0 || player.reg2.size()!=0)){
+                if (player.isContainer() && (player.getReg1().size()!=0 || player.getReg2().size()!=0)){
                     send("You cant link redstone components and inventory at the same time", p);
                     return true;
                 }
-                player.reg_is_container = false;
+                player.setContainer(false);
                 Location loc = block.getLocation();
-                if (player.reg1.contains(loc)){
-                    player.reg1.remove(loc);
+                if (player.getReg1().contains(loc)){
+                    player.getReg1().remove(loc);
                     send("unlinked this",p);
                     BaseComponent content = getRegisteredContents(p);
                     if (content != null) send(content, p);
                 }else{
-                    player.reg1.add(block.getLocation());
+                    player.getReg1().add(block.getLocation());
                     send("linked %1$s", p, tr(block.getType()));
                     BaseComponent content = getRegisteredContents(p);
                     if (content != null) send(content, p);
@@ -269,11 +269,11 @@ public class ShopLogic {
                     send("The sign does not contain an available action!", p);
                     return true;
                 }
-                if (player.reg1.size() == 0){
+                if (player.getReg1().size() == 0){
                     send("You should register items first!", p);
                     return true;
                 }
-                if (player.reg_is_container != TransactionLogic.isContainerShop(a)){
+                if (player.isContainer() != TransactionLogic.isContainerShop(a)){
                     send("Shop type and your selection is not match!", p);
                     return true;
                 }
@@ -283,14 +283,14 @@ public class ShopLogic {
                 }
                 if (!p.hasPermission("evershop.multiworld")){
                     World w = null;
-                    for (Location l : player.reg1){
+                    for (Location l : player.getReg1()){
                         if (w == null) w = l.getWorld();
                         else if (!w.equals(l.getWorld())){
                             send("You cant make multi-world shops", p);
                             return true;
                         }
                     }
-                    for (Location l : player.reg2){
+                    for (Location l : player.getReg2()){
                         if (w == null) w = l.getWorld();
                         else if (!w.equals(l.getWorld())){
                             send("You cant make multi-world shops", p);
@@ -325,8 +325,8 @@ public class ShopLogic {
     public static HashSet<ItemStack> getReg1(PlayerInfo player){
         player.cleanupRegs();
         HashSet<ItemStack> items = new HashSet<ItemStack>();
-        if (player.reg_is_container){
-            for (Location loc : player.reg1){
+        if (player.isContainer()){
+            for (Location loc : player.getReg1()){
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
                 for (ItemStack is : inv.getContents()){
                     if (is == null) continue;
@@ -350,8 +350,8 @@ public class ShopLogic {
     public static HashSet<ItemStack> getReg2(PlayerInfo player){
         player.cleanupRegs();
         HashSet<ItemStack> items = new HashSet<ItemStack>();
-        if (player.reg_is_container){
-            for (Location loc : player.reg2){
+        if (player.isContainer()){
+            for (Location loc : player.getReg2()){
                 Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
                 for (ItemStack is : inv.getContents()){
                     if (is == null) continue;
@@ -374,12 +374,12 @@ public class ShopLogic {
 
     private static BaseComponent getRegisteredContents(Player p){
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
-        if (pi.reg_is_container){
-            if (getReg1(pi).size() != 0 || (pi.advanced && getReg2(pi).size() != 0)){
+        if (pi.isContainer()){
+            if (getReg1(pi).size() != 0 || (pi.isAdvanced() && getReg2(pi).size() != 0)){
                 return getRegisteredInventoryContents(p);
             }
         } else {
-            if (pi.reg1.size() != 0){
+            if (pi.getReg1().size() != 0){
                 return getRegisteredRedstoneTargets(p);
             }
         }
@@ -389,7 +389,7 @@ public class ShopLogic {
     private static BaseComponent getRegisteredRedstoneTargets(Player p){
         BaseComponent result = tr("Current selection:", p);
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
-        for (Location l : pi.reg1){
+        for (Location l : pi.getReg1()){
             Material m = l.getBlock().getType();
             if (linkable_redstone.contains(m)){
                 result.addExtra(tr(m));
@@ -402,7 +402,7 @@ public class ShopLogic {
     private static BaseComponent getRegisteredInventoryContents(Player p){
         BaseComponent result;
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
-        if (!player.advanced){
+        if (!player.isAdvanced()){
             result = tr("Current selection:", p);
             Iterator<ItemStack> it = getReg1(player).iterator();
             while (it.hasNext()) {
@@ -449,7 +449,7 @@ public class ShopLogic {
                     loc.getBlock().breakNaturally();
                 });
             } else {
-                if (pl == PlayerLogic.getPlayer(p)
+                if (pl == PlayerLogic.getPlayerId(p)
                      || ( p.hasPermission("evershop.admin.remove")
                          && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
                     ){
@@ -525,7 +525,7 @@ public class ShopLogic {
                     for (ShopInfo sii : si){
                         BlockState bs = DataLogic.getWorld(sii.world_id).getBlockAt(sii.x, sii.y, sii.z).getState();
                         if (bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167){
-                            if (sii.player_id == PlayerLogic.getPlayer(p)){
+                            if (sii.player_id == PlayerLogic.getPlayerId(p)){
                                 loc_str += "(" + sii.x +"," + sii.y + "," + sii.z + "), ";
                             }else{
                                 count++;

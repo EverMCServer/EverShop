@@ -293,7 +293,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
                     final ShopInfo si = DataLogic.getShopInfo(loc);
                     Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayer(player)){
+                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayerId(player)){
                             player.sendMessage("no permission");
                             return;
                         } else {
@@ -312,7 +312,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayer((Player)player)){
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayerId((Player)player)){
                     player.sendMessage("no permission");
                     return;
                 } else {
@@ -333,7 +333,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
                 Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
                     final ShopInfo si = DataLogic.getShopInfo(loc);
                     Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayer(player)){
+                        if (!player.hasPermission("evershop.info.others") && si.player_id != PlayerLogic.getPlayerId(player)){
                             player.sendMessage("no permission");
                             return;
                         } else {
@@ -352,7 +352,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayer((Player)player)){
+                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.player_id != PlayerLogic.getPlayerId((Player)player)){
                     player.sendMessage("no permission");
                     return;
                 } else {
@@ -379,7 +379,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         msg.add("===== Shop #" + si.id + " Transactions =====");
         for (int i = 0; i < re.length; i++){
             PlayerInfo pi = PlayerLogic.getPlayerInfo(re[i][0]);
-            msg.add(" - " + pi==null?"Unknown":pi.name + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
+            msg.add(" - " + pi==null?"Unknown":pi.getName() + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
         }
         for (String a:msg)player.sendMessage(a);
     }
@@ -392,7 +392,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         }
         ArrayList<String> msg = new ArrayList<String>();
         msg.add("===== Shop #" + si.id + " Infomation =====");
-        msg.add("Owner: " + PlayerLogic.getPlayerInfo(si.player_id).name);
+        msg.add("Owner: " + PlayerLogic.getPlayerName(si.player_id));
         msg.add("Type: " + TransactionLogic.getName(si.action_id));
         msg.add("Location: " + SerializableLocation.toLocation(si.world_id, si.x, si.y, si.z));
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -431,9 +431,9 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             }
             int page = _page;
             if (_page*10 >= count) page = (count-1)/10;
-            ShopInfo[] sis = DataLogic.getShopList(pi.id, page);
+            ShopInfo[] sis = DataLogic.getShopList(pi.getId(), page);
             final ArrayList<String> msg = new ArrayList<String>();
-            msg.add("===== " + pi.name + "'s shops =====");
+            msg.add("===== " + pi.getName() + "'s shops =====");
             msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
             for (ShopInfo si : sis){
                 msg.add(" #" + si.id + "  " + TransactionLogic.getName(si.action_id) + " shop, at "

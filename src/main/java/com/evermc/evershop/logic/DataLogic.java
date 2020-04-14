@@ -429,11 +429,11 @@ public class DataLogic{
     }
 
     public static int getShopListLength(PlayerInfo pi){
-        String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + pi.id + "'";
+        String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + pi.getId() + "'";
         Object[] ret = SQL.queryFirst(query, 1);
         if (ret[0] instanceof Integer) return (int)ret[0];
         else if (ret[0] instanceof Long) return (int)(long)ret[0];
-        LogUtil.log(Level.SEVERE, "getShopListLength(" + pi.name+ "): retval="+ret[0]);
+        LogUtil.log(Level.SEVERE, "getShopListLength(" + pi.getName()+ "): retval="+ret[0]);
         return 0;
     }
 
