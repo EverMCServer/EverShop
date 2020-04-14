@@ -10,13 +10,17 @@ import static com.evermc.evershop.util.LogUtil.severe;
 
 public class NBTUtil {
 
+    private static Method CB_CraftItemStack_asBukkitCopy = null;
     private static Method CB_CraftItemStack_asNMSCopy = null;
     private static Method NMS_ItemStack_save = null;
+    private static Method NMS_ItemStack_fromNBT = null;
     private static Method NMS_NBTTagCompound_toString = null;
+    private static Method NMS_MojangsonParser_parse = null;
 
     private static Class<?> CB_CraftItemStack = null;
     private static Class<?> NMS_NBTTagCompound = null;
     private static Class<?> NMS_ItemStack = null;
+    private static Class<?> NMS_MojangsonParser = null;
 
     private static Constructor<?> NMS_NBTTagCompound_Constructer = null;
 
@@ -26,10 +30,14 @@ public class NBTUtil {
             CB_CraftItemStack = ReflectionUtil.CBClass("inventory.CraftItemStack");
             NMS_NBTTagCompound = ReflectionUtil.NMSClass("NBTTagCompound");
             NMS_ItemStack = ReflectionUtil.NMSClass("ItemStack");
+            NMS_MojangsonParser = ReflectionUtil.NMSClass("MojangsonParser");
 
+            CB_CraftItemStack_asBukkitCopy = CB_CraftItemStack.getMethod("asBukkitCopy", NMS_ItemStack);
             CB_CraftItemStack_asNMSCopy = CB_CraftItemStack.getMethod("asNMSCopy", ItemStack.class);
             NMS_ItemStack_save = NMS_ItemStack.getMethod("save", NMS_NBTTagCompound);
+            NMS_ItemStack_fromNBT = NMS_ItemStack.getMethod("a", NMS_NBTTagCompound);
             NMS_NBTTagCompound_toString = NMS_NBTTagCompound.getMethod("toString");
+            NMS_MojangsonParser_parse = NMS_MojangsonParser.getMethod("parse", String.class);
 
             NMS_NBTTagCompound_Constructer = NMS_NBTTagCompound.getConstructor();
 
@@ -57,6 +65,19 @@ public class NBTUtil {
             String bukkitVersion = Bukkit.getBukkitVersion();
             severe("NBTUtil:init() Unsupported version: " + bukkitVersion);
             return "";
+        }
+    }
+
+    public static ItemStack toItemStack(String nbt){
+        try{
+            Object NMS_NBTTagCompound_Object = NMS_MojangsonParser_parse.invoke(NMS_MojangsonParser, nbt);
+            Object NMS_ItemStack_Object = NMS_ItemStack_fromNBT.invoke(NMS_ItemStack, NMS_NBTTagCompound_Object);
+            return (ItemStack)CB_CraftItemStack_asBukkitCopy.invoke(CB_CraftItemStack, NMS_ItemStack_Object);
+        }catch (Exception e){
+            e.printStackTrace();
+            String bukkitVersion = Bukkit.getBukkitVersion();
+            severe("NBTUtil:init() Unsupported version: " + bukkitVersion);
+            return null;
         }
     }
 }
