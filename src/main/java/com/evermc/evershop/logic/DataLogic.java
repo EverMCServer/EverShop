@@ -17,6 +17,7 @@ import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.LogUtil;
+import com.evermc.evershop.util.NBTUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
@@ -271,8 +272,8 @@ public class DataLogic{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.getEpoch() + "', '"
              + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() + "', '" + shop.getX() + "', '"
              + shop.getY() + "', '" + shop.getZ() + "', '" + shop.getPrice()+ "', ?, ?, '" + shop.getExtra()+ "')";
-            byte[] targets = toBlob(shop.getTargets());
-            byte[] items = toBlob(shop.getItems());
+            byte[] targets = SerializableLocation.serialize(shop.getTargetOut(), shop.getTargetIn());
+            byte[] items = NBTUtil.serialize(shop.getItemOut(), shop.getItemIn());
             if (targets.length >= 65535 || items.length >= 65535){
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
@@ -282,7 +283,7 @@ public class DataLogic{
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
             }
-            for (SerializableLocation sloc : shop.getAllTargets()){
+            for (SerializableLocation sloc : shop.getTargetAll()){
                 query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
                 SQL.insert(query);
@@ -347,7 +348,7 @@ public class DataLogic{
             return null;
         }
         Object[] k = ret.get(0);
-        return new ShopInfo(k);
+        return ShopInfo.decode(k);
     }
 
     public static int getShopOwner(Location loc){
@@ -377,7 +378,7 @@ public class DataLogic{
         }
         HashSet<ShopInfo> result = new HashSet<ShopInfo>();
         for (Object[] k : ret){
-            result.add(new ShopInfo(k));
+            result.add(ShopInfo.decode(k));
         }
         return result.toArray(new ShopInfo[result.size()]);
     }
@@ -420,7 +421,7 @@ public class DataLogic{
             return null;
         }
         Object[] k = ret.get(0);
-        return new ShopInfo(k);
+        return ShopInfo.decode(k);
     }
 
     public static int getShopListLength(Player player){
@@ -448,7 +449,7 @@ public class DataLogic{
         }
         ArrayList<ShopInfo> result = new ArrayList<ShopInfo>();
         for (Object[] k : ret){
-            result.add(new ShopInfo(k));
+            result.add(ShopInfo.decode(k));
         }
         return result.toArray(new ShopInfo[result.size()]);
     }

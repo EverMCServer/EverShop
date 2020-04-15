@@ -7,7 +7,9 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -53,7 +55,11 @@ public class NBTUtil {
             severe("NBTUtil:init() Unsupported version: " + bukkitVersion);
         }
     }
-
+    /**
+     * Convert bukkit ItemStack to NMS NBT string. 
+     * Note that the the amount of output nbt item will be set to 1, since the item will be considered as invalid 
+     * when the amount is bigger than the max stack size
+     */ 
     public static String toNBTString(ItemStack it){
         ItemStack Bukkit_itemstack;
         if (it == null){
@@ -88,17 +94,17 @@ public class NBTUtil {
     }
 
     public static byte[] serialize(Collection<ItemStack> itemOut, Collection<ItemStack> itemIn){
-        String[][] result = new String[2][];
-        result[0] = new String[itemOut.size()];
-        int top = 0;
+        HashMap<?,?>[] result = new HashMap<?,?>[2];
+        HashMap<String, Integer> resultOut = new HashMap<String, Integer>();
+        HashMap<String, Integer> resultIn = new HashMap<String, Integer>();
         for (ItemStack i : itemOut){
-            result[0][top++] = toNBTString(i);
+            resultOut.put(toNBTString(i), i.getAmount());
         }
-        result[1] = new String[itemIn.size()];
-        top = 0;
         for (ItemStack i : itemIn){
-            result[1][top++] = toNBTString(i);
+            resultIn.put(toNBTString(i), i.getAmount());
         }
+        result[0] = resultOut;
+        result[1] = resultIn;
         try{
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ObjectOutputStream outputStream = new ObjectOutputStream(out);
@@ -121,23 +127,27 @@ public class NBTUtil {
         try{
             ObjectInputStream in  = new ObjectInputStream(new ByteArrayInputStream(data));
             Object obj = in.readObject();
-            if (!(obj instanceof String[][])){
-                throw new Exception("Not a string array");
+            if (!(obj instanceof HashMap<?,?>[])){
+                throw new Exception("Not a HashMap array");
             }
-            String[] itemOut = ((String[][])obj)[0];
-            String[] itemIn = ((String[][])obj)[1];
-            for (String item: itemOut){
-                resultOut.add(toItemStack(item));
+            HashMap<String, Integer> itemOut = ((HashMap<String, Integer>[])obj)[0];
+            HashMap<String, Integer> itemIn = ((HashMap<String, Integer>[])obj)[1];
+            for (Entry<String, Integer> item: itemOut.entrySet()){
+                ItemStack temp = toItemStack(item.getKey());
+                temp.setAmount(item.getValue());
+                resultOut.add(temp);
             }
-            for (String item: itemIn){
-                resultIn.add(toItemStack(item));
+            for (Entry<String, Integer> item: itemIn.entrySet()){
+                ItemStack temp = toItemStack(item.getKey());
+                temp.setAmount(item.getValue());
+                resultIn.add(temp);
             }
             result[0] = resultOut;
             result[1] = resultIn;
             return (HashSet<ItemStack>[])result;
         } catch (Exception e) {
             e.printStackTrace();
-            severe("NBTUtil: Failed to serialize itemstack.");
+            severe("NBTUtil: Failed to deserialize itemstack.");
             return null ;
         }
 

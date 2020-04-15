@@ -396,8 +396,8 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         msg.add("Type: " + TransactionLogic.getName(si.getAction()));
         msg.add("Location: " + SerializableLocation.toLocation(si.getWorldID(), si.getX(), si.getY(), si.getZ()));
         msg.add("Create time: " + si.getEpochString());
-        msg.add("Containers: " + si.getTargets());
-        msg.add("Items: " + si.getItems());
+        msg.add("Containers: " + si.getTargetAll());
+        msg.add("Items: " + si.getItemAll());
         for (String a:msg)player.sendMessage(a);
     }
 

@@ -1,6 +1,5 @@
 package com.evermc.evershop.logic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,7 +27,6 @@ import org.bukkit.block.data.type.Switch;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -93,6 +91,7 @@ public class ShopLogic {
             ShopInfo si = DataLogic.getShopInfo(loc);
             if (si == null) {
                 Bukkit.getScheduler().runTask(plugin, () -> {
+                    // TODO - handle unavailable shops
                     if (loc.getBlock().getState() instanceof Sign){
                         Sign sign = (Sign)loc.getBlock().getState();
                         sign.setLine(0, ChatColor.stripColor(sign.getLine(0)));
@@ -126,9 +125,8 @@ public class ShopLogic {
         BaseComponent[] ret = new BaseComponent[2];
         if (TransactionLogic.itemsetCount(si.getAction()) == 2){
             // trade shop
-            ArrayList<HashSet<ItemStack>> items = si.getDoubleItems();
             ret[0] = new TextComponent();
-            Iterator<ItemStack> it = items.get(0).iterator();
+            Iterator<ItemStack> it = si.getItemOut().iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
                 ret[0].addExtra(TranslationUtil.tr(is));
@@ -137,7 +135,7 @@ public class ShopLogic {
                 }
             }
             ret[1] = new TextComponent();
-            it = items.get(1).iterator();
+            it = si.getItemIn().iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
                 ret[1].addExtra(TranslationUtil.tr(is));
@@ -157,8 +155,8 @@ public class ShopLogic {
                 ret[0].addExtra(tc);
             }
         } else if (TransactionLogic.itemsetCount(si.getAction()) == 1){
-            // buy
-            HashSet<ItemStack> items = si.getAllItems();
+            // buy/sell
+            HashSet<ItemStack> items = si.getItemAll();
             ret[0] = new TextComponent();
             Iterator<ItemStack> it = items.iterator();
             while(it.hasNext()){
@@ -298,11 +296,11 @@ public class ShopLogic {
                         }
                     }
                 }
-                final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
-                if (TransactionLogic.isContainerShop(a) && newshop.getAllItems().size() == 0){
+                if (TransactionLogic.isContainerShop(a) && player.getReg1Items().size() == 0){
                     send("You should put some items in the chest first!", p);
                     return true;
                 }
+                final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, () -> {
                     String lin = sign.getLine(0);
@@ -322,60 +320,10 @@ public class ShopLogic {
         return false;
     }
 
-    public static HashSet<ItemStack> getReg1(PlayerInfo player){
-        player.cleanupRegs();
-        HashSet<ItemStack> items = new HashSet<ItemStack>();
-        if (player.isContainer()){
-            for (Location loc : player.getReg1()){
-                Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
-                for (ItemStack is : inv.getContents()){
-                    if (is == null) continue;
-                    boolean duplicate = false;
-                    for (ItemStack isc : items){
-                        if (isc.isSimilar(is)){
-                            duplicate = true;
-                            isc.setAmount(isc.getAmount() + is.getAmount());
-                            break;
-                        }
-                    }
-                    if (!duplicate){
-                        items.add(is.clone());
-                    }
-                }
-            }
-        }
-        return items;
-    }
-
-    public static HashSet<ItemStack> getReg2(PlayerInfo player){
-        player.cleanupRegs();
-        HashSet<ItemStack> items = new HashSet<ItemStack>();
-        if (player.isContainer()){
-            for (Location loc : player.getReg2()){
-                Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
-                for (ItemStack is : inv.getContents()){
-                    if (is == null) continue;
-                    boolean duplicate = false;
-                    for (ItemStack isc : items){
-                        if (isc.isSimilar(is)){
-                            duplicate = true;
-                            isc.setAmount(isc.getAmount() + is.getAmount());
-                            break;
-                        }
-                    }
-                    if (!duplicate){
-                        items.add(is.clone());
-                    }
-                }
-            }
-        }
-        return items;
-    }
-
     private static BaseComponent getRegisteredContents(Player p){
         PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
         if (pi.isContainer()){
-            if (getReg1(pi).size() != 0 || (pi.isAdvanced() && getReg2(pi).size() != 0)){
+            if (pi.getReg1Items().size() != 0 || (pi.isAdvanced() && pi.getReg2Items().size() != 0)){
                 return getRegisteredInventoryContents(p);
             }
         } else {
@@ -404,7 +352,7 @@ public class ShopLogic {
         PlayerInfo player = PlayerLogic.getPlayerInfo(p);
         if (!player.isAdvanced()){
             result = tr("Current selection:", p);
-            Iterator<ItemStack> it = getReg1(player).iterator();
+            Iterator<ItemStack> it = player.getReg1Items().iterator();
             while (it.hasNext()) {
                 ItemStack isc = it.next();
                 result.addExtra(tr(isc));
@@ -414,7 +362,7 @@ public class ShopLogic {
             }
         } else {
             result = tr("Main selection:", p);
-            Iterator<ItemStack> it = getReg1(player).iterator();
+            Iterator<ItemStack> it = player.getReg1Items().iterator();
             while (it.hasNext()) {
                 ItemStack isc = it.next();
                 result.addExtra(tr(isc));
@@ -424,7 +372,7 @@ public class ShopLogic {
             }
             result.addExtra("\n");
             result.addExtra(tr("Sub selection:", p));
-            it = getReg2(player).iterator();
+            it = player.getReg2Items().iterator();
             while (it.hasNext()) {
                 ItemStack isc = it.next();
                 result.addExtra(tr(isc));

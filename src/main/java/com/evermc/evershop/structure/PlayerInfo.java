@@ -1,12 +1,16 @@
 package com.evermc.evershop.structure;
 
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Location;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerInfo {
     private int id;
@@ -113,5 +117,82 @@ public class PlayerInfo {
 
     public CopyOnWriteArraySet<Location> getReg2(){
         return this.reg2;
+    }
+    
+    public HashSet<SerializableLocation> getReg1Loc(){
+        HashSet<SerializableLocation> result = new HashSet<SerializableLocation>();
+        for (Location loc: getReg1()){
+            result.add(new SerializableLocation(loc));
+        }
+        return result;
+    }
+
+    public HashSet<SerializableLocation> getReg2Loc(){
+        HashSet<SerializableLocation> result = new HashSet<SerializableLocation>();
+        for (Location loc: getReg2()){
+            result.add(new SerializableLocation(loc));
+        }
+        return result;
+    }
+
+    public HashSet<SerializableLocation> getRegsLoc(){
+        HashSet<SerializableLocation> result = new HashSet<SerializableLocation>();
+        for (Location loc: getReg1()){
+            result.add(new SerializableLocation(loc));
+        }
+        for (Location loc: getReg2()){
+            result.add(new SerializableLocation(loc));
+        }
+        return result;
+    }
+
+    public HashSet<ItemStack> getReg1Items(){
+        cleanupRegs();
+        HashSet<ItemStack> items = new HashSet<ItemStack>();
+        if (isContainer()){
+            for (Location loc : getReg1()){
+                Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
+                for (ItemStack is : inv.getContents()){
+                    if (is == null) continue;
+                    boolean duplicate = false;
+                    for (ItemStack isc : items){
+                        if (isc.isSimilar(is)){
+                            duplicate = true;
+                            isc.setAmount(isc.getAmount() + is.getAmount());
+                            break;
+                        }
+                    }
+                    if (!duplicate){
+                        items.add(is.clone());
+                    }
+                }
+            }
+        }
+        return items;
+    }
+
+    public HashSet<ItemStack> getReg2Items(){
+        cleanupRegs();
+        HashSet<ItemStack> items = new HashSet<ItemStack>();
+        if (isContainer()){
+            for (Location loc : getReg2()){
+                Inventory inv = ((Container)loc.getBlock().getState()).getInventory();
+                for (ItemStack is : inv.getContents()){
+                    if (is == null) continue;
+                    boolean duplicate = false;
+                    for (ItemStack isc : items){
+                        if (isc.isSimilar(is)){
+                            duplicate = true;
+                            isc.setAmount(isc.getAmount() + is.getAmount());
+                            break;
+                        }
+                    }
+                    if (!duplicate){
+                        items.add(is.clone());
+                    }
+                }
+            }
+        }
+        return items;
     }
 }

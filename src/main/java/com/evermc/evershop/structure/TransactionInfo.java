@@ -52,43 +52,27 @@ public class TransactionInfo{
         
         if (TransactionLogic.itemsetCount(si.getAction()) == 0){
             //redstone components
-            HashSet<SerializableLocation> locs = si.getAllTargets();
+            HashSet<SerializableLocation> locs = si.getTargetAll();
             rsComponents = new HashSet<Location>();
             for (SerializableLocation lo : locs){
                 rsComponents.add(lo.toLocation());
             }
         } else {
-            // targets
-            if (TransactionLogic.targetCount(si.getAction()) == 2){
-                shopOut = new HashSet<Inventory>();
-                shopIn = new HashSet<Inventory>();
-                addAllTargets(shopOut, si.getDoubleTargets().get(0));
-                addAllTargets(shopIn, si.getDoubleTargets().get(1));
-            } else if (si.getAction() == TransactionLogic.BUY.id()){
-                shopOut = new HashSet<Inventory>();
-                shopIn = null;
-                addAllTargets(shopOut, si.getAllTargets());
-            } else if (si.getAction() == TransactionLogic.SELL.id()){
-                shopOut = null;
-                shopIn = new HashSet<Inventory>();
-                addAllTargets(shopIn, si.getAllTargets());
-            } else {
-                shopOut = null; shopIn = null;
+            if (si.getItemOut() != null) {
+                this.itemsOut = new HashMap<ItemStack, Integer>();
+                addAllItems(this.itemsOut, si.getItemOut());
             }
-            // items
-            if (TransactionLogic.itemsetCount(si.getAction()) == 2){
-                itemsOut = new HashMap<ItemStack, Integer>();
-                itemsIn = new HashMap<ItemStack, Integer>();
-                addAllItems(itemsOut, si.getDoubleItems().get(0));
-                addAllItems(itemsIn, si.getDoubleItems().get(1));
-            } else if (si.getAction() == TransactionLogic.BUY.id() || si.getAction() == TransactionLogic.IBUY.id() ){
-                itemsOut = new HashMap<ItemStack, Integer>();
-                addAllItems(itemsOut, si.getAllItems());
-                itemsIn = null;
-            } else if (si.getAction() == TransactionLogic.SELL.id() || si.getAction() == TransactionLogic.ISELL.id()){
-                itemsOut = null;
-                itemsIn = new HashMap<ItemStack, Integer>();
-                addAllItems(itemsIn, si.getAllItems());
+            if (si.getItemIn() != null) {
+                this.itemsIn = new HashMap<ItemStack, Integer>();
+                addAllItems(this.itemsIn, si.getItemIn());
+            }
+            if (si.getTargetOut() != null) {
+                this.shopOut = new HashSet<Inventory>();
+                addAllTargets(this.shopOut, si.getTargetOut());
+            }
+            if (si.getTargetIn() != null) {
+                this.shopIn = new HashSet<Inventory>();
+                addAllTargets(this.shopIn, si.getTargetIn());
             }
         }
     }
