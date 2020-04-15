@@ -1,7 +1,13 @@
 package com.evermc.evershop.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -79,5 +85,61 @@ public class NBTUtil {
             severe("NBTUtil:init() Unsupported version: " + bukkitVersion);
             return null;
         }
+    }
+
+    public static byte[] serialize(Collection<ItemStack> itemOut, Collection<ItemStack> itemIn){
+        String[][] result = new String[2][];
+        result[0] = new String[itemOut.size()];
+        int top = 0;
+        for (ItemStack i : itemOut){
+            result[0][top++] = toNBTString(i);
+        }
+        result[1] = new String[itemIn.size()];
+        top = 0;
+        for (ItemStack i : itemIn){
+            result[1][top++] = toNBTString(i);
+        }
+        try{
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ObjectOutputStream outputStream = new ObjectOutputStream(out);
+            outputStream.writeObject(result);
+            byte [] bytes = out.toByteArray();
+            outputStream.close();
+            return bytes;
+        } catch (Exception e) {
+            e.printStackTrace();
+            severe("NBTUtil: Failed to serialize itemstack.");
+            return null ;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static HashSet<ItemStack>[] deserialize(byte[] data){
+        HashSet<?>[] result = new HashSet<?>[2];
+        HashSet<ItemStack> resultOut = new HashSet<ItemStack>();
+        HashSet<ItemStack> resultIn = new HashSet<ItemStack>();
+        try{
+            ObjectInputStream in  = new ObjectInputStream(new ByteArrayInputStream(data));
+            Object obj = in.readObject();
+            if (!(obj instanceof String[][])){
+                throw new Exception("Not a string array");
+            }
+            String[] itemOut = ((String[][])obj)[0];
+            String[] itemIn = ((String[][])obj)[1];
+            for (String item: itemOut){
+                resultOut.add(toItemStack(item));
+            }
+            for (String item: itemIn){
+                resultIn.add(toItemStack(item));
+            }
+            result[0] = resultOut;
+            result[1] = resultIn;
+            return (HashSet<ItemStack>[])result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            severe("NBTUtil: Failed to serialize itemstack.");
+            return null ;
+        }
+
     }
 }
