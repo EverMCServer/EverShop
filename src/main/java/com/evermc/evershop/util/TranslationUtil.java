@@ -199,7 +199,7 @@ public class TranslationUtil {
     }
     
     public static BaseComponent tr(ItemStack is){
-        // TODO - item preview
+        
         TextComponent message = new TextComponent();
 
         message.setColor(ChatColor.YELLOW);
@@ -267,6 +267,7 @@ public class TranslationUtil {
             if (bm.getAuthor() != null) {
                 message.addExtra(" by " + bm.getAuthor());
             }
+            message.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new ComponentBuilder(bm.getPage(1)).create()));
         }
 
         if (is.hasItemMeta() && is.getItemMeta() instanceof FireworkMeta){

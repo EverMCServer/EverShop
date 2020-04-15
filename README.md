@@ -2,6 +2,11 @@
 
 开发中，因为SignShop的Bug过多而且架构问题太大无法修复，所以重新开发一个商店插件
 
+# TODO
+
+- [ ] 命令执行器
+- [ ] tab completer (brigadier)
+
 ## 目标
 
 - [ ] 完成所有SignShop具有的功能

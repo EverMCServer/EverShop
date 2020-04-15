@@ -58,6 +58,10 @@ public class InteractEvent implements Listener{
             return;
         }
         if (clicked.getState() instanceof Sign){
+            if (event.getMaterial().name().endsWith("_DYE")){
+                // if clicked with a dye, return
+                return;
+            }
             Sign sign = (Sign) clicked.getState();
             if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
                 ShopLogic.accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
