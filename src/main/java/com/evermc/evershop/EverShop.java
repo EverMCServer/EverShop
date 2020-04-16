@@ -1,6 +1,5 @@
 package com.evermc.evershop;
 
-import com.evermc.evershop.event.CommandEvent;
 import com.evermc.evershop.event.InteractEvent;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.DataLogic;
@@ -16,6 +15,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.evermc.evershop.util.LogUtil.info;
 import static com.evermc.evershop.util.LogUtil.severe;
+
+import com.evermc.evershop.command.EverShopCommand;
 
 public class EverShop extends JavaPlugin {
 
@@ -42,7 +43,7 @@ public class EverShop extends JavaPlugin {
         VaultHandler.setupPermissions();
 
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
-        Bukkit.getPluginCommand("evershop").setExecutor(new CommandEvent());
+        Bukkit.getPluginCommand("evershop").setExecutor(new EverShopCommand());
         if (!DataLogic.init(this)){
             severe("Fail to start DataLogic! Check your database config.");
             getServer().getPluginManager().disablePlugin(this);

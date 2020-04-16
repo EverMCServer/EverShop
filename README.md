@@ -5,7 +5,24 @@
 # TODO
 
 - [ ] 命令执行器
+  - [x] 框架
+  - [x] /es
+  - [x] /es advanced
+  - [ ] /es clear
+  - [x] /es help
+  - [x] /es info
+  - [ ] /es inspect
+  - [ ] /es list
+  - [ ] /es log
+  - [ ] /es reload
+  - [ ] /es set
+  - [ ] /es set permission
+  - [ ] /es set text
+  - [ ] /es set price
+  - [ ] /es set duration
+  - [ ] /es selection
 - [ ] tab completer (brigadier)
+  - [ ] 框架
 
 ## 目标
 

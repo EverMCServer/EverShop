@@ -13,7 +13,6 @@ import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
-import com.evermc.evershop.util.SerializableLocation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -68,42 +67,7 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             show_usage(sender);
             return true;
         } else {
-            if ("advanced".startsWith(args[0]) && sender.hasPermission("evershop.advanced")){
-                if (sender instanceof Player){
-                    if (PlayerLogic.isAdvanced((Player)sender)){
-                        PlayerLogic.setAdvanced((Player)sender, false);
-                        sender.sendMessage("Advanced mode: off");
-                    } else {
-                        PlayerLogic.setAdvanced((Player)sender, true);
-                        sender.sendMessage("Advanced mode: on");
-                    }
-                } else {
-                    sender.sendMessage("this command must be executed by players");
-                }
-                return true;
-
-            } else if ("help".startsWith(args[0])){
-                show_usage(sender);
-                return true;
-
-            } else if ("info".startsWith(args[0]) && sender.hasPermission("evershop.info")){
-                if (args.length == 1){
-                    if (sender instanceof Player){
-                        show_info((Player)sender);
-                    } else {
-                        sender.sendMessage("use '" + label + " " + args[0] + " [shopid]'");
-                    }
-                } else {
-                    try{
-                        int shopid = Integer.parseInt(args[1]);
-                        show_info(sender, shopid);
-                    } catch (Exception e){
-                        sender.sendMessage("Invalid shopid: " + args[1]);
-                    }
-                }
-                return true;
-
-            } else if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
+            if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
                 // TODO - inspect mode
 
             } else if ("list".startsWith(args[0]) && sender.hasPermission("evershop.list")){
@@ -284,46 +248,6 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void show_info(final Player player){
-        Block b = player.getTargetBlockExact(3);
-        if (b != null && b.getState() != null && b.getState() instanceof Sign){
-            Sign sign = (Sign)b.getState();
-            if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
-                final Location loc = b.getLocation();
-                Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
-                    final ShopInfo si = DataLogic.getShopInfo(loc);
-                    Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
-                            player.sendMessage("no permission");
-                            return;
-                        } else {
-                            show_info(player, si);
-                            return;
-                        }
-                    });
-                });
-                return;
-            }
-        }
-        player.sendMessage("please look at a actived shop sign");
-    }
-
-    private void show_info(final CommandSender player, final int shopid){
-        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
-            final ShopInfo si = DataLogic.getShopInfo(shopid);
-            Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
-                    player.sendMessage("no permission");
-                    return;
-                } else {
-                    show_info(player, si);
-                    return;
-                }
-            });
-        });
-        return;
-    }
-
     private void show_log(final Player player){
         Block b = player.getTargetBlockExact(3);
         if (b != null && b.getState() != null && b.getState() instanceof Sign){
@@ -381,23 +305,6 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             PlayerInfo pi = PlayerLogic.getPlayerInfo(re[i][0]);
             msg.add(" - " + pi==null?"Unknown":pi.getName() + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
         }
-        for (String a:msg)player.sendMessage(a);
-    }
-
-    private void show_info(final CommandSender player, final ShopInfo si){
-        // TODO - tellraw
-        if (si == null){
-            player.sendMessage("shop not found");
-            return;
-        }
-        ArrayList<String> msg = new ArrayList<String>();
-        msg.add("===== Shop #" + si.getId() + " Infomation =====");
-        msg.add("Owner: " + PlayerLogic.getPlayerName(si.getOwnerId()));
-        msg.add("Type: " + TransactionLogic.getName(si.getAction()));
-        msg.add("Location: " + SerializableLocation.toLocation(si.getWorldID(), si.getX(), si.getY(), si.getZ()));
-        msg.add("Create time: " + si.getEpochString());
-        msg.add("Containers: " + si.getTargetAll());
-        msg.add("Items: " + si.getItemAll());
         for (String a:msg)player.sendMessage(a);
     }
 

@@ -20,6 +20,7 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -187,6 +188,18 @@ public class TranslationUtil {
 
     public static BaseComponent tr(String str, Player p, Object...args){
         return tr(str, getLocale(p, true), args);
+    }
+
+    public static BaseComponent tr(String str){
+        return tr(str, "en_us");
+    }
+
+    public static BaseComponent tr(String str, CommandSender p, Object...args){
+        if (p instanceof Player){
+            return tr(str, (Player)p, args);
+        } else {
+            return tr(str, "en_us", args);
+        }
     }
 
     public static BaseComponent tr(String str, String lang, Object...args){

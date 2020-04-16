@@ -12,3 +12,7 @@ commands:
   evershop:
     description: 'evershop'
     aliases: [es]
+
+permissions:
+  evershop.use:
+    default: true
