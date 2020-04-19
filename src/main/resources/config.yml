@@ -20,6 +20,9 @@ evershop:
   # use this material to destroy shop signs in creative mode
   destroyMaterial: golden_axe
   
+  # the maximum number of chests/redstone components that a single shop can connect with
+  maxLinkBlocks: 100
+
   # Default language
   #   Shop items will *always* be displayed using the player's client language settings.
   #   Transaction messages will be displayed with the same language of client only if the language is supported. Or

@@ -26,6 +26,7 @@
 'You do not have permission to create a %1$s shop': '你没有权限创建%1$s商店'
 'redstone shops disabled': '红石开关商店牌子被服务器禁用了'
 'you have %1$s %2$s for %3$s!': '你以%3$s的单价%1$s%2$s!'
+'You have linked too many blocks': '你连接太多箱子了'
 'BUY_AS_USER': '购买了'
 'SELL_AS_USER': '出售了'
 'TRADE_AS_USER': '购买了'

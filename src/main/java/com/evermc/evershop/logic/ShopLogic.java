@@ -37,16 +37,11 @@ import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public class ShopLogic {
 
-    private static EverShop plugin;
+    private static EverShop plugin = null;
     
-    private static Material linkMaterial;
-    private static Material destroyMaterial;
-
-    static{
-        linkMaterial = null;
-        destroyMaterial = null;
-        plugin = null;
-    }
+    private static Material linkMaterial = null;
+    private static Material destroyMaterial = null;
+    private static int maxLinkBlocks = 0;
 
     private static Set<Location> pendingRemoveBlocks = new HashSet<Location>();
 
@@ -72,6 +67,7 @@ public class ShopLogic {
         plugin = _plugin;
         linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
+        maxLinkBlocks = plugin.getConfig().getInt("evershop.maxLinkBlocks");
     }
 
     public static Material getLinkMaterial(){
@@ -201,6 +197,10 @@ public class ShopLogic {
                     }
                     if (!p.hasPermission("evershop.multiworld") && !block.getLocation().getWorld().equals(selected_loc.getWorld())){
                         send("You cant make multi-world shops", p);
+                        return true;
+                    }
+                    if (player.getReg1().size() + player.getReg2().size() > maxLinkBlocks){
+                        send("You have linked too many blocks", p);
                         return true;
                     }
                 }
