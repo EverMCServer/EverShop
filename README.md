@@ -23,6 +23,8 @@
   - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
+- [ ] 移植fabric
+- [ ] shopinfo缓存及牌子特征标识（meta?）
 
 ## 目标
 

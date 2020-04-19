@@ -1,6 +1,5 @@
 package com.evermc.evershop.logic;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +23,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 
 public class DataLogic{
     
@@ -454,19 +452,6 @@ public class DataLogic{
         return result.toArray(new ShopInfo[result.size()]);
     }
 
-    public static byte[] toBlob(Object object){
-        try{
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            BukkitObjectOutputStream outputStream = new BukkitObjectOutputStream(out);
-            outputStream.writeObject(object);
-            byte [] bytes = out.toByteArray();
-            outputStream.close();
-            return bytes;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null ;
-        }
-    }
     public static void recordTransaction(int shopid, int playerid){
         int time = (int)(System.currentTimeMillis()/1000/60); //create 1 record every minute
         String query = "INSERT INTO `" + SQL.getPrefix() + "transaction` VALUES (null, '" + shopid + "', '" 
