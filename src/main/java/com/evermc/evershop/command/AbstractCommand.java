@@ -78,11 +78,16 @@ public abstract class AbstractCommand {
             return true;
         } else {
             // no sub-commands or no arguments provided
+            boolean ret = true;
             if (sender instanceof Player){
-                return this.executeAsPlayer((Player)sender, args);
+                ret = this.executeAsPlayer((Player)sender, args);
             } else {
-                return this.executeAs(sender, args);
+                ret = this.executeAs(sender, args);
             }
+            if (!ret){
+                this.help(sender, args);
+            }
+            return true;
         }
     }
 
