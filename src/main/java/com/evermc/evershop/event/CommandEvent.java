@@ -70,50 +70,6 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             if ("inspect".startsWith(args[0]) && sender.hasPermission("evershop.inspect")){
                 // TODO - inspect mode
 
-            } else if ("list".startsWith(args[0]) && sender.hasPermission("evershop.list")){
-                int page = 0;
-                String player = "";
-                if (args.length == 1){
-                    if (sender instanceof Player){
-                        player = ((Player)sender).getUniqueId().toString();
-                    } else {
-                        sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
-                    }
-                } else if (args.length == 2){
-                    if (Pattern.matches("\\d+", args[1])){
-                        if (sender instanceof Player){
-                            player = ((Player)sender).getUniqueId().toString();
-                            try{
-                                page = Integer.parseInt(args[1]);
-                            } catch (Exception e){}
-                        } else {
-                            sender.sendMessage("use '" + label + " " + args[0] + " [player]' instead");
-                        }
-                    } else {
-                        if (sender.hasPermission("evershop.list.others")){
-                            player = args[1];
-                        } else {
-                            show_usage(sender);
-                            return true;
-                        }
-                    }
-                } else {
-                    if (sender.hasPermission("evershop.list.others")){
-                        player = args[1];
-                    } else {
-                        show_usage(sender);
-                    }
-                    if (!Pattern.matches("\\d+", args[2])){
-                        show_usage(sender);
-                        return true;
-                    } else {
-                        try{
-                            page = Integer.parseInt(args[2]);
-                        } catch (Exception e){}
-                    }
-                }
-                show_list(sender, player, page);
-                return true;
             } else if ("log".startsWith(args[0]) && sender.hasPermission("evershop.info")){
                 if (args.length == 1){
                     if (sender instanceof Player){
@@ -306,54 +262,5 @@ public class CommandEvent implements CommandExecutor, TabCompleter {
             msg.add(" - " + pi==null?"Unknown":pi.getName() + " @ " + df.format(new Date(((long)re[i][1])*1000*60)) + " x" + re[i][2]);
         }
         for (String a:msg)player.sendMessage(a);
-    }
-
-    private void show_list(final CommandSender sender, final String player, int _page){
-        final PlayerInfo pi;
-        UUID uuid = null;
-        try{
-            uuid = UUID.fromString(player); 
-        } catch (IllegalArgumentException e){}
-        if (uuid == null){
-            pi = PlayerLogic.getPlayerInfo(player);
-            if (pi == null) {
-                sender.sendMessage("No player named " + player + " found!");
-                return;
-            }
-        } else {
-            pi = PlayerLogic.getPlayerInfo(uuid);
-            if (pi == null) {
-                sender.sendMessage("No uuid " + uuid + " found!");
-                return;
-            }
-        }
-        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), () -> {
-            int count = DataLogic.getShopListLength(pi);
-            if (count == 0){
-                Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                    sender.sendMessage("No shops found!");
-                });
-                return;
-            }
-            int page = _page;
-            if (_page*10 >= count) page = (count-1)/10;
-            ShopInfo[] sis = DataLogic.getShopList(pi.getId(), page);
-            final ArrayList<String> msg = new ArrayList<String>();
-            msg.add("===== " + pi.getName() + "'s shops =====");
-            msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
-            for (ShopInfo si : sis){
-                msg.add(" #" + si.getId() + "  " + TransactionLogic.getName(si.getAction()) + " shop, at "
-                     + DataLogic.getWorld(si.getWorldID()).getName() + ":" + si.getX() + "," + si.getY() + "," + si.getZ());
-            }
-            Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                for (String s:msg) sender.sendMessage(s);
-                for (ShopInfo si : sis){
-                    BlockState bs = DataLogic.getWorld(si.getWorldID()).getBlockAt(si.getX(), si.getY(), si.getZ()).getState();
-                    if (!(bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167)){
-                        DataLogic.removeShop(si.getId());
-                    }
-                }
-            });
-        });
     }
 }
