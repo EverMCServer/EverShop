@@ -122,6 +122,9 @@ public class NBTUtil {
     @SuppressWarnings("unchecked")
     public static HashSet<ItemStack>[] deserialize(byte[] data){
         HashSet<?>[] result = new HashSet<?>[2];
+        if (data == null){
+            return (HashSet<ItemStack>[]) result;
+        }
         HashSet<ItemStack> resultOut = new HashSet<ItemStack>();
         HashSet<ItemStack> resultIn = new HashSet<ItemStack>();
         try{

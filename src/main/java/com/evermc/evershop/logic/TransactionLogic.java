@@ -295,6 +295,7 @@ public enum TransactionLogic {
             ti.playerPayMoney();
             ti.shopGiveMoney();
             ti.toggleRS();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             send("you have %1$s %2$s for %3$s!", p, tr("TOGGLE_AS_USER", p), "", "$" + si.getPrice());
             break;
 

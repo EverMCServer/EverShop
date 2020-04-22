@@ -86,6 +86,9 @@ public class SerializableLocation implements Serializable{
     @SuppressWarnings("unchecked")
     public static HashSet<SerializableLocation>[] deserialize(byte[] data){
         HashSet<?>[] result = new HashSet<?>[2];
+        if (data == null) {
+            return (HashSet<SerializableLocation>[])result;
+        }
         HashSet<SerializableLocation> targetOut = new HashSet<SerializableLocation>();
         HashSet<SerializableLocation> targetIn = new HashSet<SerializableLocation>();
         try{
