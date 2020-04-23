@@ -8,46 +8,31 @@
   - [x] 框架
   - [x] /es
   - [x] /es advanced
-  - [ ] /es clear
+  - [x] /es clear
   - [x] /es help
   - [x] /es info
-  - [ ] /es inspect
-  - [ ] /es list
-  - [ ] /es log
+  - [x] /es inspect
+  - [x] /es list
+  - [x] /es log
   - [ ] /es reload
   - [x] /es set
   - [ ] /es set permission
   - [ ] /es set text
   - [ ] /es set price
   - [ ] /es set duration
+  - [ ] /es set slot
   - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
+- [ ] 其他功能
+  - [ ] slot/islot
+  - [ ] device/deviceOn/deviceOff
+  - [ ] donatehand
+  - [ ] dispose/高级dispose(带缓冲箱)
 - [ ] 移植fabric
 - [ ] shopinfo缓存及牌子特征标识（meta?）
-
-## 目标
-
-- [ ] 完成所有SignShop具有的功能
-  - [x] buy
-  - [x] sell
-  - [x] ibuy
-  - [x] isell
-  - [x] itrade
-  - [x] trade
-  - [x] toggle
-- [x] 使用MySQL/SQLite存储商店信息
-- [x] 更加容易输入的牌子格式
-- [x] 可以链接按钮
-- [ ] 可以设定开启时长
-- [x] 可以>2箱子的以物易物
-- [x] 可以（物+钱）易物
 - [ ] 收税。（最高税率应为10%， 因为钻石售价444， 收购价400）
 - [ ] hook wg， 防止链接他人箱子
-- [ ] 限制牌子加入限制玩家和用户组功能，改为命令实现
-- [x] 可以跨箱子购买物品（需要购买AB，箱子1有A, 箱子2有B，可以直接购买，signshop无法购买）
-- [x] 跨世界设置
-- [x] 集成物品名翻译功能
 
 ## 如果你想测试
 
@@ -87,6 +72,12 @@ device $100
 ```
 
 并通过指令设置开启时长
+
+```
+dispose
+```
+如果不链接箱子则是普通销毁牌子（同signshop）
+最多可链接一个箱子，销毁的东西自动进入箱子，如果箱子满了自动丢弃最早进入的物品，可防止手残
 
 ------
 

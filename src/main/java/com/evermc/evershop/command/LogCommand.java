@@ -37,7 +37,7 @@ public class LogCommand extends AbstractCommand {
     }
     public boolean executeAs(CommandSender sender, String[] args){
         if (args.length == 0){
-            sender.sendMessage("use '" + this.getFullCommand() + " [shopid]'");
+            sender.sendMessage("use '" + this.getFullCommand() + "<shopid>'");
         } else {
             try{
                 int shopid = Integer.parseInt(args[0]);

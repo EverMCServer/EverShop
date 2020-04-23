@@ -46,7 +46,7 @@ public class ListCommand extends AbstractCommand {
                 return false;
             }
             try{
-                page = Integer.parseInt(args[2]);
+                page = Integer.parseInt(args[1]);
             } catch (Exception e){
                 return false;
             }
@@ -55,6 +55,35 @@ public class ListCommand extends AbstractCommand {
         return true;
     }
     public boolean executeAs(CommandSender sender, String[] args){
+        String playerName = "";
+        int page = 0;
+        if (args.length == 0){
+            sender.sendMessage("use '" + this.getFullCommand() + "<name/uuid> [page]'");
+            return true;
+        } else if (args.length == 1){
+            if (Pattern.matches("\\d+", args[0])){
+                sender.sendMessage("use '" + this.getFullCommand() + "<name/uuid> [page]'");
+                return true;
+            } else {
+                if (sender.hasPermission("evershop.list.others")){
+                    playerName = args[0];
+                } else {
+                    return false;
+                } 
+            }
+         } else {
+            if (sender.hasPermission("evershop.list.others")){
+                playerName = args[0];
+            } else {
+                return false;
+            }
+            try{
+                page = Integer.parseInt(args[1]);
+            } catch (Exception e){
+                return false;
+            }
+        }
+        show_list(sender, playerName, page);
         return true;
     }
     

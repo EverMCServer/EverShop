@@ -38,7 +38,7 @@ public class InfoCommand extends AbstractCommand {
     }
     public boolean executeAs(CommandSender sender, String[] args){
         if (args == null || args.length == 0){
-            sender.spigot().sendMessage(tr("use '" + this.getFullCommand() + "[shopid]'"));
+            sender.spigot().sendMessage(tr("use '" + this.getFullCommand() + "<shopid>'"));
         } else {
             try{
                 int shopid = Integer.parseInt(args[0]);
