@@ -15,7 +15,7 @@
   - [ ] /es list
   - [ ] /es log
   - [ ] /es reload
-  - [ ] /es set
+  - [x] /es set
   - [ ] /es set permission
   - [ ] /es set text
   - [ ] /es set price
@@ -109,8 +109,8 @@ device $100
  /es info shopid 查看指定商店信息(evershop.info/evershop.info.others)
  /es log [shopid] 查看购买记录(evershop.info/evershop.info.others)
  /es set [shopid] permission type [none/blacklist/whitelist] 设置使用权限类型(evershop.set.perm/evershop.admin.perm)
- /es set [shopid] permission allow u:<username>/g:<groupname> 设置白名单用户/组(evershop.set.perm/evershop.admin.perm)
- /es set [shopid] permission deny u:<username>/g:<groupname> 设置黑名单用户/组(evershop.set.perm/evershop.admin.perm)
+ /es set [shopid] permission add u:<username>/g:<groupname> 添加用户/组到名单(evershop.set.perm/evershop.admin.perm)
+ /es set [shopid] permission remove u:<username>/g:<groupname> 移除用户/组(evershop.set.perm/evershop.admin.perm)
  /es set [shopid] text [1-4] [text]  设置牌子显示内容(evershop.set.text/evershop.admin.text) {注意检测第一行内容}
  /es set [shopid] price [price]  设置商店价格(evershop.set.price/evershop.admin.price) {注意修改牌子内容}
  /es set [shopid] time [time]  设置红石开启时间，只能用于device牌子(evershop.set.time/evershop.admin.time)

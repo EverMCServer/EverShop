@@ -19,7 +19,7 @@ import com.evermc.evershop.structure.ShopInfo;
 
 public class ListCommand extends AbstractCommand {
     public ListCommand() {
-        super("list", "evershop.list", "list shops");
+        super("list", "evershop.list", "list shops", "[player] [page]");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         int page = 0;

@@ -40,10 +40,10 @@ public class LogCommand extends AbstractCommand {
             sender.sendMessage("use '" + this.getFullCommand() + " [shopid]'");
         } else {
             try{
-                int shopid = Integer.parseInt(args[1]);
+                int shopid = Integer.parseInt(args[0]);
                 show_log(sender, shopid);
             } catch (Exception e){
-                sender.sendMessage("Invalid shopid: " + args[1]);
+                sender.sendMessage("Invalid shopid: " + args[0]);
             } 
         }
         return true;

@@ -20,6 +20,7 @@ public class EverShopCommand extends AbstractCommand implements CommandExecutor,
         this.add(new InspectCommand());
         this.add(new ListCommand());
         this.add(new LogCommand());
+        this.add(new SetCommand());
     }
     
     @Override
@@ -32,8 +33,10 @@ public class EverShopCommand extends AbstractCommand implements CommandExecutor,
             }
         }
         String[] args = alargs.toArray(new String[alargs.size()]);
-        if (args.length == 0 || !this.execute(sender, args)){
-            this.help(sender, args);
+        String argstring = String.join(" ",args);
+        argstring = "/" + label + " " + argstring;
+        if (args.length == 0 || !this.execute(sender, args, argstring)){
+            this.help(sender, args, argstring);
         }
         return true;
     }

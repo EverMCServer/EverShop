@@ -20,7 +20,7 @@ import com.evermc.evershop.util.SerializableLocation;
 
 public class InfoCommand extends AbstractCommand {
     public InfoCommand() {
-        super("info", "evershop.info", "view shop info");
+        super("info", "evershop.info", "view shop info", "[shopid]");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         if (args == null || args.length == 0){

@@ -12,11 +12,19 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public abstract class AbstractCommand {
-    private ArrayList<AbstractCommand> children = new ArrayList<AbstractCommand>();
-    private String permission;
-    private String usage;
-    private String name;
-    private String[] path;
+    protected ArrayList<AbstractCommand> children = new ArrayList<AbstractCommand>();
+    protected String permission;
+    protected String usage;
+    protected String name;
+    protected String parameters;
+    protected String[] path;
+
+    public AbstractCommand(String name, String permission, String usage, String parameters) {
+        this.name = name;
+        this.permission = permission;
+        this.usage = usage;
+        this.parameters = parameters;
+    }
 
     public AbstractCommand(String name, String permission, String usage) {
         this.name = name;
@@ -47,6 +55,10 @@ public abstract class AbstractCommand {
         return this.path;
     }
 
+    public String getParameters(){
+        return this.parameters;
+    }
+
     public String getFullCommand(){
         String path = "/";
         for (String str : this.path) {
@@ -59,7 +71,7 @@ public abstract class AbstractCommand {
         this.path = path;
     }
 
-    public boolean execute(CommandSender sender, String[] args){
+    public boolean execute(CommandSender sender, String[] args, String cmd){
         if (!sender.hasPermission(this.permission)){
             return false;
         }
@@ -68,16 +80,16 @@ public abstract class AbstractCommand {
             String[] arg_new = Arrays.copyOfRange(args, 1, args.length);
             for (AbstractCommand sub : this.children){
                 if (sub.getName().startsWith(args[0])){
-                    if (sub.execute(sender, arg_new)){
+                    if (sub.execute(sender, arg_new, cmd)){
                         return true;
                     }
                 }
             }
             // not match any of the sub-commands
-            this.help(sender, args);
+            this.help(sender, args, cmd);
             return true;
-        } else {
-            // no sub-commands or no arguments provided
+        } else if (this.children.size() == 0){
+            // no sub-commands
             boolean ret = true;
             if (sender instanceof Player){
                 ret = this.executeAsPlayer((Player)sender, args);
@@ -85,20 +97,20 @@ public abstract class AbstractCommand {
                 ret = this.executeAs(sender, args);
             }
             if (!ret){
-                this.help(sender, args);
+                this.help(sender, args, cmd);
             }
+            return true;
+        } else {
+            this.help(sender, cmd);
             return true;
         }
     }
 
-    public void help(CommandSender sender, String[] args) {
+    public void help(CommandSender sender, String[] args, String cmd) {
         if (args != null && args.length > 0){
             ComponentBuilder msgBuilder = new ComponentBuilder();
             msgBuilder.append("Unknown command: ").color(ChatColor.DARK_RED).bold(true)
-                      .append(getFullCommand()).color(ChatColor.DARK_RED).bold(true);
-            for (String str : args) {
-                msgBuilder.append(str + " ").color(ChatColor.DARK_RED).bold(true);
-            }
+                      .append(cmd).color(ChatColor.DARK_RED).bold(true);
             sender.spigot().sendMessage(msgBuilder.create());
         }
         help(sender);
@@ -111,13 +123,53 @@ public abstract class AbstractCommand {
                   .append(" -----\n").bold(false).color(ChatColor.WHITE)
 
                   .append(tr("Command: ", sender)).color(ChatColor.GRAY)
-                  .append(getFullCommand()).color(ChatColor.DARK_AQUA)
-                  .append("- ").color(ChatColor.GRAY)
+                  .append(getFullCommand()).color(ChatColor.DARK_AQUA);
+        if (getParameters() != null) {
+            msgBuilder.append(getParameters() + " ").color(ChatColor.LIGHT_PURPLE);
+        }
+        msgBuilder.append("- ").color(ChatColor.GRAY)
                   .append(tr(this.usage, sender)).append("\n").color(ChatColor.YELLOW);
 
         for (AbstractCommand command: this.children){
-            msgBuilder.append(getFullCommand() + command.getName()).color(ChatColor.DARK_AQUA)
-                      .append(" - ").color(ChatColor.GRAY)
+            msgBuilder.append(getFullCommand()).color(ChatColor.DARK_AQUA);
+            if (getParameters() != null) {
+                msgBuilder.append(getParameters() + " ").color(ChatColor.LIGHT_PURPLE);
+            } 
+            msgBuilder.append(command.getName()).color(ChatColor.DARK_AQUA);
+            if (command.getParameters() != null) {
+                msgBuilder.append(" " + command.getParameters()).color(ChatColor.LIGHT_PURPLE);
+            }
+            msgBuilder.append(" - ").color(ChatColor.GRAY)
+                      .append(tr(command.getUsage(), sender)).color(ChatColor.WHITE).append("\n");
+        }
+        sender.spigot().sendMessage(msgBuilder.create());
+    }
+
+    public void help(CommandSender sender, String cmd) {
+        cmd += " ";
+        ComponentBuilder msgBuilder = new ComponentBuilder();
+        msgBuilder.append("----- ").color(ChatColor.WHITE)
+                  .append(tr("EverShop Help", sender)).bold(true).color(ChatColor.GREEN)
+                  .append(" -----\n").bold(false).color(ChatColor.WHITE)
+
+                  .append(tr("Command: ", sender)).color(ChatColor.GRAY)
+                  .append(cmd).color(ChatColor.DARK_AQUA);
+        if (getParameters() != null) {
+            msgBuilder.append(getParameters() + " ").color(ChatColor.LIGHT_PURPLE);
+        }
+        msgBuilder.append("- ").color(ChatColor.GRAY)
+                  .append(tr(this.usage, sender)).append("\n").color(ChatColor.YELLOW);
+
+        for (AbstractCommand command: this.children){
+            msgBuilder.append(cmd).color(ChatColor.DARK_AQUA);
+            if (getParameters() != null) {
+                msgBuilder.append(getParameters() + " ").color(ChatColor.LIGHT_PURPLE);
+            } 
+            msgBuilder.append(command.getName()).color(ChatColor.DARK_AQUA);
+            if (command.getParameters() != null) {
+                msgBuilder.append(" " + command.getParameters()).color(ChatColor.LIGHT_PURPLE);
+            }
+            msgBuilder.append(" - ").color(ChatColor.GRAY)
                       .append(tr(command.getUsage(), sender)).color(ChatColor.WHITE).append("\n");
         }
         sender.spigot().sendMessage(msgBuilder.create());
