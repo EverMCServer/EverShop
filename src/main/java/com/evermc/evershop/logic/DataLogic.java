@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.LiteDataSource;
@@ -15,7 +14,6 @@ import com.evermc.evershop.database.MySQLDataSource;
 import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
-import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.NBTUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
@@ -25,6 +23,10 @@ import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+
+import static com.evermc.evershop.util.LogUtil.info;
+import static com.evermc.evershop.util.LogUtil.warn;
+import static com.evermc.evershop.util.LogUtil.severe;
 
 public class DataLogic{
     
@@ -46,14 +48,14 @@ public class DataLogic{
             SQL = new MySQLDataSource(plugin.getConfig().getConfigurationSection("evershop.database.mysql"));
             if (SQL == null || !SQL.testConnection()) return false;
             setupDB_MySQL();
-            LogUtil.log(Level.INFO, "Connected to MySQL dataSource");
+            info("Connected to MySQL dataSource");
         } else if ("sqlite".equals(sqltype)){
             SQL = new LiteDataSource(plugin.getConfig().getConfigurationSection("evershop.database.sqlite"));  
             if (SQL == null || !SQL.testConnection()) return false;
             setupDB_SQLite();
-            LogUtil.log(Level.INFO, "Connected to SQLite dataSource");
+            info("Connected to SQLite dataSource");
         } else {
-            LogUtil.log(Level.SEVERE, "Unrecognized database type: " + sqltype + ", should be one of the following: mysql, sqlite");
+            severe("Unrecognized database type: " + sqltype + ", should be one of the following: mysql, sqlite");
             return false;
         }
 
@@ -80,10 +82,10 @@ public class DataLogic{
               "action_id int(10) NOT NULL," +
               "player_id int(10) NOT NULL," +
               "world_id int(10) NOT NULL," +
-              "x int(11) NOT NULL," +
-              "y int(11) NOT NULL," +
-              "z int(11) NOT NULL," +
-              "price int(11) NOT NULL," +
+              "x int(10) NOT NULL," +
+              "y int(10) NOT NULL," +
+              "z int(10) NOT NULL," +
+              "price int(10) NOT NULL," +
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
               "extra varchar(1024) NOT NULL," +
@@ -93,7 +95,7 @@ public class DataLogic{
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "player` (" +
-              "id int(11) NOT NULL AUTO_INCREMENT," +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
               "name varchar(16) NOT NULL," +
               "uuid varchar(36) NOT NULL," +
               "advanced tinyint(1) NOT NULL DEFAULT '0'," +
@@ -103,29 +105,29 @@ public class DataLogic{
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "world` (" +
-              "id int(11) NOT NULL AUTO_INCREMENT," +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
               "uuid varchar(36) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY uuid (uuid)" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "target` (" +
-              "id int(10) UNSIGNED NOT NULL AUTO_INCREMENT," +
-              "world_id int(10) UNSIGNED NOT NULL," +
-              "x int(11) NOT NULL," +
-              "y int(11) NOT NULL," +
-              "z int(11) NOT NULL," +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
+              "world_id int(10) NOT NULL," +
+              "x int(10) NOT NULL," +
+              "y int(10) NOT NULL," +
+              "z int(10) NOT NULL," +
               "shops varchar(1024) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY world_id (world_id,x,y,z)" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "transaction` (" +
-              "id int(10) UNSIGNED NOT NULL AUTO_INCREMENT," +
-              "shop_id int(10) UNSIGNED NOT NULL," +
-              "player_id int(10) UNSIGNED NOT NULL," +
-              "time int(10) UNSIGNED NOT NULL," +
-              "count int(10) UNSIGNED NOT NULL," +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
+              "shop_id int(10) NOT NULL," +
+              "player_id int(10) NOT NULL," +
+              "time int(10) NOT NULL," +
+              "count int(10) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY `uni` (shop_id,player_id,time)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8;"
@@ -195,7 +197,7 @@ public class DataLogic{
         if (worldList.containsKey(uid)){
             return worldList.get(uid);
         } else {
-            LogUtil.log(Level.SEVERE, "Reload worlds.");
+            severe("Reload worlds.");
             DataLogic.initWorld();
             return worldList.get(uid);
         }
@@ -223,7 +225,7 @@ public class DataLogic{
         String query = SQL.INSERT_IGNORE() + "INTO `" + SQL.getPrefix() + "world` (uuid) VALUES ";
         
         if (Bukkit.getWorlds() == null){
-            LogUtil.log(Level.SEVERE, "Cannot get worlds.");
+            severe("Cannot get worlds.");
             return false;
         }
 
@@ -241,7 +243,7 @@ public class DataLogic{
         List<Object[]> result = SQL.query(query, 2);
         
         if (result == null){
-            LogUtil.log(Level.SEVERE, "Error in initWorld.");
+            severe("Error in initWorld.");
             return false;
         }
         
@@ -249,7 +251,7 @@ public class DataLogic{
             worldList.put(UUID.fromString((String)o[1]), (Integer)o[0]);
         }
 
-        LogUtil.log(Level.INFO, "Load " + worldList.size() + " worlds.");
+        info("Load " + worldList.size() + " worlds.");
 
         return true;
     }
@@ -267,11 +269,12 @@ public class DataLogic{
         for (Object[] k : ret){
             int shopid = SQL.getInt(k[0]);
             Location loc = SerializableLocation.toLocation(SQL.getInt(k[1]), SQL.getInt(k[2]), SQL.getInt(k[3]), SQL.getInt(k[4]));
-            if (ShopLogic.isShopSign(loc.getBlock())) {
+            if (ShopLogic.isShopSign(loc.getBlock(), false)) {
                 Sign sign = (Sign)loc.getBlock().getState();
                 sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), shopid));
             } else {
                 removeShop(loc);
+                warn("Shop at " + SerializableLocation.toString(loc) + " is unavailable, remove.");
             }
         }
         return true;
@@ -384,7 +387,7 @@ public class DataLogic{
             return 0;
         }
         int r = SQL.getInt(ret[0]);
-        if (r == 0)LogUtil.log(Level.SEVERE, "getShopOwner(" + loc + ")");
+        if (r == 0)severe("getShopOwner(" + loc + ")");
         return r;
     }
 
@@ -425,7 +428,7 @@ public class DataLogic{
         for (Object[] k : ret){
             if (k[0] instanceof Integer) result.add((int)k[0]);
             else if (k[0] instanceof Long) result.add((int)(long)k[0]);
-            else LogUtil.log(Level.SEVERE, "getShopOwner(): retval="+k[0]);
+            else severe("getShopOwner(): retval="+k[0]);
         }
         if (result.size() > 0){
             int[] retval = new int[result.size()];
@@ -459,7 +462,7 @@ public class DataLogic{
         Object[] ret = SQL.queryFirst(query, 1);
         if (ret[0] instanceof Integer) return (int)ret[0];
         else if (ret[0] instanceof Long) return (int)(long)ret[0];
-        LogUtil.log(Level.SEVERE, "getShopListLength(" + pi.getName()+ "): retval="+ret[0]);
+        severe("getShopListLength(" + pi.getName()+ "): retval="+ret[0]);
         return 0;
     }
 

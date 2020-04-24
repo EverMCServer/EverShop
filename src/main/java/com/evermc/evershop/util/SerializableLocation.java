@@ -53,9 +53,12 @@ public class SerializableLocation implements Serializable{
     }
 
     public String toString(){
-        return "SeriLoc{world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z;
+        return "SeriLoc{world=" + this.world + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + "}";
     }
 
+    public static String toString(Location loc) {
+        return "(" + loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ")"; 
+    }
     
     public static byte[] serialize(Collection<SerializableLocation> targetOut, Collection<SerializableLocation> targetIn){
         SerializableLocation[][] result = new SerializableLocation[2][];

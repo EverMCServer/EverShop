@@ -107,7 +107,7 @@ public class PlayerLogic {
             return player;
         } else {
             PlayerInfo pi = fetchPlayerSync(p);
-            LogUtil.log(Level.WARNING, "Add new Player: [" + p.getUniqueId() + " | " + p.getName() + "], PlayerInfo: " + pi);
+            LogUtil.log(Level.WARNING, "Add new Player: [" + p.getUniqueId() + " | " + p.getName() + " | ID=" + pi.getId() + "]");
             return pi;
         }
 

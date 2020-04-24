@@ -388,6 +388,15 @@ public class ShopLogic {
             return;
         }
         pendingRemoveBlocks.add(loc);
+        
+        Location[] signs = ShopLogic.getAttachedSign(loc.getBlock());
+        for (Location loca : signs) {
+            if (ShopLogic.isShopSign(loca.getBlock())) {
+                send("you cannot break this block because there are shops attached on it", p);
+                pendingRemoveBlocks.remove(loca);
+                return;
+            }
+        }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             int pl = DataLogic.getShopOwner(loc);
             if (pl == 0){
@@ -429,13 +438,14 @@ public class ShopLogic {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             // first, check attached blocks
-            int[] sis = DataLogic.getShopOwner(locs);
-            if (sis != null){
-                Bukkit.getScheduler().runTask(plugin, ()->{
-                    send("you cannot break this block because there are shops attached on it", p);
-                    pendingRemoveBlocks.remove(loc);
-                });
-                return;
+            for (Location loca : locs) {
+                if (ShopLogic.isShopSign(loca.getBlock())) {
+                    Bukkit.getScheduler().runTask(plugin, ()->{
+                        send("you cannot break this block because there are shops attached on it", p);
+                        pendingRemoveBlocks.remove(loca);
+                    });
+                    return;
+                }
             }
             if (blocs != null){
                 for (Location loca : blocs){
@@ -532,8 +542,13 @@ public class ShopLogic {
     }
 
     public static boolean isShopSign(Block b) {
+        return isShopSign(b, true);
+    }
+
+    public static boolean isShopSign(Block b, boolean checkmetadata) {
         if (b != null && b.getState() instanceof Sign) {
             Sign sign = (Sign)b.getState();
+            if (checkmetadata && !sign.hasMetadata("shopid")) return false;
             return sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167 && (int)sign.getLine(0).charAt(2) == 167;
         }
         return false;
