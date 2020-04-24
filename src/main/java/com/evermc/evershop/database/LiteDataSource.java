@@ -27,4 +27,8 @@ public class LiteDataSource extends SQLDataSource {
     public String CONCAT(String s1, String s2){
         return s1 + " || " + s2;
     }
+
+    public int getInt(Object k){
+        return (int)k;
+    }
 }

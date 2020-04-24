@@ -25,6 +25,7 @@ public abstract class SQLDataSource{
     public abstract String INSERT_IGNORE();
     public abstract String ON_DUPLICATE(String col);
     public abstract String CONCAT(String s1, String s2);
+    public abstract int getInt(Object k);
     
 
     public Connection getConnection() {

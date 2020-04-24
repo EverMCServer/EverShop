@@ -51,4 +51,8 @@ public class MySQLDataSource extends SQLDataSource {
     public String CONCAT(String s1, String s2){
         return "CONCAT(" + s1 + ", " + s2 + ")";
     }
+    
+    public int getInt(Object k){
+        return (int)(long)k;
+    }
 }
