@@ -20,7 +20,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Switch;
@@ -471,8 +470,8 @@ public class ShopLogic {
                     int count = 0;
                     int tcount = 0;
                     for (ShopInfo sii : si){
-                        BlockState bs = DataLogic.getWorld(sii.getWorldID()).getBlockAt(sii.getX(), sii.getY(), sii.getZ()).getState();
-                        if (bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167){
+                        Block b = DataLogic.getWorld(sii.getWorldID()).getBlockAt(sii.getX(), sii.getY(), sii.getZ());
+                        if (ShopLogic.isShopSign(b)){
                             if (sii.getOwnerId() == PlayerLogic.getPlayerId(p)){
                                 loc_str += "(" + sii.getX() + "," + sii.getY() + "," + sii.getZ() + "), ";
                             }else{
@@ -532,4 +531,11 @@ public class ShopLogic {
         return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
     }
 
+    public static boolean isShopSign(Block b) {
+        if (b != null && b.getState() instanceof Sign) {
+            Sign sign = (Sign)b.getState();
+            return sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167 && (int)sign.getLine(0).charAt(2) == 167;
+        }
+        return false;
+    }
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 import com.evermc.evershop.logic.DataLogic;
+import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.util.NBTUtil;
 import com.evermc.evershop.util.SerializableLocation;
@@ -122,13 +123,12 @@ public class ShopInfo {
 
     public void setSignState(boolean avail){
         Location loc = SerializableLocation.toLocation(this.world_id, this.x, this.y, this.z);
-        Sign sign = (Sign)loc.getBlock().getState();
-        String lin = sign.getLine(0);
-        if (lin.charAt(0) != 167 || lin.charAt(2) != 167){
+        if (ShopLogic.isShopSign(loc.getBlock())){
             severe("setSignState(): Unrecognized shop: " + this);
             return;
         }
-        StringBuilder strBuilder = new StringBuilder(lin);
+        Sign sign = (Sign)loc.getBlock().getState();
+        StringBuilder strBuilder = new StringBuilder(sign.getLine(0));
         if (avail){
             strBuilder.setCharAt(1, ChatColor.BLUE.getChar());
         }else{

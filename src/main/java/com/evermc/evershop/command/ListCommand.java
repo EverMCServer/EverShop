@@ -1,8 +1,7 @@
 package com.evermc.evershop.command;
 
 import org.bukkit.Bukkit;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,6 +12,7 @@ import java.util.regex.Pattern;
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
@@ -127,8 +127,8 @@ public class ListCommand extends AbstractCommand {
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 for (String s:msg) sender.sendMessage(s);
                 for (ShopInfo si : sis){
-                    BlockState bs = DataLogic.getWorld(si.getWorldID()).getBlockAt(si.getX(), si.getY(), si.getZ()).getState();
-                    if (!(bs instanceof Sign && ((Sign)bs).getLine(0).length() > 0 && (int)((Sign)bs).getLine(0).charAt(0) == 167)){
+                    Block b = DataLogic.getWorld(si.getWorldID()).getBlockAt(si.getX(), si.getY(), si.getZ());
+                    if (!ShopLogic.isShopSign(b)){
                         DataLogic.removeShop(si.getId());
                     }
                 }

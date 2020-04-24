@@ -62,8 +62,7 @@ public class InteractEvent implements Listener{
                 // if clicked with a dye, return
                 return;
             }
-            Sign sign = (Sign) clicked.getState();
-            if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
+            if (ShopLogic.isShopSign(clicked)) {
                 ShopLogic.accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
                 // if clicked on formatted signs, no need to register, so return
                 return;
@@ -88,7 +87,7 @@ public class InteractEvent implements Listener{
             event.setCancelled(true);
             return;
         }
-        if (bs instanceof Sign && ((Sign)event.getBlock().getState()).getLine(0).length() > 0 && (int)((Sign)event.getBlock().getState()).getLine(0).charAt(0) == 167){
+        if (ShopLogic.isShopSign(b)){
             // try break an active shop, check it
             event.setCancelled(true);
             if (event.getPlayer().getGameMode() == GameMode.SURVIVAL || event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())

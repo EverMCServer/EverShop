@@ -22,7 +22,9 @@ import com.evermc.evershop.util.SerializableLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class DataLogic{
     
@@ -55,7 +57,9 @@ public class DataLogic{
             return false;
         }
 
-        return initWorld();
+        if (!initWorld()) return false;
+        if (!initShops()) return false;
+        return true;
     }
 
     public static SQLDataSource getSQL(){
@@ -212,7 +216,7 @@ public class DataLogic{
         return Bukkit.getWorld(uid);
     }
 
-    public static boolean initWorld(){
+    private static boolean initWorld(){
         
         worldList = new HashMap<UUID, Integer>();
 
@@ -247,6 +251,29 @@ public class DataLogic{
 
         LogUtil.log(Level.INFO, "Load " + worldList.size() + " worlds.");
 
+        return true;
+    }
+
+    private static boolean initShops() {
+        String query = "SELECT id,world_id,x,y,z FROM `" + SQL.getPrefix() + "shop`";
+
+        List<Object[]> ret = SQL.query(query, 5);
+        if (ret == null) {
+            return false;
+        }
+        if (ret.size() == 0){
+            return true;
+        }
+        for (Object[] k : ret){
+            int shopid = SQL.getInt(k[0]);
+            Location loc = SerializableLocation.toLocation(SQL.getInt(k[1]), SQL.getInt(k[2]), SQL.getInt(k[3]), SQL.getInt(k[4]));
+            if (ShopLogic.isShopSign(loc.getBlock())) {
+                Sign sign = (Sign)loc.getBlock().getState();
+                sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), shopid));
+            } else {
+                removeShop(loc);
+            }
+        }
         return true;
     }
 

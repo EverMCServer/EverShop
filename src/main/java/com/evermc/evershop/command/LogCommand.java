@@ -2,13 +2,13 @@ package com.evermc.evershop.command;
 
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -50,24 +50,21 @@ public class LogCommand extends AbstractCommand {
     }
     private void show_log(final Player player){
         Block b = player.getTargetBlockExact(3);
-        if (b != null && b.getState() != null && b.getState() instanceof Sign){
-            Sign sign = (Sign)b.getState();
-            if (sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167){
-                final Location loc = b.getLocation();
-                Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
-                    final ShopInfo si = DataLogic.getShopInfo(loc);
-                    Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                        if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
-                            player.sendMessage("no permission");
-                            return;
-                        } else {
-                            show_log(player, si);
-                            return;
-                        }
-                    });
+        if (ShopLogic.isShopSign(b)) {
+            final Location loc = b.getLocation();
+            Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
+                final ShopInfo si = DataLogic.getShopInfo(loc);
+                Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                    if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
+                        player.sendMessage("no permission");
+                        return;
+                    } else {
+                        show_log(player, si);
+                        return;
+                    }
                 });
-                return;
-            }
+            });
+            return;
         }
         player.sendMessage("please look at a actived shop sign");
     }
