@@ -292,8 +292,8 @@ public class DataLogic{
 
     public static void saveShop(final ShopInfo shop, final Consumer<Integer> afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES ('" + (shop.getId() == 0?"null":shop.getId()) 
-                + "', '" + shop.getEpoch() + "', '" + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() 
+            String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (" + (shop.getId() == 0?"null":("'"+shop.getId()+"'")) 
+                + ", '" + shop.getEpoch() + "', '" + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() 
                 + "', '" + shop.getX() + "', '" + shop.getY() + "', '" + shop.getZ() + "', '" + shop.getPrice()+ "', ?, ?, '" 
                 + shop.getExtra()+ "')";
             byte[] targets = SerializableLocation.serialize(shop.getTargetOut(), shop.getTargetIn());
