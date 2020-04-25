@@ -11,6 +11,7 @@ import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.RedstoneUtil;
+import com.evermc.evershop.util.SerializableLocation;
 import com.evermc.evershop.util.TranslationUtil;
 
 import org.bukkit.Bukkit;
@@ -484,7 +485,7 @@ public class ShopLogic {
                         Block b = DataLogic.getWorld(sii.getWorldID()).getBlockAt(sii.getX(), sii.getY(), sii.getZ());
                         if (ShopLogic.isShopSign(b)){
                             if (sii.getOwnerId() == PlayerLogic.getPlayerId(p)){
-                                loc_str += "(" + sii.getX() + "," + sii.getY() + "," + sii.getZ() + "), ";
+                                loc_str += SerializableLocation.toString(b.getLocation()) + ", ";
                             }else{
                                 count++;
                             }
@@ -494,9 +495,11 @@ public class ShopLogic {
                             DataLogic.removeShop(sii.getId());
                         }
                     }
-                    BaseComponent other_str = null;
+                    BaseComponent other_str;
                     if (count > 0){
                         other_str = tr("%1$s shops of other player", p, count);
+                    } else {
+                        other_str = new TextComponent();
                     }
                     if (loc_str.length() > 2) loc_str = loc_str.substring(0, loc_str.length() - 2);
                     if (tcount == 0){
