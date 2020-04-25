@@ -16,7 +16,7 @@
   - [x] /es log
   - [ ] /es reload
   - [x] /es set
-  - [ ] /es set permission
+  - [x] /es set permission
   - [ ] /es set text
   - [ ] /es set price
   - [ ] /es set duration

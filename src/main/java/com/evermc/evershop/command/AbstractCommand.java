@@ -131,6 +131,9 @@ public abstract class AbstractCommand {
                   .append(tr(this.usage, sender)).append("\n").color(ChatColor.YELLOW);
 
         for (AbstractCommand command: this.children){
+            if (!sender.hasPermission(command.permission)) {
+                continue;
+            }
             msgBuilder.append(getFullCommand()).color(ChatColor.DARK_AQUA);
             if (getParameters() != null) {
                 msgBuilder.append(getParameters() + " ").color(ChatColor.LIGHT_PURPLE);
