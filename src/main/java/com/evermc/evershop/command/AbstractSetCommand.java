@@ -3,6 +3,10 @@ package com.evermc.evershop.command;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import com.evermc.evershop.logic.ShopLogic;
+
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -68,14 +72,30 @@ public abstract class AbstractSetCommand extends AbstractCommand {
             return true;
         } else if (this.children.size() == 0) {
             // no sub-commands 
-            boolean ret = true;
             if (sender instanceof Player){
-                ret = this.executeAsPlayer((Player)sender, args, shopid);
+                Player player = (Player)sender;
+                if (shopid == 0) {
+                    Block b = player.getTargetBlockExact(3);
+                    if (ShopLogic.isShopSign(b)) {
+                        shopid = ShopLogic.getShopId((Sign)b.getState());
+                        if (shopid == 0) {
+                            if (!this.executeAsPlayer(player, args, shopid)){
+                                this.help(sender, args, cmd);
+                            }
+                            return true;
+                        }
+                    }
+                    player.sendMessage("please look at a actived shop sign");
+                    return true;
+                } else {
+                    if (!this.executeAsPlayer(player, args, shopid)){
+                        this.help(sender, args, cmd);
+                    }
+                }
             } else {
-                ret = this.executeAs(sender, args, shopid);
-            }
-            if (!ret){
-                this.help(sender, args, cmd);
+                if (!this.executeAs(sender, args, shopid)){
+                    this.help(sender, args, cmd);
+                }
             }
             return true;
         } else {

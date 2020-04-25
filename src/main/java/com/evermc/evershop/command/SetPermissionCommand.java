@@ -16,6 +16,7 @@ public class SetPermissionCommand extends AbstractSetCommand {
             this.add(new SetPermissionTypeCommand());
             this.add(new SetPermissionAddCommand());
             this.add(new SetPermissionRemoveCommand());
+            this.add(new SetPermissionShowCommand());
         }, 1);
     }
 
@@ -61,6 +62,19 @@ class SetPermissionRemoveCommand extends AbstractSetCommand{
     
     public SetPermissionRemoveCommand() {
         super("remove", "evershop.set.perm", "remove user/group from list", "u:<username>/g:<groupname>");
+    }
+
+    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
+        return true;
+    }
+    public boolean executeAs(CommandSender sender, String[] args, int shopid){
+        return true;
+    }
+}
+class SetPermissionShowCommand extends AbstractSetCommand{
+    
+    public SetPermissionShowCommand() {
+        super("show", "evershop.set.perm", "show the list");
     }
 
     public boolean executeAsPlayer(Player player, String[] args, int shopid) {

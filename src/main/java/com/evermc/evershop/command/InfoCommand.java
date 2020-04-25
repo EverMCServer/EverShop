@@ -1,8 +1,8 @@
 package com.evermc.evershop.command;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -24,7 +24,15 @@ public class InfoCommand extends AbstractCommand {
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         if (args == null || args.length == 0){
-            show_info(player);
+            Block b = player.getTargetBlockExact(3);
+            if (ShopLogic.isShopSign(b)) {
+                int shopid = ShopLogic.getShopId((Sign)b.getState());
+                if (shopid != 0) {
+                    show_info(player, shopid);
+                    return true;
+                }
+            }
+            player.sendMessage("please look at a actived shop sign");
         } else {
             try{
                 int shopid = Integer.parseInt(args[0]);
@@ -48,27 +56,6 @@ public class InfoCommand extends AbstractCommand {
             }
         }
         return true;
-    }
-
-    private void show_info(final Player player){
-        Block b = player.getTargetBlockExact(3);
-        if (ShopLogic.isShopSign(b)) {
-            final Location loc = b.getLocation();
-            Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
-                final ShopInfo si = DataLogic.getShopInfo(loc);
-                Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                    if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
-                        player.sendMessage("no permission");
-                        return;
-                    } else {
-                        show_info(player, si);
-                        return;
-                    }
-                });
-            });
-            return;
-        }
-        player.sendMessage("please look at a actived shop sign");
     }
 
     private void show_info(final CommandSender player, final int shopid){

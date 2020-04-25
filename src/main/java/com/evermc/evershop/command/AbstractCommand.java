@@ -108,7 +108,7 @@ public abstract class AbstractCommand {
 
     public void help(CommandSender sender, String[] args, String cmd) {
         if (args != null && args.length > 0){
-            ComponentBuilder msgBuilder = new ComponentBuilder();
+            ComponentBuilder msgBuilder = new ComponentBuilder("");
             msgBuilder.append("Unknown command: ").color(ChatColor.DARK_RED).bold(true)
                       .append(cmd).color(ChatColor.DARK_RED).bold(true);
             sender.spigot().sendMessage(msgBuilder.create());
@@ -117,7 +117,7 @@ public abstract class AbstractCommand {
     }
 
     public void help(CommandSender sender) {
-        ComponentBuilder msgBuilder = new ComponentBuilder();
+        ComponentBuilder msgBuilder = new ComponentBuilder("");
         msgBuilder.append("----- ").color(ChatColor.WHITE)
                   .append(tr("EverShop Help", sender)).bold(true).color(ChatColor.GREEN)
                   .append(" -----\n").bold(false).color(ChatColor.WHITE)
@@ -147,7 +147,7 @@ public abstract class AbstractCommand {
 
     public void help(CommandSender sender, String cmd) {
         cmd += " ";
-        ComponentBuilder msgBuilder = new ComponentBuilder();
+        ComponentBuilder msgBuilder = new ComponentBuilder("");
         msgBuilder.append("----- ").color(ChatColor.WHITE)
                   .append(tr("EverShop Help", sender)).bold(true).color(ChatColor.GREEN)
                   .append(" -----\n").bold(false).color(ChatColor.WHITE)

@@ -45,7 +45,7 @@ public class ShopInfo {
      */
     private HashSet<SerializableLocation> targetOut;
     private HashSet<SerializableLocation> targetIn;
-    private String extra;
+    private ExtraInfo extra;
 
     // Create a new shop. shopid will be generated after save to the database
     public ShopInfo(int action_id, PlayerInfo pi, Location shoploc, int price){
@@ -60,7 +60,7 @@ public class ShopInfo {
         if (action_id != TransactionLogic.ITRADE.id() && action_id != TransactionLogic.TRADE.id())
             price = Math.abs(price);
         this.price = price;
-        this.extra = new ExtraInfo().toJSON();
+        this.extra = new ExtraInfo();
         // items record
         if (TransactionLogic.itemsetCount(action_id) == 0){
             this.itemOut = new HashSet<ItemStack>();
@@ -114,7 +114,7 @@ public class ShopInfo {
             HashSet<ItemStack>[] items = NBTUtil.deserialize((byte[]) data[10]);
             result.itemOut = items[0];
             result.itemIn = items[1];
-            result.extra = (String) data[11];
+            result.extra = ExtraInfo.fromJson((String) data[11]);
             return result;
         }catch(Exception e){
             e.printStackTrace();
@@ -191,7 +191,7 @@ public class ShopInfo {
         return this.price;
     }
 
-    public String getExtra(){
+    public ExtraInfo getExtra(){
         return this.extra;
     }
 
