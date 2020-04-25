@@ -3,8 +3,13 @@ package com.evermc.evershop.command;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.DataLogic;
+import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
+import com.evermc.evershop.structure.ShopInfo;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -78,25 +83,16 @@ public abstract class AbstractSetCommand extends AbstractCommand {
                     Block b = player.getTargetBlockExact(3);
                     if (ShopLogic.isShopSign(b)) {
                         shopid = ShopLogic.getShopId((Sign)b.getState());
-                        if (shopid == 0) {
-                            if (!this.executeAsPlayer(player, args, shopid)){
-                                this.help(sender, args, cmd);
-                            }
+                        if (shopid != 0) {
+                            this.executeAs(player, args, shopid);
                             return true;
                         }
                     }
                     player.sendMessage("please look at a actived shop sign");
                     return true;
-                } else {
-                    if (!this.executeAsPlayer(player, args, shopid)){
-                        this.help(sender, args, cmd);
-                    }
-                }
-            } else {
-                if (!this.executeAs(sender, args, shopid)){
-                    this.help(sender, args, cmd);
-                }
+                } 
             }
+            this.executeAs(sender, args, shopid);
             return true;
         } else {
             this.help(sender, cmd);
@@ -114,6 +110,27 @@ public abstract class AbstractSetCommand extends AbstractCommand {
         return true;
     }
 
-    public abstract boolean executeAsPlayer(Player player, String[] args, int shopid);
-    public abstract boolean executeAs(CommandSender sender, String[] args, int shopid);
+    public void executeAs(CommandSender sender, String[] args, int shopid) {
+        Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), () -> {
+            ShopInfo si = DataLogic.getShopInfo(shopid);
+            if (si == null) {
+                sender.sendMessage("Shop #" + shopid + " not found!");
+                this.help(sender);
+                return;
+            }
+            if (!sender.hasPermission("evershop.set.admin")){
+                if (!(sender instanceof Player) || PlayerLogic.getPlayerId((Player)sender) != si.getOwnerId()) {
+                    sender.sendMessage("No permission.");
+                    return;
+                }
+            }
+            if (!this.executeAs(sender, args, si)){
+                this.help(sender);
+                return;
+            }
+            DataLogic.saveShop(si, (a) -> sender.sendMessage("ShopInfo save ok"), () -> sender.sendMessage("ShopInfo save failed"));
+        });
+    }
+
+    public abstract boolean executeAs(CommandSender sender, String[] args, ShopInfo si);
 }

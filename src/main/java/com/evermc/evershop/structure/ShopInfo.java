@@ -191,7 +191,11 @@ public class ShopInfo {
         return this.price;
     }
 
-    public ExtraInfo getExtra(){
+    public String getExtra(){
+        return this.extra.toJSON();
+    }
+
+    public ExtraInfo getExtraInfo(){
         return this.extra;
     }
 

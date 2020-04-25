@@ -2,11 +2,20 @@ package com.evermc.evershop.command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import static com.evermc.evershop.util.LogUtil.severe;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+
+import java.util.Iterator;
+import java.util.UUID;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.logic.PlayerLogic;
+import com.evermc.evershop.structure.ExtraInfo;
+import com.evermc.evershop.structure.PlayerInfo;
+import com.evermc.evershop.structure.ShopInfo;
 
 public class SetPermissionCommand extends AbstractSetCommand {
 
@@ -20,15 +29,8 @@ public class SetPermissionCommand extends AbstractSetCommand {
         }, 1);
     }
 
-    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
-        return true;
-    }
-    public boolean executeAs(CommandSender sender, String[] args, int shopid){
-        if (shopid == 0) {
-            // should not happen
-            severe("Illegal invocation: " + this.getName());
-            return true;
-        }
+    @Override
+    public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
         return true;
     }
 }
@@ -38,11 +40,12 @@ class SetPermissionTypeCommand extends AbstractSetCommand{
         super("type", "evershop.set.perm", "set permission type", "<none/blacklist/whitelist>");
     }
 
-    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
-        return true;
-    }
-    public boolean executeAs(CommandSender sender, String[] args, int shopid){
-        return true;
+    public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
+        if (args.length != 1) {
+            return false;
+        }
+        ExtraInfo ei = si.getExtraInfo();
+        return ei.permissionType(args[0].charAt(0));
     }
 }
 class SetPermissionAddCommand extends AbstractSetCommand{
@@ -51,11 +54,27 @@ class SetPermissionAddCommand extends AbstractSetCommand{
         super("add", "evershop.set.perm", "add user/group to list", "u:<username>/g:<groupname>");
     }
 
-    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
-        return true;
-    }
-    public boolean executeAs(CommandSender sender, String[] args, int shopid){
-        return true;
+    @Override
+    public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
+        if (args.length != 1) {
+            return false;
+        }
+        ExtraInfo ei = si.getExtraInfo();
+        if (args[0].startsWith("u:")) {
+            if (!ei.permissionUserAdd(args[0].substring(2))) {
+                sender.sendMessage("No player named " + args[0].substring(2) + " found!");
+                return false;
+            }
+            return true;
+        } else if (args[0].startsWith("g:")) {
+            if (!ei.permissionGroupAdd(args[0].substring(2))) {
+                sender.sendMessage("No group named " + args[0].substring(2) + " found!");
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 class SetPermissionRemoveCommand extends AbstractSetCommand{
@@ -64,23 +83,74 @@ class SetPermissionRemoveCommand extends AbstractSetCommand{
         super("remove", "evershop.set.perm", "remove user/group from list", "u:<username>/g:<groupname>");
     }
 
-    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
-        return true;
-    }
-    public boolean executeAs(CommandSender sender, String[] args, int shopid){
-        return true;
+    @Override
+    public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
+        if (args.length != 1) {
+            return false;
+        }
+        ExtraInfo ei = si.getExtraInfo();
+        if (args[0].startsWith("u:")) {
+            if (!ei.permissionUserRemove(args[0].substring(2))) {
+                sender.sendMessage("Player " + args[0].substring(2) + " is not in the list!");
+                return false;
+            }
+            return true;
+        } else if (args[0].startsWith("g:")) {
+            if (!ei.permissionGroupRemove(args[0].substring(2))) {
+                sender.sendMessage("Group " + args[0].substring(2) + " is not in the list!");
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 class SetPermissionShowCommand extends AbstractSetCommand{
     
     public SetPermissionShowCommand() {
-        super("show", "evershop.set.perm", "show the list");
+        super("show", "evershop.set.perm", "show the access control info");
     }
 
-    public boolean executeAsPlayer(Player player, String[] args, int shopid) {
-        return true;
-    }
-    public boolean executeAs(CommandSender sender, String[] args, int shopid){
+    @Override
+    public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
+        ExtraInfo ei = si.getExtraInfo();
+        ComponentBuilder msgBuilder = new ComponentBuilder("");
+        msgBuilder.append("Type: ").color(ChatColor.LIGHT_PURPLE)
+                  .append(ei.getPermissionType() + "\n").color(ChatColor.WHITE);
+        if (!"DISABLED".equals(ei.getPermissionType())) {
+            msgBuilder.append("Users: ").color(ChatColor.LIGHT_PURPLE);
+            if (ei.getPermissionUsers().size() == 0) {
+                msgBuilder.append("<empty>").color(ChatColor.WHITE);
+            } else {
+                Iterator<UUID> it = ei.getPermissionUsers().iterator();
+                while (it.hasNext()) {
+                    UUID uuid = it.next();
+                    PlayerInfo pi = PlayerLogic.getPlayerInfo(uuid);
+                    msgBuilder.append((pi==null?"<Unknown>":pi.getName())).color(ChatColor.YELLOW)
+                              .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(uuid.toString()).create()))
+                              .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid.toString()));
+                    if (it.hasNext()) {
+                        msgBuilder.append(", ").color(ChatColor.WHITE);
+                    }
+                }
+            }
+            msgBuilder.append("\nGroups: ").color(ChatColor.LIGHT_PURPLE);
+            if (ei.getPermissionGroups().size() == 0) {
+                msgBuilder.append("<empty>").color(ChatColor.WHITE);
+            } else {
+                Iterator<String> it = ei.getPermissionGroups().iterator();
+                while (it.hasNext()) {
+                    String gr = it.next();
+                    msgBuilder.append(gr).color(ChatColor.YELLOW)
+                              .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, gr));
+                    if (it.hasNext()) {
+                        msgBuilder.append(", ").color(ChatColor.WHITE);
+                    }
+                }
+            }
+        }
+        sender.spigot().sendMessage(msgBuilder.create());
         return true;
     }
 }

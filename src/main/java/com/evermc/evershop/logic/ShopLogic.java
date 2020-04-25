@@ -88,12 +88,16 @@ public class ShopLogic {
     public static void accessShop(final Player p, final Location loc, final Action action){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             ShopInfo si = DataLogic.getShopInfo(loc);
+            PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
             if (si == null) {
                 severe("accessShop error: no shop data at " + loc);
                 return;
             }
             if (action == Action.LEFT_CLICK_BLOCK){
-                // TODO - check perm
+                if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
+                    p.sendMessage("no permission.");
+                    return;
+                }
                 BaseComponent[] t = itemToString(si);
                 final BaseComponent str = TranslationUtil.tr("%1$s shop %2$s %3$s for %4$s!", p, 
                     PlayerLogic.getPlayerName(si.getOwnerId()), 
@@ -105,7 +109,10 @@ public class ShopLogic {
                     p.spigot().sendMessage(str);
                 });
             } else {
-                // TODO - check perm
+                if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
+                    p.sendMessage("no permission.");
+                    return;
+                }
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionLogic.doTransaction(si, p);
                 });

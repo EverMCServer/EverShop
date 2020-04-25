@@ -54,4 +54,11 @@ public class VaultHandler {
         return econ;
     }
 
+    public static String[] getGroups() {
+        return perms.getGroups();
+    }
+
+    public static boolean playerInGroup(Player p, String group) {
+        return perms.playerInGroup(p, group);
+    }
 }

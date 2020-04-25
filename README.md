@@ -137,10 +137,7 @@ evershop.admin.op       op
 evershop.admin.remove   强制删除商店
 evershop.info.others    查看他人商店信息
 evershop.list.others    查看他人商店列表
-evershop.admin.perm     设置他人使用权限
-evershop.admin.text     修改他人牌子文字
-evershop.admin.price    修改他人价格
-evershop.admin.time     设置他人红石开启时长
+evershop.set.admin      设置他人商店参数
 ```
 
 ### 商店流程（防bug)
