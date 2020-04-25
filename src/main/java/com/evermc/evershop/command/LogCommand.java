@@ -7,8 +7,8 @@ import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -24,7 +24,15 @@ public class LogCommand extends AbstractCommand {
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         if (args.length == 0){
-            show_log(player);
+            Block b = player.getTargetBlockExact(3);
+            if (ShopLogic.isShopSign(b)) {
+                int shopid = ShopLogic.getShopId((Sign)b.getState());
+                if (shopid != 0) {
+                    show_log(player, shopid);
+                    return true;
+                }
+            }
+            player.sendMessage("please look at a actived shop sign");
         } else {
             try{
                 int shopid = Integer.parseInt(args[1]);
@@ -47,26 +55,6 @@ public class LogCommand extends AbstractCommand {
             } 
         }
         return true;
-    }
-    private void show_log(final Player player){
-        Block b = player.getTargetBlockExact(3);
-        if (ShopLogic.isShopSign(b)) {
-            final Location loc = b.getLocation();
-            Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
-                final ShopInfo si = DataLogic.getShopInfo(loc);
-                Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                    if (!player.hasPermission("evershop.info.others") && si.getOwnerId() != PlayerLogic.getPlayerId(player)){
-                        player.sendMessage("no permission");
-                        return;
-                    } else {
-                        show_log(player, si);
-                        return;
-                    }
-                });
-            });
-            return;
-        }
-        player.sendMessage("please look at a actived shop sign");
     }
 
     private void show_log(final CommandSender player, final int shopid){

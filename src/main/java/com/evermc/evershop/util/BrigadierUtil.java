@@ -52,7 +52,6 @@ public class BrigadierUtil {
         }
     }
     private static void  setCustomSuggestionProvider(CommandNode<?> node, SuggestionProvider<?> suggestionProvider) {
-        System.out.println(node.getName());
         if (node instanceof ArgumentCommandNode) {
             ArgumentCommandNode<?, ?> argumentNode = (ArgumentCommandNode<?, ?>) node;
             try {

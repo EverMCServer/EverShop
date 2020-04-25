@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.database.LiteDataSource;
@@ -30,15 +31,9 @@ import static com.evermc.evershop.util.LogUtil.severe;
 
 public class DataLogic{
     
-    private static SQLDataSource SQL;
-    private static EverShop plugin;
-    private static Map <UUID, Integer> worldList;
-
-    static{
-        worldList = null;
-        plugin = null;
-        SQL = null;
-    }
+    private static SQLDataSource SQL = null;
+    private static EverShop plugin = null;
+    private static Map <UUID, Integer> worldList = null;
 
     public static boolean init(EverShop _plugin){
 
@@ -295,7 +290,7 @@ public class DataLogic{
         });
     }
 
-    public static void saveShop(final ShopInfo shop, final Runnable afterSave, final Runnable failSave){
+    public static void saveShop(final ShopInfo shop, final Consumer<Integer> afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (null, '" + shop.getEpoch() + "', '"
              + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() + "', '" + shop.getX() + "', '"
@@ -306,7 +301,7 @@ public class DataLogic{
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
             }
-            int ret = SQL.insertBlob(query, targets, items);
+            final int ret = SQL.insertBlob(query, targets, items);
             if (ret <= 0){
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
@@ -316,7 +311,9 @@ public class DataLogic{
                 + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
                 SQL.insert(query);
             }
-            Bukkit.getScheduler().runTask(plugin, afterSave);
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                afterSave.accept(ret);
+            });
         });
     }
 

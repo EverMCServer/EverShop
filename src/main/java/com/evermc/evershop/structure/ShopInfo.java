@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 
+import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
@@ -96,16 +97,17 @@ public class ShopInfo {
 
     public static ShopInfo decode(Object[] data){
         ShopInfo result = new ShopInfo();
+        SQLDataSource SQL = DataLogic.getSQL();
         try{
-            result.id = (int) data[0];
-            result.epoch = (int) data[1];
-            result.action_id = (int) data[2];
-            result.player_id = (int) data[3];
-            result.world_id = (int) data[4];
-            result.x = (int) data[5];
-            result.y = (int) data[6];
-            result.z = (int) data[7];
-            result.price = (int) data[8];
+            result.id = SQL.getInt(data[0]);
+            result.epoch = SQL.getInt(data[1]);
+            result.action_id = SQL.getInt(data[2]);
+            result.player_id = SQL.getInt(data[3]);
+            result.world_id = SQL.getInt(data[4]);
+            result.x = SQL.getInt(data[5]);
+            result.y = SQL.getInt(data[6]);
+            result.z = SQL.getInt(data[7]);
+            result.price = SQL.getInt(data[8]);
             HashSet<SerializableLocation>[] targets = SerializableLocation.deserialize((byte[]) data[9]);
             result.targetOut = targets[0];
             result.targetIn = targets[1];

@@ -53,6 +53,7 @@ public class MySQLDataSource extends SQLDataSource {
     }
     
     public int getInt(Object k){
+        if (k instanceof Long) return (int)(long)k;
         return (int)k;
     }
 }

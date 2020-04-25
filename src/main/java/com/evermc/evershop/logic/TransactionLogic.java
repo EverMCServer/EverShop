@@ -11,6 +11,7 @@ import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.RedstoneUtil;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -99,6 +100,7 @@ public enum TransactionLogic {
 
     public static int getPrice(String line){
         String ret = "";
+        line = ChatColor.stripColor(line);
         int i = line.length() - 1;
         while (i >= 0 && !Character.isDigit(line.charAt(i))) i--;
         for (;i >= 0 && Character.isDigit(line.charAt(i)); i--){

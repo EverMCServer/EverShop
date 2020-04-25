@@ -27,12 +27,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
+import static com.evermc.evershop.util.LogUtil.severe;
 
 public class ShopLogic {
 
@@ -85,14 +88,7 @@ public class ShopLogic {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             ShopInfo si = DataLogic.getShopInfo(loc);
             if (si == null) {
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    // TODO - handle unavailable shops
-                    if (loc.getBlock().getState() instanceof Sign){
-                        Sign sign = (Sign)loc.getBlock().getState();
-                        sign.setLine(0, ChatColor.stripColor(sign.getLine(0)));
-                        sign.update();
-                    }
-                });
+                severe("accessShop error: no shop data at " + loc);
                 return;
             }
             if (action == Action.LEFT_CLICK_BLOCK){
@@ -266,6 +262,10 @@ public class ShopLogic {
                     send("The sign does not contain an available action!", p);
                     return true;
                 }
+                if (!line.equals(ChatColor.stripColor(line))) {
+                    send("You cant create shops on formatted signs!", p);
+                    return true;
+                }
                 if (player.getReg1().size() == 0){
                     send("You should register items first!", p);
                     return true;
@@ -301,12 +301,13 @@ public class ShopLogic {
                 }
                 final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
                 final Sign sign = (Sign)block.getState();
-                DataLogic.saveShop(newshop, () -> {
+                DataLogic.saveShop(newshop, (shopid) -> {
                     String lin = sign.getLine(0);
                     lin = ChatColor.BLUE.toString() + ChatColor.BOLD.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
+                    sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), shopid));
                     BaseComponent[] t = itemToString(newshop);
                     send("You have created a shop %1$s %2$s for %3$s!", p, 
                         tr(TransactionLogic.getEnum(newshop.getAction()).name() + "_AS_OWNER", p), t[0] == null? "": t[0] , t[1]);
@@ -520,7 +521,7 @@ public class ShopLogic {
         if (b.getRelative(BlockFace.UP).getBlockData() instanceof org.bukkit.block.data.type.Sign){
             ret.add(b.getRelative(BlockFace.UP).getLocation());
         }
-        return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
+        return ret.toArray(new Location[ret.size()]);
     }
 
     public static Location[] getAttachedBlock(Block b){
@@ -538,7 +539,7 @@ public class ShopLogic {
         if (b.getRelative(BlockFace.DOWN).getBlockData() instanceof Switch && RedstoneUtil.getAttachedFace(b.getRelative(BlockFace.DOWN)) == BlockFace.UP){
             ret.add(b.getRelative(BlockFace.DOWN).getLocation());
         }
-        return ret.size() == 0? null:ret.toArray(new Location[ret.size()]);
+        return ret.toArray(new Location[ret.size()]);
     }
 
     public static boolean isShopSign(Block b) {
@@ -552,5 +553,14 @@ public class ShopLogic {
             return sign.getLine(0).length() > 0 && (int)sign.getLine(0).charAt(0) == 167 && (int)sign.getLine(0).charAt(2) == 167;
         }
         return false;
+    }
+
+    public static int getShopId(Sign s) {
+        for (MetadataValue value : s.getMetadata("shopid")) {
+            if (value.getOwningPlugin().getName().equals("EverShop")) {
+                return value.asInt();
+            }
+        }
+        return 0;
     }
 }

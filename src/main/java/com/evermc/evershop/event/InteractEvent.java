@@ -96,7 +96,7 @@ public class InteractEvent implements Listener{
         }
         Location[] signs = ShopLogic.getAttachedSign(b);
         Location[] lblocks = ShopLogic.getAttachedBlock(b);
-        if (signs == null && lblocks == null && !ShopLogic.isLinkableBlock(b.getType())){
+        if (signs.length == 0 && lblocks.length == 0 && !ShopLogic.isLinkableBlock(b.getType())){
             // no sign attached, and not a linkable block, break directly
             return;
         }

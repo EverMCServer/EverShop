@@ -27,6 +27,7 @@
 'redstone shops disabled': 'Redstone shops are disabled in this server!'
 'you have %1$s %2$s for %3$s!': 'You have %1$s %2$s for %3$s!'
 'You have linked too many blocks': 'You have linked too many blocks'
+'You cant create shops on formatted signs!': 'You can''t create shops on formatted signs!'
 'BUY_AS_USER': 'bought'
 'SELL_AS_USER': 'sold'
 'TRADE_AS_USER': 'bought'
