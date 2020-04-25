@@ -187,6 +187,10 @@ public class ShopInfo {
         return this.z;
     }
 
+    public Location getLocation(){
+        return SerializableLocation.toLocation(this.world_id, this.x, this.y, this.z);
+    }
+
     public int getPrice(){
         return this.price;
     }

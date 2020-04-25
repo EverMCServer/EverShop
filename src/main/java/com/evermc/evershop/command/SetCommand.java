@@ -12,6 +12,7 @@ public class SetCommand extends AbstractSetCommand {
         super("set", "evershop.set", "Set shop attributes", "[shopid]");
         Bukkit.getScheduler().runTaskLater(EverShop.getInstance(), () -> {
             this.add(new SetPermissionCommand());
+            this.add(new SetTextCommand());
         }, 1);
     }
     public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){

@@ -17,7 +17,7 @@
   - [ ] /es reload
   - [x] /es set
   - [x] /es set permission
-  - [ ] /es set text
+  - [x] /es set text
   - [ ] /es set price
   - [ ] /es set duration
   - [ ] /es set slot
@@ -30,7 +30,7 @@
   - [ ] donatehand
   - [ ] dispose/高级dispose(带缓冲箱)
 - [ ] 移植fabric
-- [ ] shopinfo缓存及牌子特征标识（meta?）
+- [x] shopinfo缓存及牌子特征标识（meta?）
 - [ ] 收税。（最高税率应为10%， 因为钻石售价444， 收购价400）
 - [ ] hook wg， 防止链接他人箱子
 
