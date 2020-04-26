@@ -311,7 +311,7 @@ public class ShopLogic {
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {
                     String lin = sign.getLine(0);
-                    lin = ChatColor.BLUE.toString() + ChatColor.BOLD.toString() + lin;
+                    lin = ChatColor.DARK_BLUE.toString() + ChatColor.BOLD.toString() + lin;
                     sign.setLine(0, lin);
                     sign.update();
                     PlayerLogic.getPlayerInfo(p).removeRegs();
