@@ -42,7 +42,7 @@ public class SetTextCommand extends AbstractSetCommand {
             Sign sign = (Sign)b.getState();
 
             if (linen == 0)
-                sign.setLine(linen, ChatColor.BLUE.toString() + ChatColor.BOLD.toString() + text);
+                sign.setLine(linen, ChatColor.DARK_BLUE.toString() + ChatColor.BOLD.toString() + text);
             else 
                 sign.setLine(linen, text);
             sign.update();

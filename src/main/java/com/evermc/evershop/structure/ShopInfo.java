@@ -132,7 +132,7 @@ public class ShopInfo {
         Sign sign = (Sign)loc.getBlock().getState();
         StringBuilder strBuilder = new StringBuilder(sign.getLine(0));
         if (avail){
-            strBuilder.setCharAt(1, ChatColor.BLUE.getChar());
+            strBuilder.setCharAt(1, ChatColor.DARK_BLUE.getChar());
         }else{
             strBuilder.setCharAt(1, ChatColor.RED.getChar());
         }
