@@ -42,6 +42,7 @@ public class TransactionInfo{
     private int price;
     private int action_id;
     private HashSet<Location> rsComponents;
+    private int rsDuration;
 
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
@@ -49,6 +50,7 @@ public class TransactionInfo{
         this.owner = PlayerLogic.getOfflinePlayer(si.getOwnerId());
         this.price = si.getPrice();
         this.action_id = si.getAction();
+        this.rsDuration = si.getExtraInfo().getDuration();
         
         if (TransactionLogic.itemsetCount(si.getAction()) == 0){
             //redstone components
@@ -350,12 +352,70 @@ public class TransactionInfo{
                             lo.getBlock().setBlockData(bsn);
                             RedstoneUtil.applyPhysics(lo.getBlock());
                         }
-                    }, 20); // TODO - set duration
+                    }, this.rsDuration);
                 } else {
                     sw.setPowered(!sw.isPowered());
                     lo.getBlock().setBlockData(sw);
                     RedstoneUtil.applyPhysics(lo.getBlock());
                 }
+            }
+        }
+    }
+
+    public void turnOnRS(){
+        for (final Location lo : this.rsComponents){
+            BlockData bs = lo.getBlock().getBlockData();
+            if (bs instanceof Powerable){
+                final Powerable sw = (Powerable)bs;
+                if (lo.getBlock().getType().name().endsWith("_BUTTON")){
+                    sw.setPowered(true);
+                    lo.getBlock().setBlockData(sw);
+                    RedstoneUtil.applyPhysics(lo.getBlock());
+                    Bukkit.getScheduler().runTaskLater(EverShop.getInstance(), () -> {
+                        BlockData bsn = lo.getBlock().getBlockData();
+                        if (bsn instanceof Powerable){
+                            ((Powerable)bsn).setPowered(false);
+                            lo.getBlock().setBlockData(bsn);
+                            RedstoneUtil.applyPhysics(lo.getBlock());
+                        }
+                    }, this.rsDuration);
+                } else {
+                    sw.setPowered(true);
+                    lo.getBlock().setBlockData(sw);
+                    RedstoneUtil.applyPhysics(lo.getBlock());
+                }
+            }
+        }
+    }
+
+    public void turnOffRS(){
+        for (final Location lo : this.rsComponents){
+            BlockData bs = lo.getBlock().getBlockData();
+            if (bs instanceof Powerable){
+                final Powerable sw = (Powerable)bs;
+                sw.setPowered(false);
+                lo.getBlock().setBlockData(sw);
+                RedstoneUtil.applyPhysics(lo.getBlock());
+            }
+        }
+    }
+
+    public void turnOnDurationRS(){
+        for (final Location lo : this.rsComponents){
+            BlockData bs = lo.getBlock().getBlockData();
+            if (bs instanceof Powerable){
+                final Powerable sw = (Powerable)bs;
+                sw.setPowered(true);
+                lo.getBlock().setBlockData(sw);
+                RedstoneUtil.applyPhysics(lo.getBlock());
+                Bukkit.getScheduler().runTaskLater(EverShop.getInstance(), () -> {
+                    BlockData bsn = lo.getBlock().getBlockData();
+                    if (bsn instanceof Powerable){
+                        ((Powerable)bsn).setPowered(false);
+                        lo.getBlock().setBlockData(bsn);
+                        RedstoneUtil.applyPhysics(lo.getBlock());
+                    }
+                }, this.rsDuration);
             }
         }
     }

@@ -123,6 +123,12 @@ public class ExtraInfo {
             return true;
         }
     }
+    public void setDuration(int dur) {
+        this.rc_ticks = dur;
+    }
+    public int getDuration() {
+        return this.rc_ticks;
+    }
 }
 
 class PermissionInfo{

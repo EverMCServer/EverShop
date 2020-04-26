@@ -18,15 +18,15 @@
   - [x] /es set
   - [x] /es set permission
   - [x] /es set text
-  - [ ] /es set price
-  - [ ] /es set duration
+  - [x] /es set price
+  - [x] /es set duration
   - [ ] /es set slot
   - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
 - [ ] 其他功能
   - [ ] slot/islot
-  - [ ] device/deviceOn/deviceOff
+  - [x] device/deviceOn/deviceOff
   - [ ] donatehand
   - [ ] dispose/高级dispose(带缓冲箱)
 - [ ] 移植fabric

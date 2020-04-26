@@ -301,6 +301,53 @@ public enum TransactionLogic {
             send("you have %1$s %2$s for %3$s!", p, tr("TOGGLE_AS_USER", p), "", "$" + si.getPrice());
             break;
 
+            case DEVICEON:
+            if (!RedstoneUtil.isEnabled()) {
+                send("redstone shops disabled", p);
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                send("player insufficient money", p);
+                break;
+            }
+            ti.playerPayMoney();
+            ti.shopGiveMoney();
+            ti.turnOnRS();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
+            send("you have %1$s %2$s for %3$s!", p, tr("DEVICEON_AS_USER", p), "", "$" + si.getPrice());
+            break;
+
+            case DEVICEOFF:
+            if (!RedstoneUtil.isEnabled()) {
+                send("redstone shops disabled", p);
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                send("player insufficient money", p);
+                break;
+            }
+            ti.playerPayMoney();
+            ti.shopGiveMoney();
+            ti.turnOffRS();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
+            send("you have %1$s %2$s for %3$s!", p, tr("DEVICEOFF_AS_USER", p), "", "$" + si.getPrice());
+            break;
+
+            case DEVICE:
+            if (!RedstoneUtil.isEnabled()) {
+                send("redstone shops disabled", p);
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                send("player insufficient money", p);
+                break;
+            }
+            ti.playerPayMoney();
+            ti.shopGiveMoney();
+            ti.turnOnDurationRS();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
+            send("you have %1$s %2$s for %3$s!", p, tr("DEVICE_AS_USER", p), "", "$" + si.getPrice());
+            break;
 
             default:
             LogUtil.log(Level.SEVERE, "Not Implemented!");

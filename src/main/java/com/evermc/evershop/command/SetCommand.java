@@ -14,6 +14,7 @@ public class SetCommand extends AbstractSetCommand {
             this.add(new SetPermissionCommand());
             this.add(new SetTextCommand());
             this.add(new SetPriceCommand());
+            this.add(new SetDurationCommand());
         }, 1);
     }
     public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
