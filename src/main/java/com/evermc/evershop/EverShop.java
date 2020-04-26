@@ -62,6 +62,12 @@ public class EverShop extends JavaPlugin {
         NBTUtil.init();
     }  
 
+    public void reload(){
+        ShopLogic.reload(this);
+        TransactionLogic.reload(this);
+        TranslationUtil.reload(this);
+    }
+
     public static EverShop getInstance() {
         return EverShop.instance;
     }

@@ -69,8 +69,20 @@ public class ShopLogic {
     public static void init(EverShop _plugin){
         plugin = _plugin;
         linkMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.linkMaterial"));
+        if (linkMaterial == null) {
+            severe("link material: " + plugin.getConfig().getString("evershop.linkMaterial") + " does not exist. use default.");
+            linkMaterial = Material.REDSTONE;
+        }
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
+        if (destroyMaterial == null) {
+            severe("destroy material: " + plugin.getConfig().getString("evershop.destroyMaterial") + " does not exist. use default.");
+            linkMaterial = Material.GOLDEN_AXE;
+        }
         maxLinkBlocks = plugin.getConfig().getInt("evershop.maxLinkBlocks");
+    }
+
+    public static void reload(EverShop _plugin) {
+        init(_plugin);
     }
 
     public static Material getLinkMaterial(){

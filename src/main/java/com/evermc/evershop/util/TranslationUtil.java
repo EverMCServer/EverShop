@@ -52,7 +52,7 @@ import static com.evermc.evershop.util.LogUtil.warn;
 
 public class TranslationUtil {
     
-    private static HashMap<String, HashMap<String, String>> tr_dicts = new HashMap<String, HashMap<String, String>>();
+    private static HashMap<String, HashMap<String, String>> tr_dicts = null;
     private static Set<String> item_dicts = null;
     private static String default_translation = null;
 
@@ -63,8 +63,27 @@ public class TranslationUtil {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
-        loadMsgsLang(plugin);
-        loadItemLang(plugin);
+        if (!loadMsgsLang(plugin) || !loadItemLang(plugin)) {
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+    }
+
+    public static void reload(EverShop plugin){
+        String default_translation_bak = default_translation;
+
+        default_translation = plugin.getConfig().getString("evershop.default_translation");
+        if (default_translation == null) {
+            severe("TranslationLogic: No default translation set. Please check your configuration.");
+            severe("TranslationLogic: Plugin reload failed.");
+            default_translation = default_translation_bak;
+            return;
+        }
+        if (!loadMsgsLang(plugin)) {
+            severe("TranslationLogic: Plugin reload failed.");
+            default_translation = default_translation_bak;
+            return;
+        }
     }
 
     public static void send(BaseComponent msg, Player player){
@@ -486,7 +505,7 @@ public class TranslationUtil {
         warn("TranslationUtil: Unsupported material: " + t);
         return new TextComponent(name);
     }
-    private static void loadItemLang(EverShop plugin){
+    private static boolean loadItemLang(EverShop plugin){
         BufferedReader reader = null;
         URL json = null;
         try{
@@ -496,6 +515,7 @@ public class TranslationUtil {
             reader = new BufferedReader(new InputStreamReader(json.openStream()));
         } catch (Exception e){
             severe("Cannot load en_us.json from server jar, unsupported server?");
+            return false;
         }
 
         Type type = new TypeToken<Map<String, String>>(){}.getType();
@@ -512,18 +532,22 @@ public class TranslationUtil {
         
         if (item_dicts == null || item_dicts.size() == 0) {
             severe("TranslationLogic: unable to load item list, disable the plugin.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return false;
         }
+        return true;
     }
     
-    private static void loadMsgsLang(EverShop plugin){
+    private static boolean loadMsgsLang(EverShop plugin){
+        HashMap<String, HashMap<String, String>> tr_dicts_bak = tr_dicts;
+        tr_dicts = new HashMap<String, HashMap<String, String>>();
         File folder = new File(plugin.getDataFolder(), "i18n");
         if (!folder.exists()){
             folder.mkdirs();
         }
         if (!folder.exists()){
             severe("TranslationLogic: failed to create message translation folder.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            tr_dicts = tr_dicts_bak;
+            return false;
         }
         String[] i18n_files = {"zh_cn.yml", "en_us.yml"};
         for (String n:i18n_files){
@@ -540,11 +564,14 @@ public class TranslationUtil {
         }
         info("TranslationLogic: loaded " + tr_dicts.size() + " message translations.");
         if (tr_dicts.size() == 0)  {
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            tr_dicts = tr_dicts_bak;
+            return false;
         }
         if (!tr_dicts.containsKey(default_translation)) {
             severe("TranslationLogic: Messages of default language " + default_translation + " is not loaded.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            tr_dicts = tr_dicts_bak;
+            return false;
         }
+        return true;
     }
 }  

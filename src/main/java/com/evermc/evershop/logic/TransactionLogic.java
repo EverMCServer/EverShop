@@ -80,6 +80,13 @@ public enum TransactionLogic {
         }
     }
 
+    public static void reload(EverShop plugin) {
+        map.clear();
+        actions.clear();
+        actionstr.clear();
+        init(plugin);
+    }
+
     public static int getId(String action){
         action = action.toUpperCase();
         if (actions.containsKey(action)){
