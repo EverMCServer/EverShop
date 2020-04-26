@@ -195,6 +195,10 @@ public class ShopInfo {
         return this.price;
     }
 
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
     public String getExtra(){
         return this.extra.toJSON();
     }
