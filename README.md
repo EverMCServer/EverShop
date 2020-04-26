@@ -14,7 +14,7 @@
   - [x] /es inspect
   - [x] /es list
   - [x] /es log
-  - [ ] /es reload
+  - [x] /es reload
   - [x] /es set
   - [x] /es set permission
   - [x] /es set text
