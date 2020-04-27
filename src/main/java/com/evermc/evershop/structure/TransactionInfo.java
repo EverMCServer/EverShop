@@ -52,7 +52,7 @@ public class TransactionInfo{
         this.action_id = si.getAction();
         this.rsDuration = si.getExtraInfo().getDuration();
         
-        if (TransactionLogic.itemsetCount(si.getAction()) == 0){
+        if (TransactionLogic.isRedStoneShop(si.getAction())){
             //redstone components
             HashSet<SerializableLocation> locs = si.getTargetAll();
             rsComponents = new HashSet<Location>();
@@ -75,6 +75,11 @@ public class TransactionInfo{
             if (si.getTargetIn() != null) {
                 this.shopIn = new HashSet<Inventory>();
                 addAllTargets(this.shopIn, si.getTargetIn());
+            }
+            if (si.getAction() == TransactionLogic.DONATEHAND.id()) {
+                this.itemsIn = new HashMap<ItemStack, Integer>();
+                ItemStack it = p.getInventory().getItemInMainHand();
+                this.itemsIn.put(it, it.getAmount());
             }
         }
     }
@@ -120,7 +125,9 @@ public class TransactionInfo{
 
     // Only checks if shopIn has itemsIn 
     public boolean shopCanHold(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.SELL.id()
+        && this.action_id != TransactionLogic.TRADE.id()
+        && this.action_id != TransactionLogic.DONATEHAND.id()){
             return true;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
@@ -243,7 +250,11 @@ public class TransactionInfo{
     }
 
     public void playerRemoveItems(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.TRADE.id() && this.action_id != TransactionLogic.ITRADE.id()){
+        if (this.action_id != TransactionLogic.SELL.id()
+            && this.action_id != TransactionLogic.ISELL.id()
+            && this.action_id != TransactionLogic.TRADE.id()
+            && this.action_id != TransactionLogic.ITRADE.id()
+            && this.action_id != TransactionLogic.DONATEHAND.id()){
             LogUtil.log(Level.SEVERE, "Not supported.");
             return;
         }
@@ -273,7 +284,9 @@ public class TransactionInfo{
     }
 
     public void shopGiveItems(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.SELL.id()
+        && this.action_id != TransactionLogic.TRADE.id()
+        && this.action_id != TransactionLogic.DONATEHAND.id()){
             LogUtil.log(Level.SEVERE, "Not supported.");
             return;
         }
@@ -286,6 +299,9 @@ public class TransactionInfo{
                 iv.addItem(items.toArray(new ItemStack[items.size()]));
             if (ret.size() == 0)return;
             items = ret.values();
+        }
+        if (items.size() != 0) {
+            LogUtil.log(Level.SEVERE, "shopGiveItems():"+items);
         }
     }
 

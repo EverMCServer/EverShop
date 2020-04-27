@@ -12,6 +12,7 @@ import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.RedstoneUtil;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -30,11 +31,17 @@ public enum TransactionLogic {
     IBUY(4, 0, 1),
     ISELL(5, 0, 1),
     ITRADE(6, 0, 2),
-    ISLOT(7, 0, 0),
+
     TOGGLE(8, 1, 0),
     DEVICE(9, 1, 0),
     DEVICEON(10, 1, 0),
-    DEVICEOFF(11, 1, 0)
+    DEVICEOFF(11, 1, 0),
+
+    SLOT(12, 1, 1),
+    ISLOT(13, 0, 1),
+
+    DONATEHAND(15, 1, 0),
+    DISPOSE(16, 1, 0)
     ;
 
     private int index;
@@ -121,6 +128,10 @@ public enum TransactionLogic {
     }
 
     public static boolean isContainerShop(int action){
+        return TransactionLogic.getEnum(action).item_set_count > 0 || action == TransactionLogic.DONATEHAND.id();
+    }
+
+    public static boolean needItemSet(int action) {
         return TransactionLogic.getEnum(action).item_set_count > 0;
     }
 
@@ -130,6 +141,10 @@ public enum TransactionLogic {
 
     public static int itemsetCount(int action){
         return TransactionLogic.getEnum(action).item_set_count;
+    }
+
+    public static boolean isRedStoneShop(int action){
+        return TransactionLogic.getEnum(action).item_set_count == 0 && action != TransactionLogic.DONATEHAND.id();
     }
 
     public static TransactionLogic getEnum(int action){
@@ -354,6 +369,20 @@ public enum TransactionLogic {
             ti.turnOnDurationRS();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             send("you have %1$s %2$s for %3$s!", p, tr("DEVICE_AS_USER", p), "", "$" + si.getPrice());
+            break;
+            
+            case DONATEHAND:
+            if (p.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                send("no items in main hand", p);
+                break;
+            }
+            if (!ti.shopCanHold()){
+                send("shop cannot hold", p);
+                break;
+            }
+            ti.playerRemoveItems();
+            ti.shopGiveItems();
+            send("you have %1$s %2$s!", p, tr("DONATEHAND_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
             break;
 
             default:

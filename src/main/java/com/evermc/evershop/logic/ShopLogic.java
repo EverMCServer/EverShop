@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.structure.PlayerInfo;
@@ -46,7 +47,7 @@ public class ShopLogic {
     private static Material destroyMaterial = null;
     private static int maxLinkBlocks = 0;
 
-    private static Set<Location> pendingRemoveBlocks = new HashSet<Location>();
+    private static Set<Location> pendingRemoveBlocks = new CopyOnWriteArraySet<Location>();
 
     static final List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
@@ -315,7 +316,7 @@ public class ShopLogic {
                         }
                     }
                 }
-                if (TransactionLogic.isContainerShop(a) && player.getReg1Items().size() == 0){
+                if (TransactionLogic.needItemSet(a) && player.getReg1Items().size() == 0){
                     send("You should put some items in the chest first!", p);
                     return true;
                 }
