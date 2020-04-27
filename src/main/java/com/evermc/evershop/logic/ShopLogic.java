@@ -76,7 +76,7 @@ public class ShopLogic {
         destroyMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.destroyMaterial"));
         if (destroyMaterial == null) {
             severe("destroy material: " + plugin.getConfig().getString("evershop.destroyMaterial") + " does not exist. use default.");
-            linkMaterial = Material.GOLDEN_AXE;
+            destroyMaterial = Material.GOLDEN_AXE;
         }
         maxLinkBlocks = plugin.getConfig().getInt("evershop.maxLinkBlocks");
     }
@@ -457,17 +457,16 @@ public class ShopLogic {
         }
         pendingRemoveBlocks.add(loc);
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            // first, check attached blocks
-            for (Location loca : locs) {
-                if (ShopLogic.isShopSign(loca.getBlock())) {
-                    Bukkit.getScheduler().runTask(plugin, ()->{
-                        send("you cannot break this block because there are shops attached on it", p);
-                        pendingRemoveBlocks.remove(loca);
-                    });
-                    return;
-                }
+        // first, check attached blocks
+        for (Location loca : locs) {
+            if (ShopLogic.isShopSign(loca.getBlock())) {
+                send("you cannot break this block because there are shops attached on it", p);
+                pendingRemoveBlocks.remove(loca);
+                return;
             }
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             if (blocs != null){
                 for (Location loca : blocs){
                     int count = DataLogic.getBlockLinkedCount(loca);

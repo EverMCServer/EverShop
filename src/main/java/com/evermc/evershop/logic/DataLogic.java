@@ -1,12 +1,14 @@
 package com.evermc.evershop.logic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import com.evermc.evershop.EverShop;
@@ -307,10 +309,12 @@ public class DataLogic{
                 Bukkit.getScheduler().runTask(plugin, failSave);
                 return;
             }
-            for (SerializableLocation sloc : shop.getTargetAll()){
-                query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
-                + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z")+ "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
-                SQL.insert(query);
+            if (shop.getId() == 0) {
+                for (SerializableLocation sloc : shop.getTargetAll()){
+                    query = "INSERT INTO `" + SQL.getPrefix() + "target` VALUES (null, '" + sloc.world + "', '" 
+                    + sloc.x + "', '" + sloc.y + "', '" + sloc.z + "', '" + ret + "') " + SQL.ON_DUPLICATE("world_id,x,y,z") + "`shops` = " + SQL.CONCAT("`shops`", "'," + ret + "'");
+                    SQL.insert(query);
+                }
             }
             Bukkit.getScheduler().runTask(plugin, () -> {
                 afterSave.accept(ret);
@@ -330,13 +334,20 @@ public class DataLogic{
             return null;
         }
         Set<ShopInfo> retval = new HashSet<ShopInfo>();
-        for (String str : shopstr.split(",")){
+        CopyOnWriteArrayList<String> shops = new CopyOnWriteArrayList<String>(Arrays.asList(shopstr.split(",")));
+        for (String str : shops){
             int shop = Integer.parseInt(str);
             ShopInfo t = getShopInfo(shop);
             if (t != null){
                 retval.add(t);
+            } else {
+                while(shops.remove(str));
             }
         }
+        String new_shopstr = String.join(",", shops);
+        query = "UPDATE `" + SQL.getPrefix() + "target` SET `shops` = '" + new_shopstr + "' WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        SQL.exec(query);
         if (retval.size() > 0){
             return retval.toArray(new ShopInfo[retval.size()]);
         } else {
