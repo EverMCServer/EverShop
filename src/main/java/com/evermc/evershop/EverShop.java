@@ -6,13 +6,11 @@ import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
-import com.evermc.evershop.util.BrigadierUtil;
 import com.evermc.evershop.util.NBTUtil;
 import com.evermc.evershop.util.RedstoneUtil;
 import com.evermc.evershop.util.TranslationUtil;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static com.evermc.evershop.util.LogUtil.info;
@@ -45,10 +43,7 @@ public class EverShop extends JavaPlugin {
         VaultHandler.setupPermissions();
 
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
-        PluginCommand pc = Bukkit.getPluginCommand("evershop");
-        pc.setExecutor(new EverShopCommand());
-        BrigadierUtil.init(this);
-        BrigadierUtil.register(pc);
+        Bukkit.getPluginCommand("evershop").setExecutor(new EverShopCommand());
         if (!DataLogic.init(this)){
             severe("Fail to start DataLogic! Check your database config.");
             getServer().getPluginManager().disablePlugin(this);
