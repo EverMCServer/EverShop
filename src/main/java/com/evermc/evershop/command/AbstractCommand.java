@@ -2,6 +2,7 @@ package com.evermc.evershop.command;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -103,6 +104,40 @@ public abstract class AbstractCommand {
         } else {
             this.help(sender, cmd);
             return true;
+        }
+    }
+
+    public List<String> tablist(CommandSender sender, String[] args, String cmd) {
+        if (args.length > 1) {
+            String[] arg_new = Arrays.copyOfRange(args, 1, args.length);
+            for (AbstractCommand sub : this.children){
+                if (sub.getName().startsWith(args[0])){
+                    return sub.tablist(sender, arg_new, cmd);
+                }
+            }
+            return new ArrayList<String>();
+        } else if (args.length == 1) {
+            ArrayList<String> ret = new ArrayList<String>();
+            if (this.children.size() > 0) {
+                for (AbstractCommand sub : this.children){
+                    if (sub.getName().startsWith(args[0])){
+                        ret.add(sub.getName());
+                    }
+                }            
+            } else {
+                ret.add(this.parameters);
+            }
+            return ret;
+        } else {
+            ArrayList<String> ret = new ArrayList<String>();
+            if (this.children.size() > 0) {
+                for (AbstractCommand sub : this.children){
+                    ret.add(sub.getName());
+                }
+            } else {
+                ret.add(this.parameters);
+            }
+            return ret;
         }
     }
 
