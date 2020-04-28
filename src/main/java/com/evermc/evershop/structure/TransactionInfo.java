@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TaxLogic;
 import com.evermc.evershop.logic.TransactionLogic;
-import com.evermc.evershop.util.LogUtil;
 import com.evermc.evershop.util.RedstoneUtil;
 import com.evermc.evershop.util.SerializableLocation;
 
@@ -25,6 +23,8 @@ import org.bukkit.block.data.Powerable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import static com.evermc.evershop.util.LogUtil.severe;
 
 /**
  * When getting contents of a block:
@@ -76,7 +76,7 @@ public class TransactionInfo{
                 this.shopIn = new HashSet<Inventory>();
                 addAllTargets(this.shopIn, si.getTargetIn());
             }
-            if (si.getAction() == TransactionLogic.DONATEHAND.id()) {
+            if (si.getAction() == TransactionLogic.DONATEHAND.id() || si.getAction() == TransactionLogic.DISPOSE.id()) {
                 this.itemsIn = new HashMap<ItemStack, Integer>();
                 ItemStack it = p.getInventory().getItemInMainHand();
                 this.itemsIn.put(it, it.getAmount());
@@ -219,7 +219,7 @@ public class TransactionInfo{
 
     public void shopRemoveItems(){
         if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.TRADE.id()){
-            LogUtil.log(Level.SEVERE, "Not supported.");
+            severe("TransactionInfo: Illegal invocation");
             return;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
@@ -254,8 +254,9 @@ public class TransactionInfo{
             && this.action_id != TransactionLogic.ISELL.id()
             && this.action_id != TransactionLogic.TRADE.id()
             && this.action_id != TransactionLogic.ITRADE.id()
-            && this.action_id != TransactionLogic.DONATEHAND.id()){
-            LogUtil.log(Level.SEVERE, "Not supported.");
+            && this.action_id != TransactionLogic.DONATEHAND.id()
+            && this.action_id != TransactionLogic.DISPOSE.id()){
+            severe("TransactionInfo: Illegal invocation");
             return;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
@@ -287,7 +288,7 @@ public class TransactionInfo{
         if (this.action_id != TransactionLogic.SELL.id()
         && this.action_id != TransactionLogic.TRADE.id()
         && this.action_id != TransactionLogic.DONATEHAND.id()){
-            LogUtil.log(Level.SEVERE, "Not supported.");
+            severe("TransactionInfo: Illegal invocation");
             return;
         }
         Collection<ItemStack> items = new HashSet<ItemStack>();
@@ -301,13 +302,13 @@ public class TransactionInfo{
             items = ret.values();
         }
         if (items.size() != 0) {
-            LogUtil.log(Level.SEVERE, "shopGiveItems():"+items);
+            severe("shopGiveItems():"+items);
         }
     }
 
     public void playerGiveItems(){
         if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id() && this.action_id != TransactionLogic.ITRADE.id()){
-            LogUtil.log(Level.SEVERE, "Not supported.");
+            severe("TransactionInfo: Illegal invocation");
             return;
         }
         Collection<ItemStack> items = new HashSet<ItemStack>();
@@ -317,7 +318,7 @@ public class TransactionInfo{
         HashMap<Integer, ItemStack> ret = 
             this.playerInv.addItem(items.toArray(new ItemStack[items.size()]));
         if (ret.size() != 0){
-            LogUtil.log(Level.SEVERE, "playerGiveItems():"+ret);
+            severe("playerGiveItems():"+ret);
         }
     }
 
@@ -433,6 +434,37 @@ public class TransactionInfo{
                     }
                 }, this.rsDuration);
             }
+        }
+    }
+
+    public void shopDispose(){
+        if (this.action_id != TransactionLogic.DISPOSE.id()){
+            severe("TransactionInfo: Illegal invocation");
+            return;
+        }
+        if (this.shopIn.size() != 1) {
+            severe("shopDispose(): target count != 1");
+            return;
+        }
+        if (this.getItemsIn().size() != 1) {
+            severe("shopDispose(): item count != 1");
+            return;
+        }
+        Inventory iv = this.shopIn.iterator().next();
+        ItemStack it = this.getItemsIn().iterator().next();
+        int k = iv.firstEmpty();
+        if (k == iv.getSize() - 1) {
+            iv.setItem(0, null);
+            iv.setItem(k, it);
+            return;
+        }
+        if (k == -1) {
+            iv.setItem(0, it);
+            iv.setItem(1, null);
+            return;
+        } else {
+            iv.setItem(k, it);
+            iv.setItem(k+1, null);
         }
     }
 }

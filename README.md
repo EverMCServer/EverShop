@@ -27,8 +27,8 @@
 - [ ] 其他功能
   - [ ] slot/islot
   - [x] device/deviceOn/deviceOff
-  - [ ] donatehand
-  - [ ] dispose/高级dispose(带缓冲箱)
+  - [x] donatehand
+  - [x] dispose/高级dispose(带缓冲箱)
 - [ ] 移植fabric
 - [x] shopinfo缓存及牌子特征标识（meta?）
 - [ ] 收税。（最高税率应为10%， 因为钻石售价444， 收购价400）

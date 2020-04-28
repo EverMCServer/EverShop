@@ -278,8 +278,8 @@ public class ShopLogic {
 
             else if (block.getState() instanceof Sign){
                 String line = ((Sign)block.getState()).getLine(0);
-                int a = TransactionLogic.getId(line);
-                if (a == 0) {
+                int actionid = TransactionLogic.getId(line);
+                if (actionid == 0) {
                     send("The sign does not contain an available action!", p);
                     return true;
                 }
@@ -287,16 +287,20 @@ public class ShopLogic {
                     send("You cant create shops on formatted signs!", p);
                     return true;
                 }
-                if (player.getReg1().size() == 0){
+                if (player.getReg1().size() == 0 && actionid != TransactionLogic.DISPOSE.id()){
                     send("You should register items first!", p);
                     return true;
                 }
-                if (player.isContainer() != TransactionLogic.isContainerShop(a)){
+                if (actionid == TransactionLogic.DISPOSE.id() && player.getReg1().size() > 1) {
+                    send("You can only link no more than 1 chest to a dispose shop.", p);
+                    return true;
+                }
+                if (player.isContainer() != TransactionLogic.isContainerShop(actionid)){
                     send("Shop type and your selection is not match!", p);
                     return true;
                 }
-                if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(a).name().toLowerCase())){
-                    send("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(a));
+                if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(actionid).name().toLowerCase())){
+                    send("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(actionid));
                     return true;
                 }
                 if (!p.hasPermission("evershop.multiworld")){
@@ -316,11 +320,11 @@ public class ShopLogic {
                         }
                     }
                 }
-                if (TransactionLogic.needItemSet(a) && player.getReg1Items().size() == 0){
+                if (TransactionLogic.needItemSet(actionid) && player.getReg1Items().size() == 0){
                     send("You should put some items in the chest first!", p);
                     return true;
                 }
-                final ShopInfo newshop = new ShopInfo(a, player, block.getLocation(), TransactionLogic.getPrice(line));
+                final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), TransactionLogic.getPrice(line));
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {
                     String lin = sign.getLine(0);

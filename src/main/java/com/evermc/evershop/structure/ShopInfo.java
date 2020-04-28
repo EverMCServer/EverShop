@@ -84,7 +84,7 @@ public class ShopInfo {
         } else if (TransactionLogic.targetCount(action_id) == 2){
             this.targetOut = pi.getReg1Loc();
             this.targetIn = pi.getReg2Loc();
-        } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.DONATEHAND.id()){
+        } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.DONATEHAND.id() || action_id == TransactionLogic.DISPOSE.id()){
             this.targetOut = new HashSet<SerializableLocation>();;
             this.targetIn = pi.getRegsLoc();
         } else {

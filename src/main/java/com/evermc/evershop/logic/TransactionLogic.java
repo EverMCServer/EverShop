@@ -128,7 +128,7 @@ public enum TransactionLogic {
     }
 
     public static boolean isContainerShop(int action){
-        return TransactionLogic.getEnum(action).item_set_count > 0 || action == TransactionLogic.DONATEHAND.id();
+        return TransactionLogic.getEnum(action).item_set_count > 0 || action == TransactionLogic.DONATEHAND.id() || action == TransactionLogic.DISPOSE.id();
     }
 
     public static boolean needItemSet(int action) {
@@ -144,7 +144,10 @@ public enum TransactionLogic {
     }
 
     public static boolean isRedStoneShop(int action){
-        return TransactionLogic.getEnum(action).item_set_count == 0 && action != TransactionLogic.DONATEHAND.id();
+        return action == TransactionLogic.DEVICE.id()
+        || action == TransactionLogic.DEVICEON.id()
+        || action == TransactionLogic.DEVICEOFF.id()
+        || action == TransactionLogic.TOGGLE.id();
     }
 
     public static TransactionLogic getEnum(int action){
@@ -383,6 +386,20 @@ public enum TransactionLogic {
             ti.playerRemoveItems();
             ti.shopGiveItems();
             send("you have %1$s %2$s!", p, tr("DONATEHAND_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+            break;
+
+            case DISPOSE:
+            if (p.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                break;
+            }
+            if (si.getTargetIn().size() == 0) {
+                ti.playerRemoveItems();
+                send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+                break;
+            }
+            ti.playerRemoveItems();
+            ti.shopDispose();
+            send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
             break;
 
             default:
