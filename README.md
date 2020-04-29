@@ -25,7 +25,7 @@
 - [ ] tab completer (brigadier)
   - [ ] 框架
 - [ ] 其他功能
-  - [ ] slot/islot
+  - [x] slot/islot
   - [x] device/deviceOn/deviceOff
   - [x] donatehand
   - [x] dispose/高级dispose(带缓冲箱)

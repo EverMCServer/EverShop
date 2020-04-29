@@ -14,6 +14,7 @@ import com.evermc.evershop.util.RedstoneUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 
@@ -166,6 +167,7 @@ public enum TransactionLogic {
         TransactionInfo ti = new TransactionInfo(si, p);
         si.setSignState(ti.shopHasItems());
         BaseComponent[] ite;
+        ItemStack slotItem;
         switch(getEnum(ti.getAction())){
             case BUY:
             if (!ti.shopHasItems()){
@@ -400,6 +402,39 @@ public enum TransactionLogic {
             ti.playerRemoveItems();
             ti.shopDispose();
             send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+            break;
+
+            case ISLOT:
+            if (!ti.playerHasEmptyInv()){
+                send("player cannot hold", p);
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                send("player insufficient money", p);
+                break;
+            }
+            ti.playerPayMoney();
+            slotItem = ti.playerGiveSlot();
+            send("you have %1$s %2$s!", p, tr("ISLOT_AS_USER", p), tr(slotItem));
+            break;
+
+            case SLOT:
+            if (!ti.playerHasEmptyInv()){
+                send("player cannot hold", p);
+                break;
+            }
+            if (!ti.playerHasMoney()){
+                send("player insufficient money", p);
+                break;
+            }
+            if (!ti.shopHasSlotItems()){
+                send("shop sold out", p);
+                break;
+            }
+            ti.playerPayMoney();
+            slotItem = ti.playerGiveSlot();
+            ti.shopRemoveItems(slotItem);
+            send("you have %1$s %2$s!", p, tr("SLOT_AS_USER", p), tr(slotItem));
             break;
 
             default:

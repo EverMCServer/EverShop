@@ -87,7 +87,7 @@ public class ShopInfo {
         } else if (TransactionLogic.itemsetCount(action_id) == 2){
             this.itemOut = pi.getReg1Items();
             this.itemIn = pi.getReg2Items();
-        } else if (action_id == TransactionLogic.BUY.id() || action_id == TransactionLogic.IBUY.id()){
+        } else if (action_id == TransactionLogic.BUY.id() || action_id == TransactionLogic.IBUY.id() || action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()){
             this.itemOut = pi.getReg1Items();
             this.itemIn = new HashSet<ItemStack>();
         } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.ISELL.id()){
@@ -109,6 +109,9 @@ public class ShopInfo {
         } else {
             this.targetOut = pi.getRegsLoc();
             this.targetIn = new HashSet<SerializableLocation>();;
+        }
+        if (action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()) {
+            this.extra.initSlot(this.itemOut);
         }
     }
 

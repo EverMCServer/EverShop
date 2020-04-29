@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -43,6 +45,8 @@ public class TransactionInfo{
     private int action_id;
     private HashSet<Location> rsComponents;
     private int rsDuration;
+    private ExtraInfo extra;
+    private HashMap<String,ItemStack> slotMap;
 
     public TransactionInfo(ShopInfo si, Player p){
         this.playerInv = p.getInventory();
@@ -81,6 +85,10 @@ public class TransactionInfo{
                 ItemStack it = p.getInventory().getItemInMainHand();
                 this.itemsIn.put(it, it.getAmount());
             }
+        }
+        if (si.getAction() == TransactionLogic.ISLOT.id() || si.getAction() == TransactionLogic.SLOT.id()){
+            this.extra = si.getExtraInfo();
+            this.slotMap = extra.slotItemMap(si.getItemOut());
         }
     }
 
@@ -123,12 +131,40 @@ public class TransactionInfo{
         return it.size() == 0;
     }
 
+    // used in slot
+    public boolean shopHasSlotItems(){
+        if (this.action_id != TransactionLogic.SLOT.id() && this.action_id != TransactionLogic.ISLOT.id()){
+            return true;
+        }
+        HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>();
+        for (Entry<String,ItemStack> entry: this.slotMap.entrySet()){
+            it.put(entry.getValue(), extra.slotGetMaxAmount(entry.getKey()));
+        }
+        for (Inventory iv : shopOut){
+            for (ItemStack is : iv.getContents()){
+                if (is == null) continue;
+                for (ItemStack its : it.keySet()){
+                    if (its.isSimilar(is)){
+                        if (it.get(its) > is.getAmount()){
+                            it.put(its, it.get(its) - is.getAmount());
+                        } else {
+                            it.remove(its);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return it.size() == 0;
+    }
+
     // Only checks if shopIn has itemsIn 
     public boolean shopCanHold(){
         if (this.action_id != TransactionLogic.SELL.id()
         && this.action_id != TransactionLogic.TRADE.id()
         && this.action_id != TransactionLogic.DONATEHAND.id()){
-            return true;
+            severe("TransactionInfo: Illegal invocation");
+            return false;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
         int emptycount = 0;
@@ -157,8 +193,12 @@ public class TransactionInfo{
 
     // Only checks if player has itemsIn 
     public boolean playerHasItems(){
-        if (this.action_id != TransactionLogic.SELL.id() && this.action_id != TransactionLogic.ISELL.id() && this.action_id != TransactionLogic.ITRADE.id() && this.action_id != TransactionLogic.TRADE.id()){
-            return true;
+        if (this.action_id != TransactionLogic.SELL.id() 
+        && this.action_id != TransactionLogic.ISELL.id() 
+        && this.action_id != TransactionLogic.ITRADE.id() 
+        && this.action_id != TransactionLogic.TRADE.id()){
+            severe("TransactionInfo: Illegal invocation");
+            return false;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsIn);
         for (ItemStack is : playerInv.getStorageContents()){
@@ -177,10 +217,24 @@ public class TransactionInfo{
         return it.size() == 0;
     }
 
+    // used in slot
+    public boolean playerHasEmptyInv(){
+        if (this.action_id != TransactionLogic.ISLOT.id() 
+        && this.action_id != TransactionLogic.SLOT.id()){
+            severe("TransactionInfo: Illegal invocation");
+            return false;
+        }
+        for (ItemStack is : playerInv.getStorageContents()){
+            if (is == null) return true;
+        }
+        return false;
+    }
+
     // Only checks if player has itemsOut 
     public boolean playerCanHold(){
         if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
-            return true;
+            severe("TransactionInfo: Illegal invocation");
+            return false;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
         int emptycount = 0;
@@ -223,6 +277,39 @@ public class TransactionInfo{
             return;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
+        for (Inventory iv : shopOut){
+            ItemStack[] iss = iv.getContents();
+            for (int i = 0; i < iss.length; i++){
+                ItemStack is = iss[i];
+                if (is == null) continue;
+                for (ItemStack its : it.keySet()){
+                    if (its.isSimilar(is)){
+                        if (it.get(its) > is.getAmount()){
+                            it.put(its, it.get(its) - is.getAmount());
+                            iss[i] = null;
+                        } else {
+                            if (it.get(its) < is.getAmount())
+                                is.setAmount(is.getAmount() - it.get(its));
+                            else 
+                                iss[i] = null;
+                            it.remove(its);
+                        }
+                        break;
+                    }
+                }
+            }
+            iv.setStorageContents(iss);
+        }
+        return;
+    }
+
+    public void shopRemoveItems(ItemStack item){
+        if (this.action_id != TransactionLogic.SLOT.id()){
+            severe("TransactionInfo: Illegal invocation");
+            return;
+        }
+        HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>();
+        it.put(item, item.getAmount());
         for (Inventory iv : shopOut){
             ItemStack[] iss = iv.getContents();
             for (int i = 0; i < iss.length; i++){
@@ -320,6 +407,24 @@ public class TransactionInfo{
         if (ret.size() != 0){
             severe("playerGiveItems():"+ret);
         }
+    }
+
+    public ItemStack playerGiveSlot(){
+        if (this.action_id != TransactionLogic.SLOT.id() && this.action_id != TransactionLogic.ISLOT.id()){
+            severe("TransactionInfo: Illegal invocation");
+            return null;
+        }
+        int possi = extra.slotPossibilityAll();
+        int place = new Random().nextInt(possi);
+        Entry<String, Integer> ret = extra.slotGetAt(place);
+        ItemStack item = this.slotMap.get(ret.getKey());
+        item.setAmount(ret.getValue());
+        HashMap<Integer, ItemStack> retval = 
+            this.playerInv.addItem(item);
+        if (retval.size() != 0){
+            severe("playerGiveSlot():"+ret);
+        }
+        return item;
     }
 
     public void playerPayMoney(){
