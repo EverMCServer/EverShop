@@ -122,7 +122,7 @@ public class ListCommand extends AbstractCommand {
             msg.add("Showing page " + (page+1) + " of " + ((count-1)/10+1));
             for (ShopInfo si : sis){
                 msg.add(" #" + si.getId() + "  " + TransactionLogic.getName(si.getAction()) + " shop, at "
-                     + DataLogic.getWorld(si.getWorldID()).getName() + ":" + si.getX() + "," + si.getY() + "," + si.getZ());
+                     + DataLogic.getWorld(si.getWorldID()).getName() + ":" + si.getX() + "," + si.getY() + "," + si.getZ() + " rev=" + si.getRev());
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 for (String s:msg) sender.sendMessage(s);

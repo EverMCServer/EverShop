@@ -427,29 +427,27 @@ public class ShopLogic {
                 return;
             }
         }
+        if (!ShopLogic.isShopSign(loc.getBlock())){
+            pendingRemoveBlocks.remove(loc);
+            loc.getBlock().breakNaturally();
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             int pl = DataLogic.getShopOwner(loc);
-            if (pl == 0){
+            if (pl == PlayerLogic.getPlayerId(p)
+                 || ( p.hasPermission("evershop.admin.remove")
+                     && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
+                ){
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
+                    DataLogic.removeShop(loc);
                     loc.getBlock().breakNaturally();
                 });
             } else {
-                if (pl == PlayerLogic.getPlayerId(p)
-                     || ( p.hasPermission("evershop.admin.remove")
-                         && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
-                    ){
-                    Bukkit.getScheduler().runTask(plugin, ()->{
-                        pendingRemoveBlocks.remove(loc);
-                        DataLogic.removeShop(loc);
-                        loc.getBlock().breakNaturally();
-                    });
-                } else {
-                    Bukkit.getScheduler().runTask(plugin, ()->{
-                        pendingRemoveBlocks.remove(loc);
-                        send("You cannot break this!", p);
-                    });
-                }
+                Bukkit.getScheduler().runTask(plugin, ()->{
+                    pendingRemoveBlocks.remove(loc);
+                    send("You cannot break this!", p);
+                });
             }
         });
     }
@@ -481,7 +479,7 @@ public class ShopLogic {
                     int count = DataLogic.getBlockLinkedCount(loca);
                     if (count > 0){
                         Bukkit.getScheduler().runTask(plugin, ()->{
-                            send("you cannot break this block because there are shops attached on it", p);
+                            send("you cannot break this block because there are shops linked to it", p);
                             pendingRemoveBlocks.remove(loc);
                         });
                         return;

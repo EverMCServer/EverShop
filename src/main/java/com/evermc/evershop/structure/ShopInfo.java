@@ -20,14 +20,25 @@ import static com.evermc.evershop.util.LogUtil.severe;
 
 public class ShopInfo {
 
+    // Shop UID
     private int id;
+
+    // Shop creation time
     private int epoch;
+
+    // Shop transaction type
     private int action_id;
+
+    // Shop owner pid
     private int player_id;
+
+    // Shop sign location
     private int world_id;
     private int x;
     private int y;
     private int z;
+
+    // Shop price
     private int price;
     /**
      *  BUY, IBUY:      itemOut = shopitem, itemIn = null
@@ -45,7 +56,14 @@ public class ShopInfo {
      */
     private HashSet<SerializableLocation> targetOut;
     private HashSet<SerializableLocation> targetIn;
+
+    // Extra Infomation
     private ExtraInfo extra;
+
+    // Shop revision. 
+    // Only rev=0 is available shop, others are old shops which share the same location with the current shop.
+    // A bigger rev means an older shop
+    private int rev;
 
     // Create a new shop. shopid will be generated after save to the database
     public ShopInfo(int action_id, PlayerInfo pi, Location shoploc, int price){
@@ -61,6 +79,7 @@ public class ShopInfo {
             price = Math.abs(price);
         this.price = price;
         this.extra = new ExtraInfo();
+        this.rev = 0;
         // items record
         if (TransactionLogic.itemsetCount(action_id) == 0){
             this.itemOut = new HashSet<ItemStack>();
@@ -115,6 +134,7 @@ public class ShopInfo {
             result.itemOut = items[0];
             result.itemIn = items[1];
             result.extra = ExtraInfo.fromJson((String) data[11]);
+            result.rev = SQL.getInt(data[12]);
             return result;
         }catch(Exception e){
             e.printStackTrace();
@@ -143,7 +163,7 @@ public class ShopInfo {
     public String toString(){
         return "ShopInfo{id=" + this.id +", epoch=" + this.epoch + ", action_id=" + this.action_id + ", player_id=" + this.player_id + ", world_id=" + this.world_id
          + ", x=" + this.x + ", y=" + this.y + ", z=" + this.z + ", price=" + this.price + ", targetOut=" + this.targetOut + ", targetIn=" + this.targetIn + ", itemOut="
-         + this.itemOut + ", itemIn=" + this.itemIn + ", extra=" + this.extra + "}";
+         + this.itemOut + ", itemIn=" + this.itemIn + ", extra=" + this.extra + ", rev=" + this.rev + "}";
     }
 
     public int getId(){
@@ -205,6 +225,10 @@ public class ShopInfo {
 
     public ExtraInfo getExtraInfo(){
         return this.extra;
+    }
+
+    public int getRev(){
+        return this.rev;
     }
 
     public HashSet<ItemStack> getItemOut(){

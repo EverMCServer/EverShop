@@ -86,8 +86,9 @@ public class DataLogic{
               "targets blob NOT NULL," +
               "items blob NOT NULL," +
               "extra varchar(1024) NOT NULL," +
+              "rev int(10) NOT NULL," +
               "PRIMARY KEY (id)," +
-              "UNIQUE KEY world_id (world_id,x,y,z)," +
+              "UNIQUE KEY world_id (world_id,x,y,z,rev)," +
               "KEY player_id (player_id)" +
             ") ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 
@@ -150,7 +151,8 @@ public class DataLogic{
               "targets BLOB NOT NULL," +
               "items BLOB NOT NULL," +
               "extra varchar(1024) NOT NULL," +
-              "UNIQUE (world_id,x,y,z)" +
+              "rev INTEGER NOT NULL," +
+              "UNIQUE (world_id,x,y,z,rev)" +
             ");",
 
             "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "player` (" +
@@ -254,7 +256,7 @@ public class DataLogic{
     }
 
     private static boolean initShops() {
-        String query = "SELECT id,world_id,x,y,z FROM `" + SQL.getPrefix() + "shop`";
+        String query = "SELECT id,world_id,x,y,z FROM `" + SQL.getPrefix() + "shop` WHERE rev = '0'";
 
         List<Object[]> ret = SQL.query(query, 5);
         if (ret == null) {
@@ -279,7 +281,13 @@ public class DataLogic{
 
     public static void removeShop(final Location loc){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+            String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+            + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND `rev` = '0'";
+            Object[] ret = SQL.queryFirst(query, 13);
+            if (ret == null) {
+                return;
+            }
+            query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = `rev` + 1 WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
              + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
             SQL.exec(query);
         });
@@ -287,7 +295,12 @@ public class DataLogic{
 
     public static void removeShop(final int shopid){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "DELETE FROM `" + SQL.getPrefix() + "shop` WHERE `id` = '" + shopid + "'";
+            String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `id` = '" + shopid + "' AND `rev` = '0'";
+            Object[] ret = SQL.queryFirst(query, 13);
+            if (ret == null) {
+                return;
+            }
+            query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = `rev` + 1 WHERE `id` = '" + shopid + "'";
             SQL.exec(query);
         });
     }
@@ -297,7 +310,7 @@ public class DataLogic{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (" + (shop.getId() == 0?"null":("'"+shop.getId()+"'")) 
                 + ", '" + shop.getEpoch() + "', '" + shop.getAction() + "', '" + shop.getOwnerId() + "', '" + shop.getWorldID() 
                 + "', '" + shop.getX() + "', '" + shop.getY() + "', '" + shop.getZ() + "', '" + shop.getPrice()+ "', ?, ?, '" 
-                + shop.getExtra()+ "')";
+                + shop.getExtra()+ "', '0')";
             byte[] targets = SerializableLocation.serialize(shop.getTargetOut(), shop.getTargetIn());
             byte[] items = NBTUtil.serialize(shop.getItemOut(), shop.getItemIn());
             if (targets.length >= 65535 || items.length >= 65535){
@@ -379,8 +392,8 @@ public class DataLogic{
 
     public static ShopInfo getShopInfo(Location loc){
         String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
-        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
-        List<Object[]> ret = SQL.query(query, 12);
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND rev = '0'";
+        List<Object[]> ret = SQL.query(query, 13);
         if (ret.size() == 0){
             return null;
         }
@@ -388,9 +401,18 @@ public class DataLogic{
         return ShopInfo.decode(k);
     }
 
+    public static ShopInfo getShopInfo(int shopid){
+        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE id = '" + shopid + "' AND rev = '0'";
+        Object[] ret = SQL.queryFirst(query, 13);
+        if (ret == null){
+            return null;
+        }
+        return ShopInfo.decode(ret);
+    }
+
     public static int getShopOwner(Location loc){
         String query = "SELECT player_id FROM `" + SQL.getPrefix() + "shop` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
-        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND rev = '0'";
         Object[] ret = SQL.queryFirst(query, 1);
         if (ret == null){
             return 0;
@@ -398,67 +420,6 @@ public class DataLogic{
         int r = SQL.getInt(ret[0]);
         if (r == 0)severe("getShopOwner(" + loc + ")");
         return r;
-    }
-
-    public static ShopInfo[] getShopInfo(Location[] locs){
-        if (locs == null || locs.length == 0) return null;
-        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE ";
-        for (Location loc:locs){
-            query += "(`world_id` = '" + DataLogic.getWorldId(loc.getWorld()) + "' AND `x` = '" + 
-                loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "') OR ";
-        }
-        query = query.substring(0, query.length() - 4);
-
-        List<Object[]> ret = SQL.query(query, 12);
-        if (ret.size() == 0){
-            return null;
-        }
-        HashSet<ShopInfo> result = new HashSet<ShopInfo>();
-        for (Object[] k : ret){
-            result.add(ShopInfo.decode(k));
-        }
-        return result.toArray(new ShopInfo[result.size()]);
-    }
-
-    public static int[] getShopOwner(Location[] locs){
-        if (locs == null || locs.length == 0) return null;
-        String query = "SELECT player_id FROM `" + SQL.getPrefix() + "shop` WHERE ";
-        for (Location loc:locs){
-            query += "(`world_id` = '" + DataLogic.getWorldId(loc.getWorld()) + "' AND `x` = '" + 
-                loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "') OR ";
-        }
-        query = query.substring(0, query.length() - 4);
-
-        List<Object[]> ret = SQL.query(query, 1);
-        if (ret.size() == 0){
-            return null;
-        }
-        HashSet<Integer> result = new HashSet<Integer>();
-        for (Object[] k : ret){
-            if (k[0] instanceof Integer) result.add((int)k[0]);
-            else if (k[0] instanceof Long) result.add((int)(long)k[0]);
-            else severe("getShopOwner(): retval="+k[0]);
-        }
-        if (result.size() > 0){
-            int[] retval = new int[result.size()];
-            int i = 0;
-            for (Integer in:result){
-                retval[i] = in;
-                i++;
-            }
-            return retval;
-        }
-        return null;
-    }
-
-    public static ShopInfo getShopInfo(int shopid){
-        String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE id = '" + shopid + "'";
-        List<Object[]> ret = SQL.query(query, 12);
-        if (ret.size() == 0){
-            return null;
-        }
-        Object[] k = ret.get(0);
-        return ShopInfo.decode(k);
     }
 
     public static int getShopListLength(Player player){
@@ -469,18 +430,15 @@ public class DataLogic{
     public static int getShopListLength(PlayerInfo pi){
         String query = "SELECT count(*) FROM `" + SQL.getPrefix() + "shop` WHERE player_id = '" + pi.getId() + "'";
         Object[] ret = SQL.queryFirst(query, 1);
-        if (ret[0] instanceof Integer) return (int)ret[0];
-        else if (ret[0] instanceof Long) return (int)(long)ret[0];
-        severe("getShopListLength(" + pi.getName()+ "): retval="+ret[0]);
-        return 0;
+        return SQL.getInt(ret[0]);
     }
 
     // only basic infomation will be returned!
     public static ShopInfo[] getShopList(int player_id, int page){
-        String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null FROM `" + SQL.getPrefix() + 
+        String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null,rev FROM `" + SQL.getPrefix() + 
                 "shop` WHERE player_id = '" + player_id + "' ORDER BY `epoch` DESC LIMIT 10 OFFSET " + page*10;
 
-        List<Object[]> ret = SQL.query(query, 12);
+        List<Object[]> ret = SQL.query(query, 13);
         if (ret.size() == 0){
             return null;
         }
