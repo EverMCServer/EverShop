@@ -57,6 +57,9 @@ public class InteractEvent implements Listener{
         if (clicked == null){
             return;
         }
+        if (!event.getPlayer().hasPermission("evershop")) {
+            return;
+        }
         if (clicked.getState() instanceof Sign){
             if (event.getMaterial().name().endsWith("_DYE")){
                 // if clicked with a dye, return

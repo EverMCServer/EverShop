@@ -32,7 +32,7 @@
 - [ ] 移植fabric
 - [x] shopinfo缓存及牌子特征标识（meta?）
 - [ ] 收税。（最高税率应为10%， 因为钻石售价444， 收购价400）
-- [ ] hook wg， 防止链接他人箱子
+- [x] hook wg， 防止链接他人箱子
 
 ## 如果你想测试
 
@@ -99,12 +99,12 @@ dispose
  /es info 查看视线指向商店信息(evershop.info/evershop.info.others)
  /es info shopid 查看指定商店信息(evershop.info/evershop.info.others)
  /es log [shopid] 查看购买记录(evershop.info/evershop.info.others)
- /es set [shopid] permission type [none/blacklist/whitelist] 设置使用权限类型(evershop.set.perm/evershop.admin.perm)
- /es set [shopid] permission add u:<username>/g:<groupname> 添加用户/组到名单(evershop.set.perm/evershop.admin.perm)
- /es set [shopid] permission remove u:<username>/g:<groupname> 移除用户/组(evershop.set.perm/evershop.admin.perm)
- /es set [shopid] text [1-4] [text]  设置牌子显示内容(evershop.set.text/evershop.admin.text) {注意检测第一行内容}
- /es set [shopid] price [price]  设置商店价格(evershop.set.price/evershop.admin.price) {注意修改牌子内容}
- /es set [shopid] time [time]  设置红石开启时间，只能用于device牌子(evershop.set.time/evershop.admin.time)
+ /es set [shopid] permission type [none/blacklist/whitelist] 设置使用权限类型(evershop.set.perm/evershop.admin)
+ /es set [shopid] permission add u:<username>/g:<groupname> 添加用户/组到名单(evershop.set.perm/evershop.admin)
+ /es set [shopid] permission remove u:<username>/g:<groupname> 移除用户/组(evershop.set.perm/evershop.admin)
+ /es set [shopid] text [1-4] [text]  设置牌子显示内容(evershop.set.text/evershop.admin) {注意检测第一行内容}
+ /es set [shopid] price [price]  设置商店价格(evershop.set.price/evershop.admin) {注意修改牌子内容}
+ /es set [shopid] duration [time]  设置红石开启时间，只能用于device牌子(evershop.set.duration/evershop.admin)
  /es advanced 切换高级模式（高级功能比如交易商店需要）(evershop.advance)
  /es inspect 切换查看模式 （点击牌子不会交易，只查看信息）(evershop.inspect)
  /es help 帮助（与/es相同）
@@ -117,6 +117,7 @@ dispose
 玩家权限
 
 ```
+evershop             基本权限。显示帮助、链接物品
 evershop.advanced    切换高级模式
 evershop.info        查看商店信息
 evershop.inspect     切换inspect模式
@@ -125,7 +126,7 @@ evershop.set         商店设置参数权限
 evershop.set.perm    设置使用权限
 evershop.set.text    修改牌子文字
 evershop.set.price   修改价格
-evershop.set.time    设置红石开启时长
+evershop.set.duration    设置红石开启时长
 evershop.create.[type] 创建type类型商店
 evershop.multiworld  创建跨世界商店
 ```

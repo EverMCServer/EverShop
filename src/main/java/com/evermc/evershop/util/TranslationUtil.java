@@ -87,7 +87,7 @@ public class TranslationUtil {
     }
 
     public static void send(BaseComponent msg, Player player){
-        player.spigot().sendMessage(new ComponentBuilder("[EverShop]").color(ChatColor.DARK_AQUA).append(msg).color(ChatColor.WHITE).create());
+        player.spigot().sendMessage(new ComponentBuilder("[EverShop] ").color(ChatColor.DARK_AQUA).append(msg).color(ChatColor.WHITE).create());
     }
 
     public static void send(String msg, Player player){

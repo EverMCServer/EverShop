@@ -108,6 +108,9 @@ public abstract class AbstractCommand {
     }
 
     public List<String> tablist(CommandSender sender, String[] args, String cmd) {
+        if (!sender.hasPermission(this.permission)){
+            return new ArrayList<String>();
+        }
         if (args.length > 1) {
             String[] arg_new = Arrays.copyOfRange(args, 1, args.length);
             for (AbstractCommand sub : this.children){
