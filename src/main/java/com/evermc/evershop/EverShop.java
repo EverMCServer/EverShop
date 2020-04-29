@@ -2,6 +2,7 @@ package com.evermc.evershop;
 
 import com.evermc.evershop.event.InteractEvent;
 import com.evermc.evershop.handler.VaultHandler;
+import com.evermc.evershop.handler.WorldGuardHandler;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
@@ -55,12 +56,15 @@ public class EverShop extends JavaPlugin {
         TranslationUtil.init(this);
         RedstoneUtil.init();
         NBTUtil.init();
+        WorldGuardHandler.init(this);
     }  
 
     public void reload(){
+        reloadConfig();
         ShopLogic.reload(this);
         TransactionLogic.reload(this);
         TranslationUtil.reload(this);
+        WorldGuardHandler.reload(this);
     }
 
     public static EverShop getInstance() {

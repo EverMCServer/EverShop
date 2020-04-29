@@ -36,6 +36,13 @@ evershop:
     BUY: [出售, 卖]
     SELL: 收购
 
+  # hooks
+  worldguard:
+    # configure whether players can link chests/components in regions.
+    #  - none : player can link everything
+    #  - flag : player can only link blocks in regions that he can access chests and redstone components
+    #  - member : player can only link blocks in regions which he is a member/owner of
+    restrict_link: member
   # TODO - tax logic
   tax:
     consumption_tax:

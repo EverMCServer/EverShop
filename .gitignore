@@ -1,6 +1,7 @@
 *.class
 .settings
 .classpath
+.factorypath
 bin
 /dependency-reduced-pom.xml
 *.jar
