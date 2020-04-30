@@ -296,6 +296,12 @@ public class ShopLogic {
                     send("You can link at most one chest to a dispose shop", p);
                     return true;
                 }
+                if (actionid == TransactionLogic.ITRADE.id() || actionid == TransactionLogic.TRADE.id()) {
+                    if (player.getReg1().size() == 0 || player.getReg2().size() == 0) {
+                        send("You should register items first!", p);
+                        return true;
+                    }
+                }
                 if (player.isContainer() != TransactionLogic.isContainerShop(actionid)){
                     send("Shop type and your selection is not match!", p);
                     return true;
@@ -457,19 +463,19 @@ public class ShopLogic {
         }else{
             loc = lo;
         }
+        
+        // first, check attached blocks
+        for (Location loca : locs) {
+            if (ShopLogic.isShopSign(loca.getBlock())) {
+                send("You cannot break this block because there are shops attached to it", p);
+                return;
+            }
+        }
+
         if (pendingRemoveBlocks.contains(loc)){
             return;
         }
         pendingRemoveBlocks.add(loc);
-
-        // first, check attached blocks
-        for (Location loca : locs) {
-            if (ShopLogic.isShopSign(loca.getBlock())) {
-                send("You cannot break this block because there are shops attached on it", p);
-                pendingRemoveBlocks.remove(loc);
-                return;
-            }
-        }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             if (blocs != null){
@@ -478,8 +484,8 @@ public class ShopLogic {
                     if (count > 0){
                         Bukkit.getScheduler().runTask(plugin, ()->{
                             send("You cannot break this block because there are shops linked to it", p);
-                            pendingRemoveBlocks.remove(loc);
                         });
+                        pendingRemoveBlocks.remove(loc);
                         return;
                     }
                 }
@@ -488,19 +494,21 @@ public class ShopLogic {
             if (!isLinkableBlock(blocktype)){
                 // not a linkable block, break it
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    pendingRemoveBlocks.remove(loc);
                     lo.getBlock().breakNaturally();
                 });
+                pendingRemoveBlocks.remove(loc);
+                return;
             }
             final ShopInfo[] si = DataLogic.getBlockInfo(loc);
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    pendingRemoveBlocks.remove(loc);
                     lo.getBlock().breakNaturally();
                 });
+                pendingRemoveBlocks.remove(loc);
+                return;
             } else {
+                pendingRemoveBlocks.remove(loc);
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    pendingRemoveBlocks.remove(loc);
                     String loc_str = "";
                     int count = 0;
                     int tcount = 0;
