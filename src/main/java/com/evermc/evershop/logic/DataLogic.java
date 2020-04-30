@@ -290,13 +290,15 @@ public class DataLogic{
             if (SQL instanceof MySQLDataSource) {
                 query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = `rev` + 1 WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
                 + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' ORDER BY rev DESC";
+                SQL.exec(query);
             } else {
                 query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = - (`rev` + 1) WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
-                + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND `rev` > 0;";
-                query += "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = - `rev` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+                + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND `rev` >= 0";
+                SQL.exec(query);
+                query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = - `rev` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
                 + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "' AND `rev` < 0";
+                SQL.exec(query);
             }
-            SQL.exec(query);
         });
     }
 
