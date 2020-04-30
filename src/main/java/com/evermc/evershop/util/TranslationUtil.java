@@ -240,11 +240,17 @@ public class TranslationUtil {
     }
     
     public static BaseComponent tr(ItemStack is){
+        return tr(is, true);
+    }
+
+    public static BaseComponent tr(ItemStack is, boolean showAmount){
         
         TextComponent message = new TextComponent();
 
         message.setColor(ChatColor.YELLOW);
-        message.setText(is.getAmount() + " ");
+        if (showAmount) {
+            message.setText(is.getAmount() + " ");
+        }
         message.addExtra(_tr(is));
         
         if (is.hasItemMeta() && is.getItemMeta().hasDisplayName()){

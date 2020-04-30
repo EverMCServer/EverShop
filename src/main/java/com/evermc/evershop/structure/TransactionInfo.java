@@ -88,7 +88,7 @@ public class TransactionInfo{
         }
         if (si.getAction() == TransactionLogic.ISLOT.id() || si.getAction() == TransactionLogic.SLOT.id()){
             this.extra = si.getExtraInfo();
-            this.slotMap = extra.slotItemMap(si.getItemOut());
+            this.slotMap = ExtraInfo.slotItemMap(si.getItemOut());
         }
     }
     

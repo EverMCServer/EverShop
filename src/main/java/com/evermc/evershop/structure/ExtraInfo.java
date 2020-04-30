@@ -144,6 +144,9 @@ public class ExtraInfo {
     public int getDuration() {
         return this.rc_ticks;
     }
+    public HashMap<String, String> getSlotPossibilityMap(){
+        return this.slot;
+    }
     public void initSlot(Set<ItemStack> items) {
         this.slot = new HashMap<String,String>();
         MessageDigest messageDigest;
@@ -214,7 +217,7 @@ public class ExtraInfo {
         }
         else  return new AbstractMap.SimpleEntry<String, Integer>(entry.getKey(), amount);
     }
-    public HashMap<String,ItemStack> slotItemMap(Set<ItemStack> items){
+    public static HashMap<String,ItemStack> slotItemMap(Set<ItemStack> items){
         MessageDigest messageDigest;
         HashMap<String,ItemStack> ret = new HashMap<String,ItemStack>();
         try {

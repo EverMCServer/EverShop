@@ -73,6 +73,7 @@
 'Main selection:': '左键选择:'
 'Sub selection:': '右键选择:'
 'no permission': '没有权限'
+'Click to edit': '点击这里编辑'
 
 'off': '关闭'
 'on': '开启'
@@ -88,6 +89,11 @@
 'Player %1$s is not in the list!': '玩家%1$s不在列表中'
 'Group %1$s is not in the list!': '玩家组%1$s不在列表中'
 'Shop type should not change': '你不能修改商店类型'
+'ShopInfo save failed': '商店信息保存失败，请联系管理'
+'not a slot shop': '这不是一个抽奖箱商店'
+'[win %1$s: p=%2$s] ': '[抽到%1$s个:概率=%2$s] '
+'Possibility List: (%1$s possibilitis in total)': '概率列表: (总共有%1$s种可能)'
+'Slot Shop #%1$s Infomation': '抽奖商店#%1$s信息'
 
 'EverShop Help': 'EverShop 帮助菜单'
 'Toggle advance mode': '切换高级模式'

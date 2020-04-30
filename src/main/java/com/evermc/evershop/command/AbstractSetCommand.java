@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import static com.evermc.evershop.util.LogUtil.severe;
+import static com.evermc.evershop.util.TranslationUtil.send;
 
 public abstract class AbstractSetCommand extends AbstractCommand {
 
@@ -88,7 +89,7 @@ public abstract class AbstractSetCommand extends AbstractCommand {
                             return true;
                         }
                     }
-                    player.sendMessage("please look at a actived shop sign");
+                    send("please look at a actived shop sign", player);
                     return true;
                 } 
             }
@@ -114,13 +115,13 @@ public abstract class AbstractSetCommand extends AbstractCommand {
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), () -> {
             ShopInfo si = DataLogic.getShopInfo(shopid);
             if (si == null) {
-                sender.sendMessage("Shop #" + shopid + " not found!");
+                send("shop not found", sender);
                 this.help(sender);
                 return;
             }
             if (!sender.hasPermission("evershop.set.admin")){
                 if (!(sender instanceof Player) || PlayerLogic.getPlayerId((Player)sender) != si.getOwnerId()) {
-                    sender.sendMessage("No permission.");
+                    send("no permission", sender);
                     return;
                 }
             }
@@ -128,7 +129,7 @@ public abstract class AbstractSetCommand extends AbstractCommand {
                 this.help(sender);
                 return;
             }
-            DataLogic.saveShop(si, (a) -> sender.sendMessage("ShopInfo save ok"), () -> sender.sendMessage("ShopInfo save failed"));
+            DataLogic.saveShop(si, (a) -> {}, () -> send("ShopInfo save failed", sender));
         });
     }
 

@@ -61,6 +61,10 @@ public class LogCommand extends AbstractCommand {
     private void show_log(final CommandSender player, final int shopid){
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{
             final ShopInfo si = DataLogic.getShopInfo(shopid);
+            if (si == null){
+                send("shop not found", player);
+                return;
+            }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
                     send("no permission", player);
