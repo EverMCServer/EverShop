@@ -86,16 +86,25 @@ public class TranslationUtil {
         }
     }
 
-    public static void send(BaseComponent msg, Player player){
-        player.spigot().sendMessage(new ComponentBuilder("[EverShop] ").color(ChatColor.DARK_AQUA).append(msg).color(ChatColor.WHITE).create());
+    public static void send(BaseComponent msg, CommandSender sender){
+        BaseComponent tc = new TextComponent("");
+        tc.addExtra(title());
+        tc.addExtra(msg);
+        sender.spigot().sendMessage(tc);
     }
 
-    public static void send(String msg, Player player){
-        send(tr(msg, player), player);
+    public static BaseComponent title(){
+        TextComponent tc = new TextComponent("[EverShop] ");
+        tc.setColor(ChatColor.DARK_AQUA);
+        return tc;
     }
 
-    public static void send(String msg, Player player, Object...obj){
-        send(tr(msg, player, obj), player);
+    public static void send(String msg, CommandSender sender){
+        send(tr(msg, sender), sender);
+    }
+
+    public static void send(String msg, CommandSender sender, Object...obj){
+        send(tr(msg, sender, obj), sender);
     }
 
     enum ColorTr{

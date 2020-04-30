@@ -78,6 +78,9 @@ public class ShopInfo {
         if (action_id != TransactionLogic.ITRADE.id() && action_id != TransactionLogic.TRADE.id())
             price = Math.abs(price);
         this.price = price;
+        if (action_id == TransactionLogic.DONATEHAND.id() || action_id == TransactionLogic.DISPOSE.id()) {
+            this.price = 0;
+        }
         this.extra = new ExtraInfo();
         this.rev = 0;
         // items record

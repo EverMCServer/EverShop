@@ -189,7 +189,10 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("BUY_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have bought %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have bought %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case SELL:
@@ -211,7 +214,10 @@ public enum TransactionLogic {
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("SELL_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have sold %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have sold %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case IBUY:
@@ -227,7 +233,10 @@ public enum TransactionLogic {
             ti.playerPayMoney();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("BUY_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have bought %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have sold %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case ISELL:
@@ -239,7 +248,10 @@ public enum TransactionLogic {
             ti.playerGiveMoney();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("SELL_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have sold %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have sold %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case ITRADE:
@@ -266,7 +278,10 @@ public enum TransactionLogic {
             }
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("TRADE_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have traded %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have sold %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case TRADE:
@@ -310,7 +325,10 @@ public enum TransactionLogic {
             }
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             ite = ShopLogic.itemToString(si);
-            send("you have %1$s %2$s for %3$s!", p, tr("TRADE_AS_USER", p), ite[0], ite[1]);
+            send("%1$s have traded %2$s for %3$s!", p, tr("You", p), ite[0], ite[1]);
+            if (!ti.isOwner()){
+                send("%1$s have sold %2$s for %3$s!", p, ti.getPlayerName(), ite[0], ite[1]);
+            }
             break;
 
             case TOGGLE:
@@ -326,7 +344,10 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             ti.toggleRS();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s for %3$s!", p, tr("TOGGLE_AS_USER", p), "", "$" + si.getPrice());
+            send("%1$s have toggled the devices for %2$s!", p, tr("You", p), "$" + si.getPrice());
+            if (!ti.isOwner()){
+                send("%1$s have toggled the devices for %2$s!", p, ti.getPlayerName(), "$" + si.getPrice());
+            }
             break;
 
             case DEVICEON:
@@ -342,7 +363,10 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             ti.turnOnRS();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s for %3$s!", p, tr("DEVICEON_AS_USER", p), "", "$" + si.getPrice());
+            send("%1$s have activated the devices for %2$s!", p, tr("You", p), "$" + si.getPrice());
+            if (!ti.isOwner()){
+                send("%1$s have activated the devices for %2$s!", p, ti.getPlayerName(), "$" + si.getPrice());
+            }
             break;
 
             case DEVICEOFF:
@@ -358,7 +382,10 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             ti.turnOffRS();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s for %3$s!", p, tr("DEVICEOFF_AS_USER", p), "", "$" + si.getPrice());
+            send("%1$s have deactivated the devices for %2$s!", p, tr("You", p), "$" + si.getPrice());
+            if (!ti.isOwner()){
+                send("%1$s have deactivated the devices for %2$s!", p, ti.getPlayerName(), "$" + si.getPrice());
+            }
             break;
 
             case DEVICE:
@@ -374,7 +401,10 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             ti.turnOnDurationRS();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s for %3$s!", p, tr("DEVICE_AS_USER", p), "", "$" + si.getPrice());
+            send("%1$s have used the devices for %2$s!", p, tr("You", p), "$" + si.getPrice());
+            if (!ti.isOwner()){
+                send("%1$s have used the devices for %2$s!", p, ti.getPlayerName(), "$" + si.getPrice());
+            }
             break;
             
             case DONATEHAND:
@@ -389,7 +419,10 @@ public enum TransactionLogic {
             ti.playerRemoveItems();
             ti.shopGiveItems();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s!", p, tr("DONATEHAND_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+            send("%1$s have donated %2$s!", p, tr("You", p), tr(ti.getItemsIn().iterator().next()));
+            if (!ti.isOwner()){
+                send("%1$s have donated %2$s!", p, ti.getPlayerName(), tr(ti.getItemsIn().iterator().next()));
+            }
             break;
 
             case DISPOSE:
@@ -398,13 +431,19 @@ public enum TransactionLogic {
             }
             if (si.getTargetIn().size() == 0) {
                 ti.playerRemoveItems();
-                send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+                send("%1$s have disposed %2$s!", p, tr("You", p), tr(ti.getItemsIn().iterator().next()));
+                if (!ti.isOwner()){
+                    send("%1$s have disposed %2$s!", p, ti.getPlayerName(), tr(ti.getItemsIn().iterator().next()));
+                }
                 break;
             }
             ti.playerRemoveItems();
             ti.shopDispose();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
-            send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
+            send("%1$s have disposed %2$s!", p, tr("You", p), tr(ti.getItemsIn().iterator().next()));
+            if (!ti.isOwner()){
+                send("%1$s have disposed %2$s!", p, ti.getPlayerName(), tr(ti.getItemsIn().iterator().next()));
+            }
             break;
 
             case ISLOT:
@@ -419,7 +458,10 @@ public enum TransactionLogic {
             ti.playerPayMoney();
             slotItem = ti.playerGiveSlot();
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
-            send("you have %1$s %2$s!", p, tr("ISLOT_AS_USER", p), tr(slotItem));
+            send("%1$s won %2$s!", p, tr("You", p), tr(slotItem));
+            if (!ti.isOwner()){
+                send("%1$s won %2$s!", p, ti.getPlayerName(), tr(slotItem));
+            }
             break;
 
             case SLOT:
@@ -440,7 +482,10 @@ public enum TransactionLogic {
             slotItem = ti.playerGiveSlot();
             ti.shopRemoveItems(slotItem);
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
-            send("you have %1$s %2$s!", p, tr("SLOT_AS_USER", p), tr(slotItem));
+            send("%1$s won %2$s!", p, tr("You", p), tr(slotItem));
+            if (!ti.isOwner()){
+                send("%1$s won %2$s!", p, ti.getPlayerName(), tr(slotItem));
+            }
             break;
 
             default:

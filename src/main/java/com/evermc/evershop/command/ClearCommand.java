@@ -3,7 +3,7 @@ package com.evermc.evershop.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static com.evermc.evershop.util.TranslationUtil.tr;
+import static com.evermc.evershop.util.TranslationUtil.send;
 
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.structure.PlayerInfo;
@@ -18,7 +18,7 @@ public class ClearCommand extends AbstractCommand {
         return true;
     }
     public boolean executeAs(CommandSender sender, String[] args){
-        sender.spigot().sendMessage(tr("This command must be executed by players"));
+        send("This command must be executed by players", sender);
         return true;
     }
 }

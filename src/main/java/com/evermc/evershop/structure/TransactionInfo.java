@@ -91,6 +91,14 @@ public class TransactionInfo{
             this.slotMap = extra.slotItemMap(si.getItemOut());
         }
     }
+    
+    public boolean isOwner(){
+        return this.owner.getUniqueId().equals(this.player.getUniqueId());
+    }
+
+    public String getPlayerName(){
+        return this.player.getName();
+    }
 
     private void addAllTargets(Set<Inventory> out, Set<SerializableLocation> locs){
         for (SerializableLocation loc : locs){

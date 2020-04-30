@@ -112,15 +112,12 @@ public class ShopLogic {
                     p.sendMessage("no permission.");
                     return;
                 }
-                BaseComponent[] t = itemToString(si);
-                final BaseComponent str = TranslationUtil.tr("%1$s shop %2$s %3$s for %4$s!", p, 
-                    PlayerLogic.getPlayerName(si.getOwnerId()), 
-                    tr(TransactionLogic.getEnum(si.getAction()).name() + "_AS_OWNER", p), 
-                    t[0] == null? "" : t[0] , t[1]);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
-                    p.spigot().sendMessage(str);
+                    BaseComponent[] t = itemToString(si);
+                    send("%1$s " + TransactionLogic.getEnum(si.getAction()).name() + " shop %2$s for %3$s!", p, 
+                    PlayerLogic.getPlayerName(si.getOwnerId()), t[0] , t[1]);
                 });
             } else {
                 if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
@@ -296,7 +293,7 @@ public class ShopLogic {
                     return true;
                 }
                 if (actionid == TransactionLogic.DISPOSE.id() && player.getReg1().size() > 1) {
-                    send("You can only link no more than 1 chest to a dispose shop.", p);
+                    send("You can link at most one chest to a dispose shop", p);
                     return true;
                 }
                 if (player.isContainer() != TransactionLogic.isContainerShop(actionid)){
@@ -338,8 +335,8 @@ public class ShopLogic {
                     PlayerLogic.getPlayerInfo(p).removeRegs();
                     sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), shopid));
                     BaseComponent[] t = itemToString(newshop);
-                    send("You have created a shop %1$s %2$s for %3$s!", p, 
-                        tr(TransactionLogic.getEnum(newshop.getAction()).name() + "_AS_OWNER", p), t[0] == null? "": t[0] , t[1]);
+                    send("setup " + TransactionLogic.getEnum(newshop.getAction()).name() + " shop %1$s for %2$s!", p, 
+                         t[0] , t[1]);
                 }, () -> {
                     send("Failed to create shop, maybe you put too many items in the shop", p);
                 });
@@ -400,6 +397,7 @@ public class ShopLogic {
                 }
             }
             result.addExtra("\n");
+            result.addExtra(TranslationUtil.title());
             result.addExtra(tr("Sub selection:", p));
             it = player.getReg2Items().iterator();
             while (it.hasNext()) {
@@ -422,7 +420,7 @@ public class ShopLogic {
         Location[] signs = ShopLogic.getAttachedSign(loc.getBlock());
         for (Location loca : signs) {
             if (ShopLogic.isShopSign(loca.getBlock())) {
-                send("you cannot break this block because there are shops attached on it", p);
+                send("You cannot break this block because there are shops attached to it", p);
                 pendingRemoveBlocks.remove(loca);
                 return;
             }
@@ -446,7 +444,7 @@ public class ShopLogic {
             } else {
                 Bukkit.getScheduler().runTask(plugin, ()->{
                     pendingRemoveBlocks.remove(loc);
-                    send("You cannot break this!", p);
+                    send("You cannot remove others shop!", p);
                 });
             }
         });
@@ -467,7 +465,7 @@ public class ShopLogic {
         // first, check attached blocks
         for (Location loca : locs) {
             if (ShopLogic.isShopSign(loca.getBlock())) {
-                send("you cannot break this block because there are shops attached on it", p);
+                send("You cannot break this block because there are shops attached on it", p);
                 pendingRemoveBlocks.remove(loc);
                 return;
             }
@@ -479,7 +477,7 @@ public class ShopLogic {
                     int count = DataLogic.getBlockLinkedCount(loca);
                     if (count > 0){
                         Bukkit.getScheduler().runTask(plugin, ()->{
-                            send("you cannot break this block because there are shops linked to it", p);
+                            send("You cannot break this block because there are shops linked to it", p);
                             pendingRemoveBlocks.remove(loc);
                         });
                         return;
