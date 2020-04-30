@@ -442,23 +442,24 @@ public class TransactionInfo{
         return item;
     }
 
+    private static int abs(int k){
+        return k<0?(-k):(k);
+    }
+
     public void playerPayMoney(){
-        TaxLogic.withdraw(this.player, this.price);
+        TaxLogic.withdraw(this.player, abs(this.price));
     }
 
     public void playerGiveMoney(){
-        if (this.price >= 0)
-        TaxLogic.deposit(this.player, this.price);
-        else 
-        TaxLogic.deposit(this.player, -this.price);
+        TaxLogic.deposit(this.player, abs(this.price));
     }
 
     public void shopPayMoney(){
-        TaxLogic.withdraw(this.owner, this.price);
+        TaxLogic.withdraw(this.owner, abs(this.price));
     }
 
     public void shopGiveMoney(){
-        TaxLogic.deposit(this.owner, this.price);
+        TaxLogic.deposit(this.owner, abs(this.price));
     }
 
     public int getPrice(){
