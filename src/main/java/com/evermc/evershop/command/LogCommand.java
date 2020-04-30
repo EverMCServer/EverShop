@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.evermc.evershop.EverShop;
+import static com.evermc.evershop.util.TranslationUtil.send;
 
 public class LogCommand extends AbstractCommand {
     public LogCommand() {
@@ -32,13 +33,13 @@ public class LogCommand extends AbstractCommand {
                     return true;
                 }
             }
-            player.sendMessage("please look at a actived shop sign");
+            send("please look at a actived shop sign", player);
         } else {
             try{
-                int shopid = Integer.parseInt(args[1]);
+                int shopid = Integer.parseInt(args[0]);
                 show_log(player, shopid);
             } catch (Exception e){
-                player.sendMessage("Invalid shopid: " + args[1]);
+                send("Invalid shopid: %1$s", player, args[0]);
             }
         }
         return true;
@@ -51,7 +52,7 @@ public class LogCommand extends AbstractCommand {
                 int shopid = Integer.parseInt(args[0]);
                 show_log(sender, shopid);
             } catch (Exception e){
-                sender.sendMessage("Invalid shopid: " + args[0]);
+                send("Invalid shopid: %1$s", sender, args[0]);
             } 
         }
         return true;
@@ -62,7 +63,7 @@ public class LogCommand extends AbstractCommand {
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
-                    player.sendMessage("no permission");
+                    send("no permission", player);
                     return;
                 } else {
                     show_log(player, si);
@@ -76,12 +77,12 @@ public class LogCommand extends AbstractCommand {
     private void show_log(final CommandSender player, final ShopInfo si){
         // TODO - tellraw
         if (si == null){
-            player.sendMessage("shop not found");
+            send("shop not found", player);
             return;
         }
         int[][] re = DataLogic.getTransaction(si.getId());
         if (re == null){
-            player.sendMessage("no logs");
+            send("no logs", player);
             return;
         }
         ArrayList<String> msg = new ArrayList<String>();

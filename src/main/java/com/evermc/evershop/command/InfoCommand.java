@@ -6,8 +6,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static com.evermc.evershop.util.TranslationUtil.tr;
-
 import java.util.ArrayList;
 
 import com.evermc.evershop.EverShop;
@@ -17,6 +15,8 @@ import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.SerializableLocation;
+
+import static com.evermc.evershop.util.TranslationUtil.send;
 
 public class InfoCommand extends AbstractCommand {
     public InfoCommand() {
@@ -32,13 +32,13 @@ public class InfoCommand extends AbstractCommand {
                     return true;
                 }
             }
-            player.sendMessage("please look at a actived shop sign");
+            send("please look at a actived shop sign", player);
         } else {
             try{
                 int shopid = Integer.parseInt(args[0]);
                 show_info(player, shopid);
             } catch (Exception e){
-                player.sendMessage("Invalid shopid: " + args[0]);
+                send("Invalid shopid: %1$s", player, args[0]);
             }
         }
 
@@ -46,13 +46,13 @@ public class InfoCommand extends AbstractCommand {
     }
     public boolean executeAs(CommandSender sender, String[] args){
         if (args == null || args.length == 0){
-            sender.spigot().sendMessage(tr("use '" + this.getFullCommand() + "<shopid>'"));
+            send("use '" + this.getFullCommand() + "<shopid>'", sender);
         } else {
             try{
                 int shopid = Integer.parseInt(args[0]);
                 show_info(sender, shopid);
             } catch (Exception e){
-                sender.sendMessage("Invalid shopid: " + args[0]);
+                send("Invalid shopid: %1$s", sender, args[0]);
             }
         }
         return true;
@@ -63,7 +63,7 @@ public class InfoCommand extends AbstractCommand {
             final ShopInfo si = DataLogic.getShopInfo(shopid);
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
-                    player.sendMessage("no permission");
+                    send("no permission", player);
                     return;
                 } else {
                     show_info(player, si);
@@ -77,7 +77,7 @@ public class InfoCommand extends AbstractCommand {
     private void show_info(final CommandSender player, final ShopInfo si){
         // TODO - tellraw
         if (si == null){
-            player.sendMessage("shop not found");
+            send("shop not found", player);
             return;
         }
         ArrayList<String> msg = new ArrayList<String>();

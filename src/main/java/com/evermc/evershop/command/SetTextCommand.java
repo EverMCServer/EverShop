@@ -10,6 +10,8 @@ import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.ShopInfo;
 
+import static com.evermc.evershop.util.TranslationUtil.send;
+
 public class SetTextCommand extends AbstractSetCommand {
 
     public SetTextCommand(){
@@ -33,7 +35,7 @@ public class SetTextCommand extends AbstractSetCommand {
         if (line == 1) {
             int a = TransactionLogic.getId(text);
             if (a != si.getAction()) {
-                sender.sendMessage("Shop type should not change");
+                send("Shop type should not change", sender);
                 return true;
             }
         }

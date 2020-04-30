@@ -17,6 +17,8 @@ import com.evermc.evershop.structure.ExtraInfo;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
+import static com.evermc.evershop.util.TranslationUtil.send;
+
 public class SetPermissionCommand extends AbstractSetCommand {
 
     public SetPermissionCommand(){
@@ -62,13 +64,13 @@ class SetPermissionAddCommand extends AbstractSetCommand{
         ExtraInfo ei = si.getExtraInfo();
         if (args[0].startsWith("u:")) {
             if (!ei.permissionUserAdd(args[0].substring(2))) {
-                sender.sendMessage("No player named " + args[0].substring(2) + " found!");
+                send("No player named %1$s found!", sender, args[0].substring(2));
                 return false;
             }
             return true;
         } else if (args[0].startsWith("g:")) {
             if (!ei.permissionGroupAdd(args[0].substring(2))) {
-                sender.sendMessage("No group named " + args[0].substring(2) + " found!");
+                send("No group named %1$s found!", sender, args[0].substring(2));
                 return false;
             }
             return true;
@@ -91,13 +93,13 @@ class SetPermissionRemoveCommand extends AbstractSetCommand{
         ExtraInfo ei = si.getExtraInfo();
         if (args[0].startsWith("u:")) {
             if (!ei.permissionUserRemove(args[0].substring(2))) {
-                sender.sendMessage("Player " + args[0].substring(2) + " is not in the list!");
+                send("Player %1$s is not in the list!", sender, args[0].substring(2));
                 return false;
             }
             return true;
         } else if (args[0].startsWith("g:")) {
             if (!ei.permissionGroupRemove(args[0].substring(2))) {
-                sender.sendMessage("Group " + args[0].substring(2) + " is not in the list!");
+                send("Group %1$s is not in the list!", sender, args[0].substring(2));
                 return false;
             }
             return true;

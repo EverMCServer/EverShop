@@ -128,7 +128,9 @@ public abstract class AbstractCommand {
                     }
                 }            
             } else {
-                ret.add(this.parameters);
+                if (this.parameters != null){
+                    ret.add(this.parameters);
+                }
             }
             return ret;
         } else {
@@ -138,7 +140,9 @@ public abstract class AbstractCommand {
                     ret.add(sub.getName());
                 }
             } else {
-                ret.add(this.parameters);
+                if (this.parameters != null){
+                    ret.add(this.parameters);
+                }
             }
             return ret;
         }

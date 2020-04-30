@@ -17,6 +17,8 @@ import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
+import static com.evermc.evershop.util.TranslationUtil.send;
+
 public class ListCommand extends AbstractCommand {
     public ListCommand() {
         super("list", "evershop.list", "list shops", "[player] [page]");
@@ -96,13 +98,13 @@ public class ListCommand extends AbstractCommand {
         if (uuid == null){
             pi = PlayerLogic.getPlayerInfo(player);
             if (pi == null) {
-                sender.sendMessage("No player named " + player + " found!");
+                send("No player named %1$s found!", sender, player);
                 return;
             }
         } else {
             pi = PlayerLogic.getPlayerInfo(uuid);
             if (pi == null) {
-                sender.sendMessage("No uuid " + uuid + " found!");
+                send("No uuid %1$s found!", sender, uuid.toString());
                 return;
             }
         }
@@ -110,7 +112,7 @@ public class ListCommand extends AbstractCommand {
             int count = DataLogic.getShopListLength(pi);
             if (count == 0){
                 Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                    sender.sendMessage("No shops found!");
+                    send("shop not found", sender);
                 });
                 return;
             }
