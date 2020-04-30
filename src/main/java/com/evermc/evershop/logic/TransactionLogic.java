@@ -432,6 +432,7 @@ public enum TransactionLogic {
                 break;
             }
             ti.playerPayMoney();
+            ti.shopPayMoney();
             slotItem = ti.playerGiveSlot();
             ti.shopRemoveItems(slotItem);
             send("you have %1$s %2$s!", p, tr("SLOT_AS_USER", p), tr(slotItem));

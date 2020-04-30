@@ -232,7 +232,10 @@ public class TransactionInfo{
 
     // Only checks if player has itemsOut 
     public boolean playerCanHold(){
-        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != TransactionLogic.BUY.id()
+         && this.action_id != TransactionLogic.IBUY.id()
+          && this.action_id != TransactionLogic.TRADE.id()
+          && this.action_id != TransactionLogic.ITRADE.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }

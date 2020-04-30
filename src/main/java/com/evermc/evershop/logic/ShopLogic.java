@@ -468,7 +468,7 @@ public class ShopLogic {
         for (Location loca : locs) {
             if (ShopLogic.isShopSign(loca.getBlock())) {
                 send("you cannot break this block because there are shops attached on it", p);
-                pendingRemoveBlocks.remove(loca);
+                pendingRemoveBlocks.remove(loc);
                 return;
             }
         }

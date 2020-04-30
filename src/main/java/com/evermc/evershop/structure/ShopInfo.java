@@ -157,7 +157,7 @@ public class ShopInfo {
         if (avail){
             strBuilder.setCharAt(1, ChatColor.DARK_BLUE.getChar());
         }else{
-            strBuilder.setCharAt(1, ChatColor.RED.getChar());
+            strBuilder.setCharAt(1, ChatColor.DARK_RED.getChar());
         }
         sign.setLine(0, strBuilder.toString());
         sign.update();

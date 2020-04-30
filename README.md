@@ -24,7 +24,7 @@
   - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
-- [ ] 其他功能
+- [x] 其他功能
   - [x] slot/islot
   - [x] device/deviceOn/deviceOff
   - [x] donatehand
