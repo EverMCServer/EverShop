@@ -331,7 +331,12 @@ public class ShopLogic {
                     send("You should put some items in the chest first!", p);
                     return true;
                 }
-                final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), TransactionLogic.getPrice(line));
+                int price = TransactionLogic.getPrice(line);
+                String line4 = ((Sign)block.getState()).getLine(3);
+                if (price == 0) {
+                    price = TransactionLogic.getPrice(line4);
+                }
+                final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), price);
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {
                     String lin = sign.getLine(0);

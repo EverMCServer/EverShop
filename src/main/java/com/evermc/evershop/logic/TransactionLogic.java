@@ -115,6 +115,9 @@ public enum TransactionLogic {
     }
 
     public static int getPrice(String line){
+        if (line.length() == 0) {
+            return 0;
+        }
         String ret = "";
         line = ChatColor.stripColor(line);
         int i = line.length() - 1;
@@ -123,7 +126,7 @@ public enum TransactionLogic {
             ret = line.charAt(i) + ret;
         }
         if ("".equals(ret)) return 0;
-        if (line.charAt(i) == '-')
+        if (i >= 0 && line.charAt(i) == '-')
             return -Integer.parseInt(ret);
         else
             return Integer.parseInt(ret);
