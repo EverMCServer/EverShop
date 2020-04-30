@@ -30,7 +30,7 @@ public class SetTextCommand extends AbstractSetCommand {
         if (line < 1 || line > 4) {
             return false;
         }
-        final String text = ChatColor.stripColor(args[1]);
+        final String text = ChatColor.stripColor(args[1]).replaceAll("\\.", " ");
         final int linen = line - 1;
         if (line == 1) {
             int a = TransactionLogic.getId(text);

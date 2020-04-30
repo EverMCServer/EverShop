@@ -57,9 +57,6 @@ public class InteractEvent implements Listener{
         if (clicked == null){
             return;
         }
-        if (!event.getPlayer().hasPermission("evershop")) {
-            return;
-        }
         if (clicked.getState() instanceof Sign){
             if (event.getMaterial().name().endsWith("_DYE")){
                 // if clicked with a dye, return
@@ -70,6 +67,9 @@ public class InteractEvent implements Listener{
                 // if clicked on formatted signs, no need to register, so return
                 return;
             }
+        }
+        if (!event.getPlayer().hasPermission("evershop")) {
+            return;
         }
         if (event.getMaterial() == ShopLogic.getLinkMaterial()){
             boolean ret = ShopLogic.registerBlock(event.getPlayer(), clicked, event.getAction());
