@@ -128,6 +128,17 @@ public class DataLogic{
               "count int(10) NOT NULL," +
               "PRIMARY KEY (id)," +
               "UNIQUE KEY `uni` (shop_id,player_id,time)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8;",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "slot_transaction` (" +
+              "id int(10) NOT NULL AUTO_INCREMENT," +
+              "shop_id int(10) NOT NULL," +
+              "player_id int(10) NOT NULL," +
+              "time int(10) NOT NULL," +
+              "count int(10) NOT NULL," +
+              "itemkey varchar(64) NOT NULL," +
+              "amount int(10) NOT NULL," +
+              "PRIMARY KEY (id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8;"
         };
         
@@ -186,6 +197,16 @@ public class DataLogic{
               "time INTEGER NOT NULL," +
               "count INTEGER NOT NULL," +
               "UNIQUE (shop_id,player_id,time)" +
+            ");",
+
+            "CREATE TABLE IF NOT EXISTS `" + SQL.getPrefix() + "slot_transaction` (" +
+              "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+              "shop_id INTEGER NOT NULL," +
+              "player_id INTEGER NOT NULL," +
+              "time INTEGER NOT NULL," +
+              "count INTEGER NOT NULL," +
+              "itemkey varchar(64) NOT NULL," +
+              "amount INTEGER NOT NULL" +
             ");"
         };
         SQL.exec(query);
@@ -462,6 +483,13 @@ public class DataLogic{
         int time = (int)(System.currentTimeMillis()/1000/60); //create 1 record every minute
         String query = "INSERT INTO `" + SQL.getPrefix() + "transaction` VALUES (null, '" + shopid + "', '" 
         + playerid + "', '" + time + "', '1') " + SQL.ON_DUPLICATE("shop_id,player_id,time")+ " count = count + 1";
+        SQL.insert(query);
+    }
+
+    public static void recordTransaction(int shopid, int playerid, String key, int amount){
+        int time = (int)(System.currentTimeMillis()/1000/60); //create 1 record every minute
+        String query = "INSERT INTO `" + SQL.getPrefix() + "slot_transaction` VALUES (null, '" + shopid + "', '" 
+        + playerid + "', '" + time + "', '1', '" + key + "', '" + amount + "') ";
         SQL.insert(query);
     }
 

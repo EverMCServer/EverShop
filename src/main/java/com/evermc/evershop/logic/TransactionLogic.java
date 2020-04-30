@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.structure.ExtraInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.LogUtil;
@@ -387,6 +388,7 @@ public enum TransactionLogic {
             }
             ti.playerRemoveItems();
             ti.shopGiveItems();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             send("you have %1$s %2$s!", p, tr("DONATEHAND_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
             break;
 
@@ -401,6 +403,7 @@ public enum TransactionLogic {
             }
             ti.playerRemoveItems();
             ti.shopDispose();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p));
             send("you have %1$s %2$s!", p, tr("DISPOSE_AS_USER", p), tr(ti.getItemsIn().iterator().next()));
             break;
 
@@ -415,6 +418,7 @@ public enum TransactionLogic {
             }
             ti.playerPayMoney();
             slotItem = ti.playerGiveSlot();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
             send("you have %1$s %2$s!", p, tr("ISLOT_AS_USER", p), tr(slotItem));
             break;
 
@@ -435,6 +439,7 @@ public enum TransactionLogic {
             ti.shopPayMoney();
             slotItem = ti.playerGiveSlot();
             ti.shopRemoveItems(slotItem);
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
             send("you have %1$s %2$s!", p, tr("SLOT_AS_USER", p), tr(slotItem));
             break;
 

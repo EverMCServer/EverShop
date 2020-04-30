@@ -162,6 +162,20 @@ public class ExtraInfo {
             this.slot.put(byteToHex(re), "1:" + amount);
         }
     }
+    public static String getItemKey(ItemStack item){
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (Exception e) {
+            e.printStackTrace();
+            severe("ExtraInfo: Hash not supported!");
+            return null;
+        }
+        ItemStack it = item.clone();
+        it.setAmount(1);
+        byte[] re = messageDigest.digest(NBTUtil.toNBTString(it).getBytes(StandardCharsets.UTF_8));
+        return byteToHex(re);
+    }
     public int slotPossibilityAll() {
         int ret = 0;
         for (String posa:this.slot.values()){
