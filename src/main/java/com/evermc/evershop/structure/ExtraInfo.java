@@ -205,7 +205,7 @@ public class ExtraInfo {
                     e.printStackTrace();
                     severe("ExtraInfo: failed to decode slot possibility data");
                 }
-                if (place <= 0) return new AbstractMap.SimpleEntry<String, Integer>(entry.getKey(), amount);
+                if (place < 0) return new AbstractMap.SimpleEntry<String, Integer>(entry.getKey(), amount);
             }
         }
         if (entry == null) {
