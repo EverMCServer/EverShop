@@ -96,6 +96,10 @@ public class TransactionInfo{
         return this.owner.getUniqueId().equals(this.player.getUniqueId());
     }
 
+    public Player getOnlineOwner(){
+        return this.owner.getPlayer();
+    }
+
     public String getPlayerName(){
         return this.player.getName();
     }

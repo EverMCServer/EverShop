@@ -20,7 +20,7 @@
   - [x] /es set text
   - [x] /es set price
   - [x] /es set duration
-  - [ ] /es set slot
+  - [x] /es slot
   - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
