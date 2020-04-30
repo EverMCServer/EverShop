@@ -478,7 +478,7 @@ public enum TransactionLogic {
                 break;
             }
             ti.playerPayMoney();
-            ti.shopPayMoney();
+            ti.shopGiveMoney();
             slotItem = ti.playerGiveSlot();
             ti.shopRemoveItems(slotItem);
             DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
