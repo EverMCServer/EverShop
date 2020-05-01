@@ -3,6 +3,7 @@ package com.evermc.evershop.event;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.handler.uSkyBlockHandler;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
@@ -72,6 +73,11 @@ public class InteractEvent implements Listener{
             return;
         }
         if (event.getMaterial() == ShopLogic.getLinkMaterial()){
+            Player p = event.getPlayer();
+            if(!uSkyBlockHandler.isChallengeCompleted(p, "builder5")){
+                send("complete challenge to use", p);
+                return;
+            }
             boolean ret = ShopLogic.registerBlock(event.getPlayer(), clicked, event.getAction());
             event.setCancelled(ret);
         } 

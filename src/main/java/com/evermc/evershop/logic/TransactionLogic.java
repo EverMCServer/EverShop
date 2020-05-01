@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.handler.uSkyBlockHandler;
 import com.evermc.evershop.structure.ExtraInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
@@ -172,6 +173,12 @@ public enum TransactionLogic {
         si.setSignState(ti.shopHasItems());
         BaseComponent[] ite;
         ItemStack slotItem;
+        if (!getEnum(ti.getAction()).name().startsWith("I")) {
+            if(!uSkyBlockHandler.isChallengeCompleted(p, "builder5")){
+                send("complete challenge to use", p);
+                return;
+            }
+        }
         switch(getEnum(ti.getAction())){
             case BUY:
             if (!ti.shopHasItems()){
