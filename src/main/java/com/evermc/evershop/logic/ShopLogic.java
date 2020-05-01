@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.handler.WorldGuardHandler;
+import com.evermc.evershop.handler.uSkyBlockHandler;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
@@ -197,6 +198,10 @@ public class ShopLogic {
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
 
+            if(!uSkyBlockHandler.isChallengeCompleted(p, "builder5")){
+                send("complete challenge to use", p);
+                return false;
+            }
             if (!(block.getState() instanceof Sign) && !WorldGuardHandler.canAccessChest(p, block.getLocation())) {
                 send("You cant link this", p);
                 return true;
