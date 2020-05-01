@@ -54,7 +54,9 @@ public class ShopLogic {
         Material.CHEST,
         Material.TRAPPED_CHEST,
         Material.BARREL,
-        Material.HOPPER
+        Material.HOPPER,
+        Material.DISPENSER,
+        Material.DROPPER
     );
 
     static final List<Material> linkable_redstone = Arrays.asList(
