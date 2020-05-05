@@ -111,10 +111,6 @@ public class ShopLogic {
                 return;
             }
             if (action == Action.LEFT_CLICK_BLOCK){
-                if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
-                    p.sendMessage("no permission.");
-                    return;
-                }
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     TransactionInfo ti = new TransactionInfo(si, p);
                     si.setSignState(ti.shopHasItems());
@@ -124,7 +120,7 @@ public class ShopLogic {
                 });
             } else {
                 if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
-                    p.sendMessage("no permission.");
+                    send("no permission", p);
                     return;
                 }
                 Bukkit.getScheduler().runTask(plugin, () -> {
