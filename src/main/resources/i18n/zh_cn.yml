@@ -94,6 +94,16 @@
 '[win %1$s: p=%2$s] ': '[抽到%1$s个:概率=%2$s] '
 'Possibility List: (%1$s possibilitis in total)': '概率列表: (总共有%1$s种可能)'
 'Slot Shop #%1$s Infomation': '抽奖商店#%1$s信息'
+'Shop #%1$s Transactions': '商店#%1$s交易记录'
+'Showing %1$s results Page %2$s of %3$s': '共%1$s条结果 正在显示%2$s/%3$s页'
+'win': '抽到'
+'accessed': '使用'
+'%1$s times': '%1$s 次'
+'just now': '刚刚'
+'%1$s minutes ago': '%1$s分钟之前'
+'%1$s hours ago': '%1$s小时之前'
+'%1$sh%2$sm ago': '%1$s小时%2$s分之前'
+'%1$sd%2$sh%3$sm ago': '%1$s天%2$s小时%3$s分之前'
 
 'EverShop Help': 'EverShop 帮助菜单'
 'Toggle advance mode': '切换高级模式'
@@ -115,5 +125,9 @@
 'show the access control info': '显示使用权限详细信息'
 'set shop price': '设置商店价格'
 'set shop sign text': '设置商店牌子内容'
+
+'Click to view the previous page': '点击查看前一页'
+'Click to view the next page': '点击查看下一页'
+'Click to enter page number': '点击手动输入页码'
 
 'complete challenge to use': '完成新手任务以后才可以使用玩家商店哦~ 想买东西的话先去系统商店看看吧'
