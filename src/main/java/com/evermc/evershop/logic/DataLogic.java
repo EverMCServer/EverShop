@@ -493,21 +493,72 @@ public class DataLogic{
         SQL.insert(query);
     }
 
-    public static int[][] getTransaction(int shopid){
+    public static class TransactionLog {
+        public int player_id;
+        public int time;
+        public int count;
+        public String itemkey;
+        public int amount;
+    }
+    public static TransactionLog[] getTransaction(int shopid, int page, boolean isSlotShop){
+        if (isSlotShop) {
+            return getSlotTransaction(shopid, page - 1);
+        } else {
+            return getNormalTransaction(shopid, page - 1);
+        }
+    }
+    
+    public static TransactionLog[] getNormalTransaction(int shopid, int page){
         String query = "SELECT player_id, time, count FROM `" + SQL.getPrefix() + 
-                "transaction` WHERE shop_id = '" + shopid + "' ORDER BY `time` DESC LIMIT 10";
+                "transaction` WHERE shop_id = '" + shopid + "' ORDER BY `time` DESC LIMIT 10 OFFSET " + page*10;
 
         List<Object[]> ret = SQL.query(query, 3);
         if (ret.size() == 0){
             return null;
         }
-        int [][] retval = new int[ret.size()][3];
+        TransactionLog[] retval = new TransactionLog[ret.size()];
         for (int i = 0; i < ret.size(); i ++){
             Object[] k = ret.get(i);
-            retval[i][0] = SQL.getInt(k[0]);
-            retval[i][1] = SQL.getInt(k[1]);
-            retval[i][2] = SQL.getInt(k[2]);
+            TransactionLog t = new TransactionLog();
+            t.player_id = SQL.getInt(k[0]);
+            t.time = SQL.getInt(k[1]);
+            t.count = SQL.getInt(k[2]);
+            retval[i] = t;
         }
         return retval;
+    }
+    public static TransactionLog[] getSlotTransaction(int shopid, int page){
+        String query = "SELECT player_id, time, count, itemkey, amount FROM `" + SQL.getPrefix() + 
+                "slot_transaction` WHERE shop_id = '" + shopid + "' ORDER BY `time` DESC LIMIT 10 OFFSET " + page*10;
+
+        List<Object[]> ret = SQL.query(query, 5);
+        if (ret.size() == 0){
+            return null;
+        }
+        TransactionLog[] retval = new TransactionLog[ret.size()];
+        for (int i = 0; i < ret.size(); i ++){
+            Object[] k = ret.get(i);
+            TransactionLog t = new TransactionLog();
+            t.player_id = SQL.getInt(k[0]);
+            t.time = SQL.getInt(k[1]);
+            t.count = SQL.getInt(k[2]);
+            t.itemkey = (String)k[3];
+            t.amount = SQL.getInt(k[4]);
+            retval[i] = t;
+        }
+        return retval;
+    }
+    public static int getTransactionCount(int shopid, boolean isSlotShop){
+        String query;
+        if (isSlotShop) {
+            query = "SELECT count(*) FROM `" + SQL.getPrefix() + "slot_transaction` WHERE shop_id = '" + shopid + "'";
+        } else {
+            query = "SELECT count(*) FROM `" + SQL.getPrefix() + "transaction` WHERE shop_id = '" + shopid + "'";
+        }
+        Object[] ret = SQL.queryFirst(query, 1);
+        if (ret == null) {
+            return 0;
+        }
+        return SQL.getInt(ret[0]);
     }
 }
