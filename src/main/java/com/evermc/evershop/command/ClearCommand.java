@@ -10,11 +10,12 @@ import com.evermc.evershop.structure.PlayerInfo;
 
 public class ClearCommand extends AbstractCommand {
     public ClearCommand() {
-        super("clear", "evershop.clear", "remove all current selections");
+        super("clear", "evershop", "remove all current selections");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         PlayerInfo p = PlayerLogic.getPlayerInfo(player);
         p.removeRegs();
+        send("You have removed all your selections", player);
         return true;
     }
     public boolean executeAs(CommandSender sender, String[] args){
