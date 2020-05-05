@@ -18,6 +18,7 @@ import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
+import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public class SetPermissionCommand extends AbstractSetCommand {
 
@@ -47,7 +48,11 @@ class SetPermissionTypeCommand extends AbstractSetCommand{
             return false;
         }
         ExtraInfo ei = si.getExtraInfo();
-        return ei.permissionType(args[0].charAt(0));
+        if(ei.permissionType(args[0].charAt(0))) {
+            send("Permission type set to %1$s", sender, tr(ei.getPermissionType(), sender));
+            return true;
+        }
+        return false;
     }
 }
 class SetPermissionAddCommand extends AbstractSetCommand{
@@ -62,17 +67,23 @@ class SetPermissionAddCommand extends AbstractSetCommand{
             return false;
         }
         ExtraInfo ei = si.getExtraInfo();
+        if ("DISABLED".equals(ei.getPermissionType())) {
+            send("Set permission type first", sender);
+            return true;
+        }
         if (args[0].startsWith("u:")) {
             if (!ei.permissionUserAdd(args[0].substring(2))) {
                 send("No player named %1$s found!", sender, args[0].substring(2));
                 return false;
             }
+            send("Player %1$s added to the list!", sender, args[0].substring(2));
             return true;
         } else if (args[0].startsWith("g:")) {
             if (!ei.permissionGroupAdd(args[0].substring(2))) {
                 send("No group named %1$s found!", sender, args[0].substring(2));
                 return false;
             }
+            send("Group %1$s added to the list!", sender, args[0].substring(2));
             return true;
         } else {
             return false;
@@ -91,17 +102,23 @@ class SetPermissionRemoveCommand extends AbstractSetCommand{
             return false;
         }
         ExtraInfo ei = si.getExtraInfo();
+        if ("DISABLED".equals(ei.getPermissionType())) {
+            send("Set permission type first", sender);
+            return true;
+        }
         if (args[0].startsWith("u:")) {
             if (!ei.permissionUserRemove(args[0].substring(2))) {
                 send("Player %1$s is not in the list!", sender, args[0].substring(2));
                 return false;
             }
+            send("Player %1$s removed from the list!", sender, args[0].substring(2));
             return true;
         } else if (args[0].startsWith("g:")) {
             if (!ei.permissionGroupRemove(args[0].substring(2))) {
                 send("Group %1$s is not in the list!", sender, args[0].substring(2));
                 return false;
             }
+            send("Group %1$s removed from the list!", sender, args[0].substring(2));
             return true;
         } else {
             return false;
@@ -118,8 +135,14 @@ class SetPermissionShowCommand extends AbstractSetCommand{
     public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
         ExtraInfo ei = si.getExtraInfo();
         ComponentBuilder msgBuilder = new ComponentBuilder("");
-        msgBuilder.append("Type: ").color(ChatColor.LIGHT_PURPLE)
-                  .append(ei.getPermissionType() + "\n").color(ChatColor.WHITE);
+        msgBuilder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+                  .append(tr("Shop #%1$s Access Control info", sender, si.getId())).bold(true).color(ChatColor.WHITE)
+                  .append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
+                  .append("\n").color(ChatColor.WHITE)
+                  .append(tr("Type", sender)).color(ChatColor.LIGHT_PURPLE)
+                  .append(": ").color(ChatColor.LIGHT_PURPLE)
+                  .append(tr(ei.getPermissionType(), sender)).color(ChatColor.WHITE)
+                  .append("\n").color(ChatColor.WHITE);
         if (!"DISABLED".equals(ei.getPermissionType())) {
             msgBuilder.append("Users: ").color(ChatColor.LIGHT_PURPLE);
             if (ei.getPermissionUsers().size() == 0) {
