@@ -28,7 +28,7 @@ import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public class SlotCommand extends AbstractCommand {
     public SlotCommand() {
-        super("slot", "evershop.create.SLOT", "setup slot shop", "[shopid] set <itemkey> <possibility>");
+        super("slot", "evershop.create.SLOT", "setup slot shop", "[shopid] [set <itemkey> <possibility>]");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         if (args == null || args.length == 0){
@@ -155,11 +155,11 @@ public class SlotCommand extends AbstractCommand {
 
     private void show_info(final CommandSender player, final ShopInfo si){
         ComponentBuilder builder = new ComponentBuilder("");
-        builder.append("----- ").color(ChatColor.WHITE)
-               .append(tr("Slot Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.GREEN)
-               .append(" -----\n").bold(false).color(ChatColor.WHITE);
+        builder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+               .append(tr("Slot Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.WHITE);
         ExtraInfo extra = si.getExtraInfo();
-        builder.append(tr("Possibility List: (%1$s possibilitis in total)", player, extra.slotPossibilityAll())).color(ChatColor.YELLOW);
+        builder.append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
+               .append(tr("Possibility List: (%1$s possibilitis in total)", player, extra.slotPossibilityAll())).color(ChatColor.YELLOW);
 
         int count = 0;
         for (Entry<String, ItemStack> entry : ExtraInfo.slotItemMap(si.getItemOut()).entrySet()) {
@@ -174,11 +174,11 @@ public class SlotCommand extends AbstractCommand {
                 String possi = posi.split(":")[1];
                 builder.append(tr("[win %1$s: p=%2$s] ", player, amount, possi)).color(ChatColor.WHITE);
             }
-            if (player instanceof Player) {
+            if (player instanceof Player && (player.hasPermission("evershop.info.others") || si.getOwnerId() == PlayerLogic.getPlayerId((Player)player))) {
                 builder.append("[+]").color(ChatColor.GREEN)
                      .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es slot " + si.getId() + " set " + entry.getKey() + " " + possibility))
                      .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{tr("Click to edit", player)}));
-            } else {
+            } else if (!(player instanceof Player)){
                 builder.append("\n  Key = " + entry.getKey());
             }
         }

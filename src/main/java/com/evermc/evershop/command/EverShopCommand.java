@@ -15,6 +15,7 @@ public class EverShopCommand extends AbstractCommand implements CommandExecutor,
         super("es", "evershop", "EverShop Commands");
         this.setPath(new String[]{"es"});
         this.add(new AdvancedCommand());
+        this.add(new ClearCommand());
         this.add(new HelpCommand(this));
         this.add(new InfoCommand());
         this.add(new ListCommand());

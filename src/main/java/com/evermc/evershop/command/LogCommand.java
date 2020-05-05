@@ -31,7 +31,7 @@ import static com.evermc.evershop.util.TranslationUtil.tr;
 
 public class LogCommand extends AbstractCommand {
     public LogCommand() {
-        super("log", "evershop.info", "Show shop transaction logs");
+        super("log", "evershop.info", "Show shop transaction logs", "[shopid [page]]");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         if (args.length == 0){
@@ -53,7 +53,8 @@ public class LogCommand extends AbstractCommand {
                 }
                 show_log(player, shopid, page);
             } catch (Exception e){
-                send("Invalid shopid: %1$s", player, args[0]);
+                send("Invalid argument: %1$s", player, String.join(" ",args));
+                this.help(player);
             }
         }
         return true;
@@ -70,7 +71,8 @@ public class LogCommand extends AbstractCommand {
                 }
                 show_log(sender, shopid, page);
             } catch (Exception e){
-                send("Invalid shopid: %1$s", sender, args[0]);
+                send("Invalid argument: %1$s", sender, String.join(" ",args));
+                this.help(sender);
             } 
         }
         return true;
@@ -108,10 +110,6 @@ public class LogCommand extends AbstractCommand {
             return;
         }
         DataLogic.TransactionLog[] data = DataLogic.getTransaction(si.getId(), page, isSlotShop);
-        if (data == null){
-            send("no logs", player);
-            return;
-        }
         HashMap<String,ItemStack> itemmap = null;
         if (isSlotShop) {
             itemmap = ExtraInfo.slotItemMap(si.getItemOut());
@@ -122,26 +120,28 @@ public class LogCommand extends AbstractCommand {
                .append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
                .append(tr("Showing %1$s results Page %2$s of %3$s", player, countAll, page, countAll/10+1)).color(ChatColor.GRAY)
                .append("\n").color(ChatColor.WHITE);
-        for (int i = 0; i < data.length; i++){
-            PlayerInfo pi = PlayerLogic.getPlayerInfo(data[i].player_id);
-            builder.append(" + ").color(ChatColor.GREEN)
-                   .append(String.format("[%1$s] ", countAll - (page-1)*10 - i)).color(ChatColor.GRAY)
-                   .append((pi==null?"Unknown":pi.getName())).color(ChatColor.DARK_AQUA)
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
-                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
-                   .append(" ", ComponentBuilder.FormatRetention.NONE);
-            if (isSlotShop) {
-                builder.append(tr("win", player)).color(ChatColor.WHITE)
-                       .append(String.format(" %d ", data[i].amount)).color(ChatColor.YELLOW)
-                       .append(tr(itemmap.get(data[i].itemkey), false)).color(ChatColor.YELLOW);
-            } else {
-                builder.append(tr("accessed", player)).color(ChatColor.WHITE)
-                       .append(" ").color(ChatColor.WHITE)
-                       .append(tr("%1$s times", player, data[i].count)).color(ChatColor.DARK_AQUA);
+        if (data != null) {
+            for (int i = 0; i < data.length; i++){
+                PlayerInfo pi = PlayerLogic.getPlayerInfo(data[i].player_id);
+                builder.append(" + ").color(ChatColor.GREEN)
+                       .append(String.format("[%1$s] ", countAll - (page-1)*10 - i)).color(ChatColor.GRAY)
+                       .append((pi==null?"Unknown":pi.getName())).color(ChatColor.DARK_AQUA)
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
+                            .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
+                       .append(" ", ComponentBuilder.FormatRetention.NONE);
+                if (isSlotShop) {
+                    builder.append(tr("win", player)).color(ChatColor.WHITE)
+                           .append(String.format(" %d ", data[i].amount)).color(ChatColor.YELLOW)
+                           .append(tr(itemmap.get(data[i].itemkey), false)).color(ChatColor.YELLOW);
+                } else {
+                    builder.append(tr("accessed", player)).color(ChatColor.WHITE)
+                           .append(" ").color(ChatColor.WHITE)
+                           .append(tr("%1$s times", player, data[i].count)).color(ChatColor.DARK_AQUA);
+                }
+                builder.append(" ").color(ChatColor.WHITE)
+                       .append(datedisplay(data[i].time, player)).color(ChatColor.GRAY)
+                       .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
             }
-            builder.append(" ").color(ChatColor.WHITE)
-                   .append(datedisplay(data[i].time, player)).color(ChatColor.GRAY)
-                   .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         }
         if (player instanceof Player) {
             builder.append("  ").color(ChatColor.GRAY);

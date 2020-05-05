@@ -81,6 +81,7 @@
 'EverShop reloaded': 'EverShop重新加载成功'
 'please look at a actived shop sign': '请将视线对准一个激活的商店牌子'
 'Invalid shopid: %1$s': '非法的商店编号: %1$s'
+'Invalid argument: %1$s': '非法的参数: %1$s'
 'shop not found': '没有找到相关的商店信息'
 'no logs': '没有找到这个商店的交易记录'
 'No uuid %1$s found!': '没有找到uuid: %1$s'
@@ -131,3 +132,4 @@
 'Click to enter page number': '点击手动输入页码'
 
 'complete challenge to use': '完成新手任务以后才可以使用玩家商店哦~ 想买东西的话先去系统商店看看吧'
+'You have removed all your selections': '你清除了选择的方块'
