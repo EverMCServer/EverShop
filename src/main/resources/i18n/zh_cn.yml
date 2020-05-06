@@ -116,11 +116,13 @@
 'Group %1$s removed from the list!': '玩家%1$s已从列表中移除'
 'Shop #%1$s Access Control info': '商店#%1$s权限设置信息'
 'Type': '类型'
+'Price set to %1$s': '价格已更改为%1$s'
 
 'EverShop Help': 'EverShop 帮助菜单'
 'Toggle advance mode': '切换高级模式'
 'Command: ': '指令: '
 'EverShop Commands': 'EverShop 菜单'
+'setup slot shop': '抽奖箱商店相关设置'
 'remove all current selections': '清除当前选中的方块'
 'Show EverShop help': '显示EverShop帮助'
 'view shop info': '显示商店信息'

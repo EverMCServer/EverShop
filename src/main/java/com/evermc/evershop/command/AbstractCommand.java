@@ -123,7 +123,7 @@ public abstract class AbstractCommand {
             ArrayList<String> ret = new ArrayList<String>();
             if (this.children.size() > 0) {
                 for (AbstractCommand sub : this.children){
-                    if (sub.getName().startsWith(args[0])){
+                    if (sub.getName().startsWith(args[0]) && sender.hasPermission(sub.permission)){
                         ret.add(sub.getName());
                     }
                 }            
