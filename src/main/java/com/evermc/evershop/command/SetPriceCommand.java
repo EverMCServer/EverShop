@@ -5,6 +5,8 @@ import org.bukkit.command.CommandSender;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.ShopInfo;
 
+import static com.evermc.evershop.util.TranslationUtil.send;
+
 public class SetPriceCommand extends AbstractSetCommand {
 
     public SetPriceCommand(){
@@ -26,6 +28,7 @@ public class SetPriceCommand extends AbstractSetCommand {
            price = -price; 
         }
         si.setPrice(price);
+        send("Price set to %1$s", sender, price);
         return true;
     }
 }
