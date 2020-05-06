@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.handler.LocketteProHandler;
 import com.evermc.evershop.handler.WorldGuardHandler;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
@@ -193,7 +194,9 @@ public class ShopLogic {
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
 
-            if (!(block.getState() instanceof Sign) && !WorldGuardHandler.canAccessChest(p, block.getLocation())) {
+            if (!(block.getState() instanceof Sign) && !(
+            WorldGuardHandler.canAccessChest(p, block.getLocation()) &&
+            LocketteProHandler.canAccessChest(p, block.getLocation()))) {
                 send("You cant link this", p);
                 return true;
             }

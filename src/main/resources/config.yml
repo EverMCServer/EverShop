@@ -43,6 +43,15 @@ evershop:
     #  - flag : player can only link blocks in regions that he can access chests and redstone components
     #  - member : player can only link blocks in regions which he is a member/owner of
     restrict_link: member
+  
+  lockettepro:
+    # configure whether players can link locked chests
+    #  - none : player can link everything
+    #  - user : user of the lock (everyone that can access the chest) can link
+    #  - owner : only the owner of the lock can link
+    #  - all : only unlocked chest can be linked
+    restrict_link: user
+
   # TODO - tax logic
   tax:
     consumption_tax:
