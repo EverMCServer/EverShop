@@ -675,7 +675,7 @@ public class ShopLogic {
                             tcount ++;
                         } else {
                             // detect unavailable shops (have shop info but no signs)
-                            DataLogic.removeShop(sii.getId());
+                            DataLogic.removeShop(b.getLocation());
                         }
                     }
                     BaseComponent other_str;

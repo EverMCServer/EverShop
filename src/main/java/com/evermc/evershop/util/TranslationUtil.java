@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +42,7 @@ import org.bukkit.potion.PotionType;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -588,5 +591,57 @@ public class TranslationUtil {
             return false;
         }
         return true;
+    }
+    public static BaseComponent show_location(Location loc, CommandSender sender) {
+        TextComponent ret = new TextComponent("" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
+        if (sender instanceof Player) {
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport!").create()));
+            // first try multi-world teleport
+            if (sender.hasPermission("essentials.tppos")) {
+                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                     "/tppos " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + " " + loc.getWorld().getName()));
+            } else if (sender.hasPermission("multiverse.teleport.self.e")) {
+                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                     "/mvtp e:" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()));
+            }
+            // then normal teleport
+            else if (sender.hasPermission("essentials.tp.position")) {
+                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                     "/essentials:tp " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ()));
+            }
+            else if (sender.hasPermission("minecraft.command")) {
+                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                     "/minecraft:tp " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ()));
+            }
+            // no teleport permission
+            else {
+                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy location!").create()));
+                ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                     "[x:" + loc.getBlockX() + ", y:" + loc.getBlockY() + ", z: " + loc.getBlockZ() + "]"));
+            }
+        }
+        return ret;
+    }
+    public static BaseComponent show_date(int timerec, final CommandSender p){
+        int timenow = (int)(System.currentTimeMillis()/1000/60);
+        int diff = timenow - timerec;
+        BaseComponent retval = null;
+        if (diff < 1) {
+            retval = tr("just now", p);
+        } else if (diff <= 60) {
+            retval = tr("%1$s minutes ago", p, diff);
+        } else if (diff <= 60 * 24) {
+            if (diff % 60 == 0) {
+                retval = tr("%1$s hours ago", p, diff/60);
+            } else {
+                retval = tr("%1$sh%2$sm ago", p, diff/60, diff%60);
+            }
+        } else {
+            retval = tr("%1$sd%2$sh%3$sm ago", p, diff/60/24, (diff/60)%24, diff%60);
+        }
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date date = new Date(((long)timerec)*1000*60);
+        retval.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(df.format(date)).create()));
+        return retval;
     }
 }  
