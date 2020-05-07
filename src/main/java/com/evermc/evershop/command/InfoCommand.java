@@ -1,7 +1,6 @@
 package com.evermc.evershop.command;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -9,11 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
@@ -26,6 +23,7 @@ import com.evermc.evershop.util.SerializableLocation;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
+import static com.evermc.evershop.util.TranslationUtil.show_location;
 
 public class InfoCommand extends AbstractCommand {
     public InfoCommand() {
@@ -159,35 +157,5 @@ public class InfoCommand extends AbstractCommand {
             builder.append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         }
         player.spigot().sendMessage(builder.create());
-    }
-    private BaseComponent show_location(Location loc, CommandSender sender) {
-        TextComponent ret = new TextComponent("" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
-        if (sender instanceof Player) {
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport!").create()));
-            // first try multi-world teleport
-            if (sender.hasPermission("essentials.tppos")) {
-                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                     "/tppos " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + " " + loc.getWorld().getName()));
-            } else if (sender.hasPermission("multiverse.teleport.self.e")) {
-                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                     "/mvtp e:" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ()));
-            }
-            // then normal teleport
-            else if (sender.hasPermission("essentials.tp.position")) {
-                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                     "/essentials:tp " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ()));
-            }
-            else if (sender.hasPermission("minecraft.command")) {
-                ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                     "/minecraft:tp " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ()));
-            }
-            // no teleport permission
-            else {
-                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy location!").create()));
-                ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                     "[x:" + loc.getBlockX() + ", y:" + loc.getBlockY() + ", z: " + loc.getBlockZ() + "]"));
-            }
-        }
-        return ret;
     }
 }

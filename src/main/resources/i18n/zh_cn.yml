@@ -130,6 +130,10 @@
 'Shop #%1$s Infomation': '商店#%1$s信息'
 'Click to teleport!': '点击传送'
 'Click to copy location!': '点击复制坐标'
+'click to view shop info': '点击查看商店详情'
+'%1$ss shop list': '%1$s的商店列表'
+'%1$s shop, at %2$s': '%1$s类型商店, 位于%2$s'
+'Closed': '已关闭'
 
 'EverShop Help': 'EverShop 帮助菜单'
 'Toggle advance mode': '切换高级模式'

@@ -16,18 +16,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 
 import com.evermc.evershop.EverShop;
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
+import static com.evermc.evershop.util.TranslationUtil.show_date;
 
 public class LogCommand extends AbstractCommand {
     public LogCommand() {
@@ -139,7 +137,7 @@ public class LogCommand extends AbstractCommand {
                            .append(tr("%1$s times", player, data[i].count)).color(ChatColor.DARK_AQUA);
                 }
                 builder.append(" ").color(ChatColor.WHITE)
-                       .append(datedisplay(data[i].time, player)).color(ChatColor.GRAY)
+                       .append(show_date(data[i].time, player)).color(ChatColor.GRAY)
                        .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
             }
         }
@@ -170,28 +168,5 @@ public class LogCommand extends AbstractCommand {
         }
 
         player.spigot().sendMessage(builder.create());
-    }
-
-    private static BaseComponent datedisplay(int timerec, final CommandSender p){
-        int timenow = (int)(System.currentTimeMillis()/1000/60);
-        int diff = timenow - timerec;
-        BaseComponent retval = null;
-        if (diff < 1) {
-            retval = tr("just now", p);
-        } else if (diff <= 60) {
-            retval = tr("%1$s minutes ago", p, diff);
-        } else if (diff <= 60 * 24) {
-            if (diff % 60 == 0) {
-                retval = tr("%1$s hours ago", p, diff/60);
-            } else {
-                retval = tr("%1$sh%2$sm ago", p, diff/60, diff%60);
-            }
-        } else {
-            retval = tr("%1$sd%2$sh%3$sm ago", p, diff/60/24, (diff/60)%24, diff%60);
-        }
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        Date date = new Date(((long)timerec)*1000*60);
-        retval.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(df.format(date)).create()));
-        return retval;
     }
 }

@@ -265,6 +265,10 @@ public class ShopInfo {
         return this.rev;
     }
 
+    public void setRev(int rev) {
+        this.rev = rev;
+    }
+
     public HashSet<ItemStack> getItemOut(){
         return this.itemOut;
     }

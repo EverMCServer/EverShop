@@ -323,18 +323,6 @@ public class DataLogic{
         });
     }
 
-    public static void removeShop(final int shopid){
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
-            String query = "SELECT * FROM `" + SQL.getPrefix() + "shop` WHERE `id` = '" + shopid + "' AND `rev` = '0'";
-            Object[] ret = SQL.queryFirst(query, 13);
-            if (ret == null) {
-                return;
-            }
-            query = "UPDATE `" + SQL.getPrefix() + "shop` SET `rev` = `rev` + 1 WHERE `id` = '" + shopid + "'";
-            SQL.exec(query);
-        });
-    }
-
     public static void saveShop(final ShopInfo shop, final Consumer<Integer> afterSave, final Runnable failSave){
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             String query = "REPLACE INTO `" + SQL.getPrefix() + "shop` VALUES (" + (shop.getId() == 0?"null":("'"+shop.getId()+"'")) 
