@@ -179,9 +179,9 @@ public class ShopLogic {
                         send("You can link at most one chest to a dispose shop", p);
                         return;
                     }
-                    if (pi.getReg1().size() == 0 || pi.getReg2().size() == 0) {
+                    if (si.getAction() == TransactionLogic.TRADE.id() && (pi.getReg1().size() == 0 || pi.getReg2().size() == 0)) {
                         send("You should register items first!", p);
-                        return;
+                        return true;
                     }
                     if (pi.getReg1().size() == 0 && si.getAction() != TransactionLogic.DISPOSE.id()){
                         send("You should register items first!", p);
