@@ -100,21 +100,45 @@ public class ShopInfo {
             severe("ShopInfo: Unimplemented shop type: " + action_id);
         }
         // targets record
+        this.setTarget(pi);
+
+        // init slot
+        if (action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()) {
+            this.extra.initSlot(this.itemOut);
+        }
+    }
+
+    // copy a shop.
+    public ShopInfo(ShopInfo old, PlayerInfo pi, Location shopLoc) {
+        this.id = 0;
+        this.epoch = (int)(System.currentTimeMillis()/1000);
+        this.action_id = old.getAction();
+        this.player_id = old.getOwnerId();
+        SerializableLocation sloc = new SerializableLocation(shopLoc);
+        this.world_id = sloc.world;
+        this.x = sloc.x;
+        this.y = sloc.y;
+        this.z = sloc.z;
+        this.price = old.getPrice();
+        this.itemOut = old.getItemOut();
+        this.itemIn = old.getItemIn();
+        this.setTarget(pi);
+        this.extra = old.getExtraInfo();
+    }
+
+    public void setTarget(PlayerInfo pi) {
         if (TransactionLogic.targetCount(action_id) == 0){
             this.targetOut = new HashSet<SerializableLocation>();
-            this.targetIn = new HashSet<SerializableLocation>();;
+            this.targetIn = new HashSet<SerializableLocation>();
         } else if (TransactionLogic.targetCount(action_id) == 2){
             this.targetOut = pi.getReg1Loc();
             this.targetIn = pi.getReg2Loc();
         } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.DONATEHAND.id() || action_id == TransactionLogic.DISPOSE.id()){
-            this.targetOut = new HashSet<SerializableLocation>();;
+            this.targetOut = new HashSet<SerializableLocation>();
             this.targetIn = pi.getRegsLoc();
         } else {
             this.targetOut = pi.getRegsLoc();
-            this.targetIn = new HashSet<SerializableLocation>();;
-        }
-        if (action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()) {
-            this.extra.initSlot(this.itemOut);
+            this.targetIn = new HashSet<SerializableLocation>();
         }
     }
 
@@ -174,6 +198,10 @@ public class ShopInfo {
 
     public int getId(){
         return this.id;
+    }
+
+    public void setId(int id){
+        this.id = id;
     }
 
     public int getEpoch(){

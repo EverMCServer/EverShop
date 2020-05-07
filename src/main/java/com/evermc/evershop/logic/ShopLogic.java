@@ -47,6 +47,7 @@ public class ShopLogic {
     
     private static Material linkMaterial = null;
     private static Material destroyMaterial = null;
+    private static Material wandMaterial = null;
     private static int maxLinkBlocks = 0;
 
     private static Set<Location> pendingRemoveBlocks = new CopyOnWriteArraySet<Location>();
@@ -83,6 +84,11 @@ public class ShopLogic {
             severe("destroy material: " + plugin.getConfig().getString("evershop.destroyMaterial") + " does not exist. use default.");
             destroyMaterial = Material.GOLDEN_AXE;
         }
+        wandMaterial = Material.matchMaterial(plugin.getConfig().getString("evershop.wandMaterial"));
+        if (wandMaterial == null) {
+            severe("wand material: " + plugin.getConfig().getString("evershop.wandMaterial") + " does not exist. use default.");
+            wandMaterial = Material.BONE_MEAL;
+        }
         maxLinkBlocks = plugin.getConfig().getInt("evershop.maxLinkBlocks");
     }
 
@@ -92,6 +98,10 @@ public class ShopLogic {
 
     public static Material getLinkMaterial(){
         return linkMaterial;
+    }
+
+    public static Material getWandMaterial(){
+        return wandMaterial;
     }
 
     public static Material getDestroyMaterial(){
@@ -128,6 +138,133 @@ public class ShopLogic {
                 });
             }
         });
+    }
+
+    public static boolean wandShop(final Player p, final Block b){
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
+        if (!pi.isAdvanced()){
+            return false;
+        }
+        if (ShopLogic.isShopSign(b)) {
+            final Location loc = b.getLocation();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
+                ShopInfo si = DataLogic.getShopInfo(loc);
+                if (si.getOwnerId() != pi.getId() && !p.hasPermission("evershop.set.admin")) {
+                    send("no permission", p);
+                    return;
+                }
+                if (pi.getWandShop() == null || si.getId() != pi.getWandShop().getId()) {
+                    // update selection
+                    pi.setWandShop(si);
+                    pi.removeRegs();
+                    if (TransactionLogic.targetCount(si.getAction()) == 2) {
+                        //TRADE shop, set player reg1 and reg2
+                        for (SerializableLocation sloc : si.getTargetOut()) {
+                            pi.getReg1().add(sloc.toLocation());
+                        }
+                        for (SerializableLocation sloc : si.getTargetIn()) {
+                            pi.getReg2().add(sloc.toLocation());
+                        }
+                    } else {
+                        for (SerializableLocation sloc : si.getTargetAll()) {
+                            pi.getReg1().add(sloc.toLocation());
+                        }
+                    }
+                    pi.setContainer(TransactionLogic.isContainerShop(si.getAction()));
+                    send("you have selected a shop", p);
+                    return;
+                } else {
+                    // update current shop (only target)
+                    if (si.getAction() == TransactionLogic.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
+                        send("You can link at most one chest to a dispose shop", p);
+                        return;
+                    }
+                    if (pi.getReg1().size() == 0 || pi.getReg2().size() == 0) {
+                        send("You should register items first!", p);
+                        return;
+                    }
+                    if (pi.getReg1().size() == 0 && si.getAction() != TransactionLogic.DISPOSE.id()){
+                        send("You should register items first!", p);
+                        return;
+                    }
+                    si.setTarget(pi);
+                    DataLogic.saveShop(si, (a) -> {
+                        pi.removeRegs();
+                        pi.removeWand();
+                        send("you have updated shopinfo", p);
+                    }, () -> send("ShopInfo save failed", p));
+                }
+            });
+            return true;
+        } else {
+            if (pi.getWandShop() == null) {
+                send("please select an active shop first", p);
+                return true;
+            }
+            // paste shop
+            ShopInfo si = pi.getWandShop();
+            Sign sign = (Sign)b.getState();
+            String[] lines = sign.getLines();
+            if (lines[0].length() == 0 && lines[1].length() == 0 && lines[2].length() == 0 && lines[3].length() == 0) {
+                Sign original = (Sign)si.getLocation().getBlock().getState();
+                sign.setLine(0, ChatColor.stripColor(original.getLine(0)));
+                sign.setLine(1, original.getLine(1));
+                sign.setLine(2, original.getLine(2));
+                sign.setLine(3, original.getLine(3));
+                sign.update();
+            }
+            String line = sign.getLine(0);
+            int actionid = TransactionLogic.getId(line);
+            if (actionid == 0) {
+                send("The sign does not contain an available action!", p);
+                return true;
+            }
+            if (actionid != si.getAction()) {
+                send("The action type of new sign is different from the old one!", p);
+                return true;
+            }
+            if (!line.equals(ChatColor.stripColor(line))) {
+                send("You cant create shops on formatted signs!", p);
+                return true;
+            }
+            if (!p.hasPermission("evershop.multiworld") && si.getWorldID() != DataLogic.getWorldId(b.getWorld())) {
+                send("You cant make multi-world shops", p);
+                return true;
+            }
+            if (si.getAction() == TransactionLogic.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
+                send("You can link at most one chest to a dispose shop", p);
+                return true;
+            }
+            if (pi.getReg1().size() == 0 || pi.getReg2().size() == 0) {
+                send("You should register items first!", p);
+                return true;
+            }
+            if (pi.getReg1().size() == 0 && si.getAction() != TransactionLogic.DISPOSE.id()){
+                send("You should register items first!", p);
+                return true;
+            }
+            int price = TransactionLogic.getPrice(line);
+            String line4 = sign.getLine(3);
+            if (price == 0) {
+                price = TransactionLogic.getPrice(line4);
+            }
+            if (price != si.getPrice()) {
+                send("The price of new sign is different from the old one!", p);
+                return true;
+            }
+            ShopInfo newshop = new ShopInfo(si, pi, b.getLocation());
+            DataLogic.saveShop(newshop, (a) -> {
+                pi.removeRegs();
+                pi.removeWand();
+                String lin = sign.getLine(0);
+                lin = ChatColor.DARK_BLUE.toString() + ChatColor.BOLD.toString() + lin;
+                sign.setLine(0, lin);
+                sign.update();
+                sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), a));
+                send("you have copied a shop", p);
+            }, () -> send("ShopInfo save failed", p));
+            return true;
+        }
     }
 
     public static BaseComponent[] itemToString(ShopInfo si){
@@ -293,7 +430,7 @@ public class ShopLogic {
                     send("You should register items first!", p);
                     return true;
                 }
-                if (actionid == TransactionLogic.DISPOSE.id() && player.getReg1().size() > 1) {
+                if (actionid == TransactionLogic.DISPOSE.id() && player.getReg1().size() + player.getReg2().size() > 1) {
                     send("You can link at most one chest to a dispose shop", p);
                     return true;
                 }
@@ -326,6 +463,10 @@ public class ShopLogic {
                             send("You cant make multi-world shops", p);
                             return true;
                         }
+                    }
+                    if (!w.equals(block.getWorld())) {
+                        send("You cant make multi-world shops", p);
+                        return true;
                     }
                 }
                 if (TransactionLogic.needItemSet(actionid) && player.getReg1Items().size() == 0){

@@ -49,9 +49,9 @@ public class LocketteProHandler {
         Block b = loc.getBlock();
         switch(restrict_type) {
             case 1:
-                return LocketteProAPI.isUser(b, p);
+                return !LocketteProAPI.isProtected(b) || LocketteProAPI.isUser(b, p);
             case 2:
-                return LocketteProAPI.isOwner(b, p);
+                return !LocketteProAPI.isProtected(b) || LocketteProAPI.isOwner(b, p);
             case 3:
                 return !LocketteProAPI.isProtected(b);
             default:

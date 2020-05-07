@@ -19,6 +19,7 @@ public class PlayerInfo {
     private boolean advanced;
     private CopyOnWriteArraySet<Location> reg1;
     private CopyOnWriteArraySet<Location> reg2;
+    private ShopInfo wandShop;
     private boolean reg_is_container;
 
     public PlayerInfo(int id, UUID uuid, String name, boolean advanced){
@@ -29,6 +30,7 @@ public class PlayerInfo {
         this.reg1 = new CopyOnWriteArraySet<Location>();
         this.reg2 = new CopyOnWriteArraySet<Location>();
         this.reg_is_container = false;
+        this.wandShop = null;
     }
 
     public String toString(){
@@ -38,6 +40,10 @@ public class PlayerInfo {
     public void removeRegs(){
         this.reg1.clear();
         this.reg2.clear();
+    }
+
+    public void removeWand(){
+        this.wandShop = null;
     }
 
     /**
@@ -88,6 +94,14 @@ public class PlayerInfo {
 
     public void setName(String name){
         this.name = name;
+    }
+
+    public void setWandShop(ShopInfo si) {
+        this.wandShop = si;
+    }
+
+    public ShopInfo getWandShop(){
+        return this.wandShop;
     }
 
     public boolean isAdvanced(){

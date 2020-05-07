@@ -18,6 +18,12 @@
 'You cannot break this block because there are shops linked to it': '你不能破坏这个方块，它连接到了一个商店'
 'You cannot break this! Its locked by %1$s %2$s': '你不能破坏这个！他被%1$s %2$s锁定'
 '%1$s shops of other player': '%1$s个别人的商店.'
+'you have selected a shop': '你用魔杖选择了一个商店，如果要取消选择请使用/es clear'
+'please select an active shop first': '请先使用魔杖选择一个激活的商店'
+'The action type of new sign is different from the old one!': '新商店的交易类型和旧的不一样！'
+'The price of new sign is different from the old one!': '新商店的价格和旧的不一样！'
+'you have updated shopinfo': '你更新了商店信息'
+'you have copied a shop': '你成功的复制了一个商店'
 
 'player cannot hold': '你背包放不下了!'
 'player insufficient money': '你没钱了!'
