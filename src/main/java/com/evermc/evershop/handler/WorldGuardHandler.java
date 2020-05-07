@@ -38,11 +38,11 @@ public class WorldGuardHandler {
     public static void reload(EverShop plugin) {
         String type = plugin.getConfig().getString("evershop.worldguard.restrict_link");
         info("Worldguard restriction type: " + type);
-        if (type.equals("none")) {
+        if ("none".equals(type)) {
             enabled = false;
-        } else if (type.equals("flag")) {
+        } else if ("flag".equals(type)) {
             checkFlag = true;
-        } else if (type.equals("member")) {
+        } else if ("member".equals(type)) {
             checkFlag = false;
         } else {
             warn("Unknown worldguard restrict type: " + type + ", must be one of: [none, flag, member]");

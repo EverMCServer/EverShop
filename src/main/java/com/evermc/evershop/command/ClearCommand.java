@@ -15,6 +15,7 @@ public class ClearCommand extends AbstractCommand {
     public boolean executeAsPlayer(Player player, String[] args) {
         PlayerInfo p = PlayerLogic.getPlayerInfo(player);
         p.removeRegs();
+        p.removeWand();
         send("You have removed all your selections", player);
         return true;
     }

@@ -1,6 +1,7 @@
 package com.evermc.evershop;
 
 import com.evermc.evershop.event.InteractEvent;
+import com.evermc.evershop.handler.LocketteProHandler;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.handler.WorldGuardHandler;
 import com.evermc.evershop.logic.DataLogic;
@@ -59,6 +60,7 @@ public class EverShop extends JavaPlugin {
         NBTUtil.init();
         WorldGuardHandler.init(this);
         ParticlesUtil.init(this);
+        LocketteProHandler.init(this);
     }  
 
     public void reload(){
@@ -67,6 +69,7 @@ public class EverShop extends JavaPlugin {
         TransactionLogic.reload(this);
         TranslationUtil.reload(this);
         WorldGuardHandler.reload(this);
+        LocketteProHandler.reload(this);
     }
 
     public static EverShop getInstance() {

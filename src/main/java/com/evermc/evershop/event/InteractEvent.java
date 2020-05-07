@@ -62,6 +62,11 @@ public class InteractEvent implements Listener{
                 // if clicked with a dye, return
                 return;
             }
+            if (event.getMaterial() == ShopLogic.getWandMaterial() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
+                if (ShopLogic.wandShop(event.getPlayer(), clicked)) {
+                    return;
+                }
+            }
             if (ShopLogic.isShopSign(clicked)) {
                 ShopLogic.accessShop(event.getPlayer(), clicked.getLocation(), event.getAction());
                 // if clicked on formatted signs, no need to register, so return
@@ -85,7 +90,9 @@ public class InteractEvent implements Listener{
         }
         Block b = event.getBlock();
         BlockState bs = b.getState();
-        if ((bs instanceof Sign || ShopLogic.isLinkableBlock(b.getType())) && event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial()){
+        if ((bs instanceof Sign || ShopLogic.isLinkableBlock(b.getType())) && 
+            (event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getLinkMaterial() ||
+             event.getPlayer().getInventory().getItemInMainHand().getType() == ShopLogic.getWandMaterial())){
             // player is creating shop, cancel
             event.setCancelled(true);
             return;
