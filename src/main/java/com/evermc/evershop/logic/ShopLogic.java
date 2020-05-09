@@ -445,7 +445,7 @@ public class ShopLogic {
                         return true;
                     }
                 }
-                if (player.isContainer() != TransactionLogic.isContainerShop(actionid)){
+                if (player.isContainer() != TransactionLogic.isContainerShop(actionid) && (player.getReg1().size() != 0 || player.getReg2().size() != 0)){
                     send("Shop type and your selection is not match!", p);
                     return true;
                 }

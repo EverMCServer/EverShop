@@ -4,35 +4,10 @@
 
 # TODO
 
-- [ ] 命令执行器
-  - [x] 框架
-  - [x] /es
-  - [x] /es advanced
-  - [x] /es clear
-  - [x] /es help
-  - [x] /es info
-  - [x] /es inspect
-  - [x] /es list
-  - [x] /es log
-  - [x] /es reload
-  - [x] /es set
-  - [x] /es set permission
-  - [x] /es set text
-  - [x] /es set price
-  - [x] /es set duration
-  - [x] /es slot
-  - [ ] /es selection
 - [ ] tab completer (brigadier)
   - [ ] 框架
-- [x] 其他功能
-  - [x] slot/islot
-  - [x] device/deviceOn/deviceOff
-  - [x] donatehand
-  - [x] dispose/高级dispose(带缓冲箱)
 - [ ] 移植fabric
-- [x] shopinfo缓存及牌子特征标识（meta?）
 - [ ] 收税。（最高税率应为10%， 因为钻石售价444， 收购价400）
-- [x] hook wg， 防止链接他人箱子
 
 ## 如果你想测试
 
