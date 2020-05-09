@@ -464,7 +464,7 @@ public class ShopLogic {
                             return true;
                         }
                     }
-                    if (!w.equals(block.getWorld())) {
+                    if (w != null && !w.equals(block.getWorld())) {
                         send("You cant make multi-world shops", p);
                         return true;
                     }
