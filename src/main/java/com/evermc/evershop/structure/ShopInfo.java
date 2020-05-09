@@ -176,8 +176,6 @@ public class ShopInfo {
     public void setSignState(boolean avail){
         Location loc = SerializableLocation.toLocation(this.world_id, this.x, this.y, this.z);
         if (!ShopLogic.isShopSign(loc.getBlock())){
-            severe("setSignState(): Unrecognized shop: " + this);
-            new Exception().printStackTrace();
             return;
         }
         Sign sign = (Sign)loc.getBlock().getState();
