@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.handler.LocketteProHandler;
@@ -49,8 +47,6 @@ public class ShopLogic {
     private static Material destroyMaterial = null;
     private static Material wandMaterial = null;
     private static int maxLinkBlocks = 0;
-
-    private static Set<Location> pendingRemoveBlocks = new CopyOnWriteArraySet<Location>();
 
     static final List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
@@ -565,24 +561,19 @@ public class ShopLogic {
     }
 
     public static void tryBreakShop(final Location loc, final Player p){
-        if (pendingRemoveBlocks.contains(loc)){
-            return;
-        }
-        pendingRemoveBlocks.add(loc);
-        
+
         Location[] signs = ShopLogic.getAttachedSign(loc.getBlock());
         for (Location loca : signs) {
             if (ShopLogic.isShopSign(loca.getBlock())) {
                 send("You cannot break this block because there are shops attached to it", p);
-                pendingRemoveBlocks.remove(loca);
                 return;
             }
         }
         if (!ShopLogic.isShopSign(loc.getBlock())){
-            pendingRemoveBlocks.remove(loc);
             loc.getBlock().breakNaturally();
             return;
         }
+        final Material orig_type = loc.getBlock().getType();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             int pl = DataLogic.getShopOwner(loc);
             if (pl == PlayerLogic.getPlayerId(p)
@@ -590,15 +581,13 @@ public class ShopLogic {
                      && p.getInventory().getItemInMainHand().getType() == ShopLogic.getDestroyMaterial())
                 ){
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    pendingRemoveBlocks.remove(loc);
+                    if (orig_type == loc.getBlock().getType()) {
+                        loc.getBlock().breakNaturally();
+                    }
                     DataLogic.removeShop(loc);
-                    loc.getBlock().breakNaturally();
                 });
             } else {
-                Bukkit.getScheduler().runTask(plugin, ()->{
-                    pendingRemoveBlocks.remove(loc);
-                    send("You cannot remove others shop!", p);
-                });
+                send("You cannot remove others shop!", p);
             }
         });
     }
@@ -619,10 +608,7 @@ public class ShopLogic {
             }
         }
 
-        if (pendingRemoveBlocks.contains(loc)){
-            return;
-        }
-        pendingRemoveBlocks.add(loc);
+        final Material orig_type = lo.getBlock().getType();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, ()->{
             if (blocs != null){
@@ -632,7 +618,6 @@ public class ShopLogic {
                         Bukkit.getScheduler().runTask(plugin, ()->{
                             send("You cannot break this block because there are shops linked to it", p);
                         });
-                        pendingRemoveBlocks.remove(loc);
                         return;
                     }
                 }
@@ -641,26 +626,30 @@ public class ShopLogic {
             if (!isLinkableBlock(blocktype)){
                 // not a linkable block, break it
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    lo.getBlock().breakNaturally();
+                    if (orig_type == lo.getBlock().getType()) {
+                        lo.getBlock().breakNaturally();
+                    }
                 });
-                pendingRemoveBlocks.remove(loc);
                 return;
             }
             final ShopInfo[] si = DataLogic.getBlockInfo(loc);
             if (si == null){
                 Bukkit.getScheduler().runTask(plugin, ()->{
-                    lo.getBlock().breakNaturally();
+                    if (orig_type == lo.getBlock().getType()) {
+                        lo.getBlock().breakNaturally();
+                    }
                 });
-                pendingRemoveBlocks.remove(loc);
                 return;
             } else {
-                pendingRemoveBlocks.remove(loc);
                 Bukkit.getScheduler().runTask(plugin, ()->{
+                    if (orig_type != lo.getBlock().getType()) {
+                        return;
+                    }
                     String loc_str = "";
                     int count = 0;
                     int tcount = 0;
                     for (ShopInfo sii : si){
-                        Block b = DataLogic.getWorld(sii.getWorldID()).getBlockAt(sii.getX(), sii.getY(), sii.getZ());
+                        Block b = sii.getLocation().getBlock();
                         if (ShopLogic.isShopSign(b)){
                             if (sii.getOwnerId() == PlayerLogic.getPlayerId(p)){
                                 loc_str += SerializableLocation.toString(b.getLocation()) + ", ";
