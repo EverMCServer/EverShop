@@ -127,6 +127,12 @@ public class ListCommand extends AbstractCommand {
             ShopInfo[] sis = DataLogic.getShopList(pi.getId(), page);
             final int showingpage = page + 1;
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
+                String _player;
+                if (player.equals(((Player)sender).getUniqueId().toString())) {
+                    _player = "";
+                } else {
+                    _player = player + " ";
+                }
                 for (ShopInfo si : sis){
                     if (si.getRev() != 0) {
                         continue;
@@ -169,7 +175,7 @@ public class ListCommand extends AbstractCommand {
                     if (showingpage > 1) {
                         builder.append("[<< Prev]").color(ChatColor.DARK_AQUA)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", sender)).create()))
-                                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + player + " " + (showingpage-1)))
+                                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage-1)))
                                .append(" ", ComponentBuilder.FormatRetention.NONE);
                     } else {
                         builder.append("[<< Prev] ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.GRAY);
@@ -178,7 +184,7 @@ public class ListCommand extends AbstractCommand {
                     if (showingpage <= (count-1)/10) {
                         builder.append("[Next >>]").color(ChatColor.DARK_AQUA)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", sender)).create()))
-                                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + player + " " + (showingpage+1)))
+                                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage+1)))
                                .append(" | ", ComponentBuilder.FormatRetention.NONE);
                     } else {
                         builder.append("[Next >>]").color(ChatColor.GRAY)
@@ -186,7 +192,7 @@ public class ListCommand extends AbstractCommand {
                     }
                     builder.append("[Enter Page]").color(ChatColor.DARK_AQUA)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", sender)).create()))
-                                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es list " + player + " "))
+                                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es list " + _player))
                            .append(" ", ComponentBuilder.FormatRetention.NONE);
                 }
                 sender.spigot().sendMessage(builder.create());
