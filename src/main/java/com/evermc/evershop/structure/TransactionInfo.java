@@ -170,6 +170,18 @@ public class TransactionInfo{
         return it.size() == 0;
     }
 
+    private int countSize(HashMap<ItemStack, Integer> items) {
+        int count = 0;
+        for (Entry<ItemStack,Integer> entry : items.entrySet()) {
+            ItemStack it = entry.getKey();
+            int amount = entry.getValue();
+            if (amount == 0) {
+                continue;
+            }
+            count += (amount-1)/it.getMaxStackSize() + 1;
+        } 
+        return count;
+    }
     // Only checks if shopIn has itemsIn 
     public boolean shopCanHold(){
         if (this.action_id != TransactionLogic.SELL.id()
@@ -184,7 +196,7 @@ public class TransactionInfo{
             for (ItemStack is : iv.getContents()){
                 if (is == null){
                     emptycount ++;
-                    if (emptycount >= it.size()) return true;
+                    if (emptycount >= countSize(it)) return true;
                     continue;
                 }
                 for (ItemStack its : it.keySet()){
@@ -200,7 +212,7 @@ public class TransactionInfo{
                 }
             }
         }
-        return it.size() <= emptycount;
+        return countSize(it) <= emptycount;
     }
 
     // Only checks if player has itemsIn 
@@ -256,7 +268,7 @@ public class TransactionInfo{
         for (ItemStack is : playerInv.getStorageContents()){
             if (is == null){
                 emptycount ++;
-                if (emptycount >= it.size()) return true;
+                if (emptycount >= countSize(it)) return true;
                 continue;
             }
             for (ItemStack its : it.keySet()){
@@ -271,7 +283,7 @@ public class TransactionInfo{
                 }
             }
         }
-        return it.size() <= emptycount;
+        return countSize(it) <= emptycount;
     }
 
     public boolean playerHasMoney(){
