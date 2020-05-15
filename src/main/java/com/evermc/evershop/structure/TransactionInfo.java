@@ -1,5 +1,6 @@
 package com.evermc.evershop.structure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -405,9 +406,21 @@ public class TransactionInfo{
             severe("TransactionInfo: Illegal invocation");
             return;
         }
-        Collection<ItemStack> items = new HashSet<ItemStack>();
-        for (ItemStack is : this.itemsIn.keySet()){
-            items.add(is.clone());
+        Collection<ItemStack> items = new ArrayList<ItemStack>();
+        for (Entry<ItemStack,Integer> entry : this.itemsIn.entrySet()){
+            ItemStack it = entry.getKey();
+            int amount = entry.getValue();
+            while(amount > it.getMaxStackSize()) {
+                ItemStack tt = it.clone();
+                tt.setAmount(it.getMaxStackSize());
+                items.add(tt);
+                amount -= it.getMaxStackSize();
+            }
+            if (amount > 0) {
+                ItemStack tt = it.clone();
+                tt.setAmount(amount);
+                items.add(tt);
+            }
         }
         for (Inventory iv : shopIn){
             HashMap<Integer, ItemStack> ret = 
@@ -425,9 +438,21 @@ public class TransactionInfo{
             severe("TransactionInfo: Illegal invocation");
             return;
         }
-        Collection<ItemStack> items = new HashSet<ItemStack>();
-        for (ItemStack is : this.itemsOut.keySet()){
-            items.add(is.clone());
+        Collection<ItemStack> items = new ArrayList<ItemStack>();
+        for (Entry<ItemStack,Integer> entry : this.itemsOut.entrySet()){
+            ItemStack it = entry.getKey();
+            int amount = entry.getValue();
+            while(amount > it.getMaxStackSize()) {
+                ItemStack tt = it.clone();
+                tt.setAmount(it.getMaxStackSize());
+                items.add(tt);
+                amount -= it.getMaxStackSize();
+            }
+            if (amount > 0) {
+                ItemStack tt = it.clone();
+                tt.setAmount(amount);
+                items.add(tt);
+            }
         }
         HashMap<Integer, ItemStack> ret = 
             this.playerInv.addItem(items.toArray(new ItemStack[items.size()]));
