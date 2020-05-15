@@ -438,7 +438,7 @@ public class TransactionInfo{
             severe("TransactionInfo: Illegal invocation");
             return;
         }
-        Collection<ItemStack> items = new HashSet<ItemStack>();
+        Collection<ItemStack> items = new ArrayList<ItemStack>();
         for (Entry<ItemStack,Integer> entry : this.itemsOut.entrySet()){
             ItemStack it = entry.getKey();
             int amount = entry.getValue();
