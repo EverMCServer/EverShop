@@ -10,9 +10,10 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class MySQLDataSource extends SQLDataSource {
 
-    private HikariConfig hConfig;
-
     public MySQLDataSource(ConfigurationSection config){
+
+        HikariConfig hConfig;
+
         this.config = config;
         this.prefix = config.getString("prefix");
         String jdbc = "jdbc:mysql://" + this.config.getString("hostname") + ":"

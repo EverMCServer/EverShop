@@ -394,7 +394,7 @@ public class DataLogic{
             return 0;
         }
         String shopstr = (String)ret.get(0)[0];
-        if (shopstr == null || shopstr == ""){
+        if (shopstr == null || shopstr.length() == 0){
             return 0;
         }
         int retval = 0;
