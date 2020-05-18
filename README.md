@@ -1,7 +1,7 @@
 # EverShop
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a9fb0d5ad5844f3098e80bc5fce01a2e)](https://app.codacy.com/gh/EverMCServer/EverShop?utm_source=github.com&utm_medium=referral&utm_content=EverMCServer/EverShop&utm_campaign=Badge_Grade_Dashboard)
-[![GitHub Actions](https://github.com/EverMCServer/EverShop/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/EverMCServer/EverShop/actions)
+[![GitHub Actions](https://github.com/EverMCServer/EverShop/workflows/GitHub%20Actions/badge.svg)](https://github.com/EverMCServer/EverShop/actions)
 
 开发中，因为SignShop的Bug过多而且架构问题太大无法修复，所以重新开发一个商店插件
 
