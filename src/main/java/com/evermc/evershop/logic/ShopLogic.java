@@ -303,7 +303,7 @@ public class ShopLogic {
             Iterator<ItemStack> it = items.iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
-                ret[0].addExtra(TranslationUtil.tr(is));
+                ret[0].addExtra(tr(is));
                 if (it.hasNext()){
                     ret[0].addExtra(", ");
                 }

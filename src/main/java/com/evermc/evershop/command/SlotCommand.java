@@ -102,7 +102,6 @@ public class SlotCommand extends AbstractCommand {
                 }
             });
         });
-        return;
     }
     private void modify_info(final CommandSender player, final int shopid, String key, String possi){
         Bukkit.getScheduler().runTaskAsynchronously(EverShop.getInstance(), ()->{

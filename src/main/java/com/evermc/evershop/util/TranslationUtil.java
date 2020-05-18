@@ -67,7 +67,7 @@ public class TranslationUtil {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
-        if (!loadMsgsLang(plugin) || !loadItemLang(plugin)) {
+        if (!loadMsgsLang(plugin) || !loadItemLang()) {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
@@ -524,7 +524,7 @@ public class TranslationUtil {
         warn("TranslationUtil: Unsupported material: " + t);
         return new TextComponent(name);
     }
-    private static boolean loadItemLang(EverShop plugin){
+    private static boolean loadItemLang(){
         BufferedReader reader = null;
         URL json = null;
         try{

@@ -361,7 +361,6 @@ public class TransactionInfo{
             }
             iv.setStorageContents(iss);
         }
-        return;
     }
 
     public void playerRemoveItems(){
