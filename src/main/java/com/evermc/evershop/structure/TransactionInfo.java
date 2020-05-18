@@ -396,7 +396,6 @@ public class TransactionInfo{
             }
         }
         playerInv.setStorageContents(iss);
-        return;
     }
 
     public void shopGiveItems(){

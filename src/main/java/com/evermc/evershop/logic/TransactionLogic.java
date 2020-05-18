@@ -45,6 +45,10 @@ public enum TransactionLogic {
     DONATEHAND(15, 1, 0),
     DISPOSE(16, 1, 0)
     ;
+    
+    private static Map<Integer, TransactionLogic> map = new HashMap<Integer, TransactionLogic>();
+    private static Map<String, Integer> actions = new HashMap<String, Integer>();
+    private static Map<Integer, String> actionstr = new HashMap<Integer, String>();
 
     private int index;
     private int location_count;
@@ -55,10 +59,6 @@ public enum TransactionLogic {
         this.location_count = location_count;
         this.item_set_count = item_set_count;
     }
-    
-    private static Map<Integer, TransactionLogic> map = new HashMap<Integer, TransactionLogic>();
-    private static Map<String, Integer> actions = new HashMap<String, Integer>();
-    private static Map<Integer, String> actionstr = new HashMap<Integer, String>();
 
     public static void init(EverShop plugin){
 

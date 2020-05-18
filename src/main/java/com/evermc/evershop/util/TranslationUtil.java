@@ -497,7 +497,7 @@ public class TranslationUtil {
         }
         String name = is.getType().name().toLowerCase();
         if (name.endsWith("_wall_banner")){
-            name.replace("_wall_banner", "_banner");
+            name = name.replace("_wall_banner", "_banner");
         }
         if (item_dicts.contains("item.minecraft." + name)){
             return new TranslatableComponent("item.minecraft." + name);

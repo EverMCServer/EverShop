@@ -124,7 +124,6 @@ public class SlotCommand extends AbstractCommand {
                 }
             });
         });
-        return;
     }
 
     private void modify_info(final CommandSender player, final ShopInfo si, String key, String possi){

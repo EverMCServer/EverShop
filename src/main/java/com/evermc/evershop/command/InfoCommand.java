@@ -82,7 +82,6 @@ public class InfoCommand extends AbstractCommand {
                 }
             });
         });
-        return;
     }
 
     private void show_info(final CommandSender player, final ShopInfo si){

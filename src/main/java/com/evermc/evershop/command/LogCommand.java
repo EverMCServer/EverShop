@@ -93,7 +93,6 @@ public class LogCommand extends AbstractCommand {
                 }
             });
         });
-        return;
     }
 
     private void show_log(final CommandSender player, final ShopInfo si, int page){

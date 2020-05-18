@@ -23,7 +23,7 @@ import org.bukkit.Location;
  */
 public class SerializableLocation implements Serializable{
 
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public int x;
     public int y;
     public int z;
