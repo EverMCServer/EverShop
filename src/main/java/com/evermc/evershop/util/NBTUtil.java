@@ -2,6 +2,7 @@ package com.evermc.evershop.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
@@ -131,7 +132,7 @@ public class NBTUtil {
             ObjectInputStream in  = new ObjectInputStream(new ByteArrayInputStream(data));
             Object obj = in.readObject();
             if (!(obj instanceof HashMap<?,?>[])){
-                throw new Exception("Not a HashMap array");
+                throw new IOException("Not a HashMap array");
             }
             HashMap<String, Integer> itemOut = ((HashMap<String, Integer>[])obj)[0];
             HashMap<String, Integer> itemIn = ((HashMap<String, Integer>[])obj)[1];

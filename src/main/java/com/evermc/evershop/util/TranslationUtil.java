@@ -2,6 +2,7 @@ package com.evermc.evershop.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -529,7 +530,7 @@ public class TranslationUtil {
         try{
             Enumeration<URL> e = ClassLoader.getSystemResources("assets/minecraft/lang/en_us.json");
             if (e.hasMoreElements()) json = e.nextElement();
-            else throw new Exception();
+            else throw new IOException();
             reader = new BufferedReader(new InputStreamReader(json.openStream()));
         } catch (Exception e){
             severe("Cannot load en_us.json from server jar, unsupported server?");
