@@ -123,6 +123,33 @@ public class PlayerLogic {
         });
     }
 
+    public static boolean removePlayer(final PlayerInfo pi){
+        removeCachedPlayer(pi);
+        String query = "DELETE FROM `" + DataLogic.getPrefix() + "player` WHERE `id` = '" + pi.getId() + "' AND `uuid` = '" + pi.getUUID() + "'";
+        int ret = DataLogic.getSQL().exec(query);
+        if (ret != 1) {
+            LogUtil.severe("Error in removing player " + pi + "; retval = " + ret);
+            return false;
+        }
+        return true;
+    }
+
+    public static void removeCachedPlayer(final PlayerInfo pi){
+        cachedPlayerId.remove(pi.getId());
+        cachedPlayers.remove(pi.getUUID());
+        cachedPlayerName.remove(pi.getName());
+    }
+
+    public static boolean updatePlayer(final PlayerInfo pi){
+        String query = "UPDATE `" + DataLogic.getPrefix() + "player` SET `uuid` = '" + pi.getUUID() + "', `name` = '" + pi.getName() + "' WHERE `id` = '" + pi.getId() + "'";
+        int ret = DataLogic.getSQL().exec(query);
+        if (ret != 1) {
+            LogUtil.severe("Error in updating player " + pi + "; retval = " + ret);
+            return false;
+        }
+        return true;
+    }
+
     private static PlayerInfo fetchPlayerSync(OfflinePlayer p){
 
         UUID uuid = p.getUniqueId();
@@ -158,6 +185,28 @@ public class PlayerLogic {
         Object[] result = DataLogic.getSQL().queryFirst(query, 4);
         if (result == null){
             LogUtil.log(Level.SEVERE, "Error in fetchPlayer(playerid=" + playerid +").");
+            return null;
+        }
+
+        boolean advanced;
+        if (result[3] instanceof Integer)
+            advanced = ((int)result[3]) != 0;
+        else
+            advanced = (Boolean)result[3];
+        PlayerInfo pi = new PlayerInfo((Integer)result[0], UUID.fromString((String)result[2]), (String)result[1], advanced);
+        cachedPlayers.put(pi.getUUID(), pi);
+        cachedPlayerId.put(pi.getId(), pi);
+        cachedPlayerName.put(pi.getName(), pi);
+        LogUtil.log(Level.INFO, "Load " + pi);
+
+        return pi;
+    }
+
+    public static PlayerInfo fetchPlayerSync(UUID player){
+
+        String query = "SELECT * FROM `" + DataLogic.getPrefix() + "player` WHERE uuid = '" + player.toString() + "'";
+        Object[] result = DataLogic.getSQL().queryFirst(query, 4);
+        if (result == null){
             return null;
         }
 

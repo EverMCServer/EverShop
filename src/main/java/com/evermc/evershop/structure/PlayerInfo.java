@@ -88,6 +88,10 @@ public class PlayerInfo {
         return this.uuid;
     }
 
+    public void setUUID(UUID uuid){
+        this.uuid = uuid;
+    }
+
     public String getName(){
         return this.name;
     }

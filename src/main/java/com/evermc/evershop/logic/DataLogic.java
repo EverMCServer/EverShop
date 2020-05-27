@@ -353,6 +353,16 @@ public class DataLogic{
         });
     }
 
+    public static boolean changeOwner(int shopid, int newowner) {
+        String query = "UPDATE `" + SQL.getPrefix() + "shop` SET `player_id` = '" + newowner + "' WHERE `id` = '" + shopid + "'";
+        int ret = DataLogic.getSQL().exec(query);
+        if (ret != 1) {
+            severe("Error in updating shop " + shopid + "; retval = " + ret);
+            return false;
+        }
+        return true;
+    }
+
     public static ShopInfo[] getBlockInfo(Location loc){
         String query = "SELECT shops FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
         + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
@@ -455,6 +465,20 @@ public class DataLogic{
     public static ShopInfo[] getShopList(int player_id, int page){
         String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null,rev FROM `" + SQL.getPrefix() + 
                 "shop` WHERE player_id = '" + player_id + "' ORDER BY `epoch` DESC LIMIT 10 OFFSET " + page*10;
+
+        List<Object[]> ret = SQL.query(query, 13);
+        if (ret.size() == 0){
+            return null;
+        }
+        ArrayList<ShopInfo> result = new ArrayList<ShopInfo>();
+        for (Object[] k : ret){
+            result.add(ShopInfo.decode(k));
+        }
+        return result.toArray(new ShopInfo[result.size()]);
+    }
+    public static ShopInfo[] getShopList(int player_id){
+        String query = "SELECT id,0,action_id,0,world_id,x,y,z,0,null,null,null,rev FROM `" + SQL.getPrefix() + 
+                "shop` WHERE player_id = '" + player_id + "' ORDER BY `epoch` DESC";
 
         List<Object[]> ret = SQL.query(query, 13);
         if (ret.size() == 0){

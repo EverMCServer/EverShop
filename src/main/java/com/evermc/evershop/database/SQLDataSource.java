@@ -90,22 +90,23 @@ public abstract class SQLDataSource{
         }
     }
 
-    public void exec(String query){
+    public int exec(String query){
         Connection conn = null;
         Statement st = null;
         try {
             conn = getConnection();
             if (conn == null){
                 LogUtil.log(Level.WARNING, "Failed to getConnection");
-                return;
+                return 0;
             }
             st = conn.createStatement();
 
-            st.executeUpdate(query);
+            return st.executeUpdate(query);
 
         } catch (final SQLException e) {
             LogUtil.log(Level.INFO, "Database connection error: " + e.getMessage());
             e.printStackTrace();
+            return 0;
         } finally {
             if (st != null)
                 try {
