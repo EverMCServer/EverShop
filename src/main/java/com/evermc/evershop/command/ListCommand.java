@@ -128,7 +128,7 @@ public class ListCommand extends AbstractCommand {
             final int showingpage = page + 1;
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
                 String _player;
-                if (player.equals(((Player)sender).getUniqueId().toString())) {
+                if (sender instanceof Player && player.equals(((Player)sender).getUniqueId().toString())) {
                     _player = "";
                 } else {
                     _player = player + " ";

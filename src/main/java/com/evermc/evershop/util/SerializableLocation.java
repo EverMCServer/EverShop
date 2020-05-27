@@ -2,6 +2,7 @@ package com.evermc.evershop.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -23,7 +24,7 @@ import org.bukkit.Location;
  */
 public class SerializableLocation implements Serializable{
 
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public int x;
     public int y;
     public int z;
@@ -98,7 +99,7 @@ public class SerializableLocation implements Serializable{
             ObjectInputStream in  = new ObjectInputStream(new ByteArrayInputStream(data));
             Object obj = in.readObject();
             if (!(obj instanceof SerializableLocation[][])){
-                throw new Exception("Not a SeriLoc array");
+                throw new IOException("Not a SeriLoc array");
             }
             SerializableLocation[] targetOutArray = ((SerializableLocation[][])obj)[0];
             SerializableLocation[] targetInArray = ((SerializableLocation[][])obj)[1];

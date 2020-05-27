@@ -8,6 +8,7 @@ depend:
   - Vault
 softdepend:
   - WorldGuard
+  - LockettePro
 api-version: 1.14
 
 commands:

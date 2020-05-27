@@ -49,7 +49,7 @@ public class ShopLogic {
     private static Material wandMaterial = null;
     private static int maxLinkBlocks = 0;
 
-    static final List<Material> linkable_container = Arrays.asList(
+    private static final List<Material> linkable_container = Arrays.asList(
         Material.CHEST,
         Material.TRAPPED_CHEST,
         Material.BARREL,
@@ -58,7 +58,7 @@ public class ShopLogic {
         Material.DROPPER
     );
 
-    static final List<Material> linkable_redstone = Arrays.asList(
+    private static final List<Material> linkable_redstone = Arrays.asList(
         Material.LEVER,
         Material.ACACIA_BUTTON,
         Material.BIRCH_BUTTON,
@@ -272,7 +272,7 @@ public class ShopLogic {
             Iterator<ItemStack> it = si.getItemOut().iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
-                ret[0].addExtra(TranslationUtil.tr(is));
+                ret[0].addExtra(tr(is));
                 if (it.hasNext()){
                     ret[0].addExtra(", ");
                 }
@@ -281,7 +281,7 @@ public class ShopLogic {
             it = si.getItemIn().iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
-                ret[1].addExtra(TranslationUtil.tr(is));
+                ret[1].addExtra(tr(is));
                 if (it.hasNext()){
                     ret[1].addExtra(", ");
                 }
@@ -304,7 +304,7 @@ public class ShopLogic {
             Iterator<ItemStack> it = items.iterator();
             while(it.hasNext()){
                 ItemStack is = it.next();
-                ret[0].addExtra(TranslationUtil.tr(is));
+                ret[0].addExtra(tr(is));
                 if (it.hasNext()){
                     ret[0].addExtra(", ");
                 }

@@ -328,7 +328,6 @@ public class TransactionInfo{
             }
             iv.setStorageContents(iss);
         }
-        return;
     }
 
     public void shopRemoveItems(ItemStack item){
@@ -361,7 +360,6 @@ public class TransactionInfo{
             }
             iv.setStorageContents(iss);
         }
-        return;
     }
 
     public void playerRemoveItems(){
@@ -396,7 +394,6 @@ public class TransactionInfo{
             }
         }
         playerInv.setStorageContents(iss);
-        return;
     }
 
     public void shopGiveItems(){

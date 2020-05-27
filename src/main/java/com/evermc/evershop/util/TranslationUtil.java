@@ -2,6 +2,7 @@ package com.evermc.evershop.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -66,7 +67,7 @@ public class TranslationUtil {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
-        if (!loadMsgsLang(plugin) || !loadItemLang(plugin)) {
+        if (!loadMsgsLang(plugin) || !loadItemLang()) {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
@@ -497,7 +498,7 @@ public class TranslationUtil {
         }
         String name = is.getType().name().toLowerCase();
         if (name.endsWith("_wall_banner")){
-            name.replace("_wall_banner", "_banner");
+            name = name.replace("_wall_banner", "_banner");
         }
         if (item_dicts.contains("item.minecraft." + name)){
             return new TranslatableComponent("item.minecraft." + name);
@@ -512,7 +513,7 @@ public class TranslationUtil {
     public static BaseComponent tr(Material t){
         String name = t.name().toLowerCase();
         if (name.endsWith("_wall_banner")){
-            name.replace("_wall_banner", "_banner");
+            name = name.replace("_wall_banner", "_banner");
         }
         if (item_dicts.contains("item.minecraft." + name)){
             return new TranslatableComponent("item.minecraft." + name);
@@ -523,13 +524,13 @@ public class TranslationUtil {
         warn("TranslationUtil: Unsupported material: " + t);
         return new TextComponent(name);
     }
-    private static boolean loadItemLang(EverShop plugin){
+    private static boolean loadItemLang(){
         BufferedReader reader = null;
         URL json = null;
         try{
             Enumeration<URL> e = ClassLoader.getSystemResources("assets/minecraft/lang/en_us.json");
             if (e.hasMoreElements()) json = e.nextElement();
-            else throw new Exception();
+            else throw new IOException();
             reader = new BufferedReader(new InputStreamReader(json.openStream()));
         } catch (Exception e){
             severe("Cannot load en_us.json from server jar, unsupported server?");

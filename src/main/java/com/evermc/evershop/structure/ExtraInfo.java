@@ -23,9 +23,9 @@ import static com.evermc.evershop.util.LogUtil.severe;
 
 public class ExtraInfo {
 
-    PermissionInfo perm;
-    int rc_ticks;
-    HashMap<String, String> slot;
+    private PermissionInfo perm;
+    private int rc_ticks;
+    private HashMap<String, String> slot;
 
     public ExtraInfo(){
         this.perm = new PermissionInfo();
@@ -245,7 +245,8 @@ public class ExtraInfo {
             return false;
         }
         for (String pos:possibility.split(";")){
-            int amount = 0, possi = 0;
+            int amount = 0;
+            int possi = 0;
             try{
                 amount = Integer.parseInt(pos.split(":")[0]);
                 possi = Integer.parseInt(pos.split(":")[1]);
@@ -291,9 +292,9 @@ class PermissionInfo{
     enum Type{
         DISABLED, BLACKLIST, WHITELIST
     }
-    Type type;
-    ArrayList<UUID> users;
-    ArrayList<String> groups;
+    protected Type type;
+    protected ArrayList<UUID> users;
+    protected ArrayList<String> groups;
     public PermissionInfo(){
         this.type = Type.DISABLED;
         this.users = new ArrayList<UUID>();

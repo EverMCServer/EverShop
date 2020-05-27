@@ -224,6 +224,10 @@ public class ShopInfo {
         return this.player_id;
     }
 
+    public void setOwnerId(int id){
+        this.player_id = id;
+    }
+
     public int getWorldID(){
         return this.world_id;
     }
