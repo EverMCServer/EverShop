@@ -65,10 +65,15 @@ public class ExtraInfo {
             }
             uuid = pi.getUUID();
         } 
-        if (this.perm.users.contains(uuid)) {
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(uuid);
+        if (pi == null) {
+            return false;
+        }
+        int player = pi.getId();
+        if (this.perm.users.contains(player)) {
             return true;
         }
-        this.perm.users.add(uuid);
+        this.perm.users.add(player);
         return true;
     }
     public boolean permissionGroupAdd(String group) {
@@ -96,7 +101,12 @@ public class ExtraInfo {
             }
             uuid = pi.getUUID();
         } 
-        return this.perm.users.remove(uuid);
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(uuid);
+        if (pi == null) {
+            return false;
+        }
+        int player = pi.getId();
+        return this.perm.users.remove((Integer)player);
     }
     public boolean permissionGroupRemove(String group) {
         return this.perm.groups.remove(group);
@@ -104,18 +114,23 @@ public class ExtraInfo {
     public String getPermissionType(){
         return this.perm.type.name();
     }
-    public ArrayList<UUID> getPermissionUsers(){
+    public ArrayList<Integer> getPermissionUsers(){
         return this.perm.users;
     }
     public ArrayList<String> getPermissionGroups(){
         return this.perm.groups;
     }
     public boolean checkPermission(Player p) {
+        PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
+        if (pi == null) {
+            return false;
+        }
+        Integer playerid = pi.getId();
         switch (this.perm.type) {
             case DISABLED:
                 return true;
             case WHITELIST:
-                if (this.perm.users.contains(p.getUniqueId())) {
+                if (this.perm.users.contains(playerid)) {
                     return true;
                 }
                 for (String group : this.perm.groups) {
@@ -125,7 +140,7 @@ public class ExtraInfo {
                 }
                 return false;
             case BLACKLIST:
-            if (this.perm.users.contains(p.getUniqueId())) {
+            if (this.perm.users.contains(playerid)) {
                 return false;
             }
             for (String group : this.perm.groups) {
@@ -293,11 +308,11 @@ class PermissionInfo{
         DISABLED, BLACKLIST, WHITELIST
     }
     protected Type type;
-    protected ArrayList<UUID> users;
+    protected ArrayList<Integer> users;
     protected ArrayList<String> groups;
     public PermissionInfo(){
         this.type = Type.DISABLED;
-        this.users = new ArrayList<UUID>();
+        this.users = new ArrayList<Integer>();
         this.groups = new ArrayList<String>();
     }
 }

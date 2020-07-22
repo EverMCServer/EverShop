@@ -9,7 +9,6 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 import java.util.Iterator;
-import java.util.UUID;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -148,13 +147,17 @@ class SetPermissionShowCommand extends AbstractSetCommand{
             if (ei.getPermissionUsers().size() == 0) {
                 msgBuilder.append("<empty>").color(ChatColor.WHITE);
             } else {
-                Iterator<UUID> it = ei.getPermissionUsers().iterator();
+                Iterator<Integer> it = ei.getPermissionUsers().iterator();
                 while (it.hasNext()) {
-                    UUID uuid = it.next();
-                    PlayerInfo pi = PlayerLogic.getPlayerInfo(uuid);
+                    int id = it.next();
+                    PlayerInfo pi = PlayerLogic.getPlayerInfo(id);
+                    String uuid = "-";
+                    if (pi != null) {
+                        uuid = pi.getUUID().toString();
+                    }
                     msgBuilder.append((pi==null?"<Unknown>":pi.getName())).color(ChatColor.YELLOW)
-                              .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(uuid.toString()).create()))
-                              .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid.toString()));
+                              .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(uuid).create()))
+                              .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid));
                     if (it.hasNext()) {
                         msgBuilder.append(", ").color(ChatColor.WHITE);
                     }
