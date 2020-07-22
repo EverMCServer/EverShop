@@ -33,6 +33,9 @@ public class MySQLDataSource extends SQLDataSource {
         hConfig.addDataSourceProperty("cacheServerConfiguration", "true");
         hConfig.addDataSourceProperty("elideSetAutoCommits", "true");
         hConfig.addDataSourceProperty("maintainTimeStats", "true");
+        if (this.config.isInt("maximumPoolSize")) {
+            hConfig.addDataSourceProperty("maximumPoolSize", "" + this.config.getInt("maximumPoolSize"));
+        }
         try{
             this.ds = new HikariDataSource(hConfig);
         }catch(Exception e){
