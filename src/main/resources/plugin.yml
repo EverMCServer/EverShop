@@ -1,6 +1,6 @@
 name: EverShop
 main: com.evermc.evershop.EverShop
-version: 1.0
+version: "1.0"
 description: EverShop-1.0
 author: djytw
 load: POSTWORLD
@@ -9,7 +9,7 @@ depend:
 softdepend:
   - WorldGuard
   - LockettePro
-api-version: 1.14
+api-version: "1.16"
 
 commands:
   evershop:
