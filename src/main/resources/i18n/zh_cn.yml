@@ -11,6 +11,7 @@
 'You can link at most one chest to a dispose shop': '销毁物品商店最多只能链接一个箱子'
 'Shop type and your selection is not match!': '商店类型和你链接的方块类型不匹配!'
 'You do not have permission to create a %1$s shop': '你没有权限创建%1$s商店'
+'You do not have permission to create a shop with price': '你没有权限创建带有金额的商店'
 'You should put some items in the chest first!': '你需要先往箱子里放一些东西!'
 'Failed to create shop, maybe you put too many items in the shop': '创建商店失败，是不是你放太多东西了'
 'You cannot break this block because there are shops attached to it': '你不能破坏这个方块，上面有商店'

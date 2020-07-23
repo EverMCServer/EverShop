@@ -11,6 +11,7 @@
 'You can link at most one chest to a dispose shop': 'You can link at most one chest to a dispose shop'
 'Shop type and your selection is not match!': 'Shop type and your selection is not match!'
 'You do not have permission to create a %1$s shop': 'You do not have permission to create a %1$s shop'
+'You do not have permission to create a shop with price': 'You do not have permission to create a shop with price'
 'You should put some items in the chest first!': 'You should put some items in the chest first!'
 'Failed to create shop, maybe you put too many items in the shop': 'Failed to create shop, maybe you put too many items in the shop.'
 'You cannot break this block because there are shops attached to it': 'You can''t break this block because there are shops attached to it'

@@ -474,6 +474,10 @@ public class ShopLogic {
                 if (price == 0) {
                     price = TransactionLogic.getPrice(line4);
                 }
+                if (price != 0 && !p.hasPermission("evershop.create.price")) {
+                    send("You do not have permission to create a shop with price", p);
+                    return true;
+                }
                 final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), price);
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {
