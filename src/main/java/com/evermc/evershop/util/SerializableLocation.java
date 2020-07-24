@@ -15,6 +15,7 @@ import com.evermc.evershop.logic.DataLogic;
 import static com.evermc.evershop.util.LogUtil.severe;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
 /**
  * The same to the ConfigurationSerializable version of Location
@@ -50,7 +51,11 @@ public class SerializableLocation implements Serializable{
     }
 
     public static Location toLocation(int world, int x, int y, int z){
-        return new Location(DataLogic.getWorld(world), x, y, z);
+        World w = DataLogic.getWorld(world);
+        if (w == null) {
+            return null;
+        }
+        return new Location(w, x, y, z);
     }
 
     public String toString(){

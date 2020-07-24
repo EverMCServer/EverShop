@@ -47,20 +47,22 @@ public class EverShop extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new InteractEvent(this), this);
         Bukkit.getPluginCommand("evershop").setExecutor(new EverShopCommand());
-        if (!DataLogic.init(this)){
-            severe("Fail to start DataLogic! Check your database config.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-        PlayerLogic.init(this);
-        ShopLogic.init(this);
-        TransactionLogic.init(this);
-        TranslationUtil.init(this);
-        RedstoneUtil.init();
-        NBTUtil.init();
-        WorldGuardHandler.init(this);
-        ParticlesUtil.init(this);
-        LocketteProHandler.init(this);
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (!DataLogic.init(this)){
+                severe("Fail to start DataLogic! Check your database config.");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+            PlayerLogic.init(this);
+            ShopLogic.init(this);
+            TransactionLogic.init(this);
+            TranslationUtil.init(this);
+            RedstoneUtil.init();
+            NBTUtil.init();
+            WorldGuardHandler.init(this);
+            ParticlesUtil.init(this);
+            LocketteProHandler.init(this);
+        }, 20);
     }  
 
     public void reload(){

@@ -289,6 +289,10 @@ public class DataLogic{
         for (Object[] k : ret){
             int shopid = SQL.getInt(k[0]);
             Location loc = SerializableLocation.toLocation(SQL.getInt(k[1]), SQL.getInt(k[2]), SQL.getInt(k[3]), SQL.getInt(k[4]));
+            if (loc == null) {
+                warn("Shop #" + shopid + " is at a not loaded world.");
+                continue;
+            }
             if (ShopLogic.isShopSign(loc.getBlock(), false)) {
                 Sign sign = (Sign)loc.getBlock().getState();
                 sign.setMetadata("shopid", new FixedMetadataValue(EverShop.getInstance(), shopid));
