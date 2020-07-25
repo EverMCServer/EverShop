@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import com.evermc.evershop.EverShop;
@@ -379,17 +378,17 @@ public class DataLogic{
             return null;
         }
         Set<ShopInfo> retval = new HashSet<ShopInfo>();
-        CopyOnWriteArrayList<String> shops = new CopyOnWriteArrayList<String>(Arrays.asList(shopstr.split(",")));
+        List<String> shops = Arrays.asList(shopstr.split(","));
+        Set<String> notremove = new HashSet<String>();
         for (String str : shops){
             int shop = Integer.parseInt(str);
             ShopInfo t = getShopInfo(shop);
             if (t != null){
                 retval.add(t);
-            } else {
-                while(shops.remove(str));
+                notremove.add(str);
             }
         }
-        String new_shopstr = String.join(",", shops);
+        String new_shopstr = String.join(",", notremove);
         query = "UPDATE `" + SQL.getPrefix() + "target` SET `shops` = '" + new_shopstr + "' WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
         + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
         SQL.exec(query);

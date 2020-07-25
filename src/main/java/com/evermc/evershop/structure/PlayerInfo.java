@@ -1,8 +1,9 @@
 package com.evermc.evershop.structure;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.evermc.evershop.util.SerializableLocation;
 
@@ -17,8 +18,8 @@ public class PlayerInfo {
     private UUID uuid;
     private String name;
     private boolean advanced;
-    private CopyOnWriteArraySet<Location> reg1;
-    private CopyOnWriteArraySet<Location> reg2;
+    private Set<Location> reg1;
+    private Set<Location> reg2;
     private ShopInfo wandShop;
     private boolean reg_is_container;
 
@@ -27,8 +28,8 @@ public class PlayerInfo {
         this.uuid = uuid;
         this.name = name;
         this.advanced = advanced;
-        this.reg1 = new CopyOnWriteArraySet<Location>();
-        this.reg2 = new CopyOnWriteArraySet<Location>();
+        this.reg1 = ConcurrentHashMap.newKeySet();
+        this.reg2 = ConcurrentHashMap.newKeySet();
         this.reg_is_container = false;
         this.wandShop = null;
     }
@@ -129,11 +130,11 @@ public class PlayerInfo {
         this.reg_is_container = reg_is_container;
     }
 
-    public CopyOnWriteArraySet<Location> getReg1(){
+    public Set<Location> getReg1(){
         return this.reg1;
     }
 
-    public CopyOnWriteArraySet<Location> getReg2(){
+    public Set<Location> getReg2(){
         return this.reg2;
     }
     
