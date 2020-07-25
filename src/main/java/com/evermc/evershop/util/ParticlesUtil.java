@@ -1,6 +1,7 @@
 package com.evermc.evershop.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -14,24 +15,53 @@ import org.bukkit.Particle.DustOptions;
 import org.bukkit.entity.Player;
 
 public class ParticlesUtil {
+    private static long counter = 0;
     public static void init(EverShop plugin){
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            ParticlesUtil.counter ++;
             for (Player p : Bukkit.getOnlinePlayers()) {
                 PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
-                for (Location loc : pi.getReg1()) {
-                    DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), 0.5f);
-                    for (Location lo : getBorder(loc, 5)){
-                        p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
-                    }   
+                int count = pi.getReg1().size() + pi.getReg2().size();
+                int dustcount = 5;
+                float dustsize = 0.5f;
+                if (count > 5) {
+                    dustcount = 3;
+                    dustsize = 0.8f;
                 }
-                for (Location loc : pi.getReg2()) {
-                    DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), 0.5f);
-                    for (Location lo : getBorder(loc, 5)){
+                if (count <= 10) {
+                    if (counter % 10 != 0) continue;
+                    for (Location loc : pi.getReg1()) {
+                        DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), dustsize);
+                        for (Location lo : getBorder(loc, dustcount)){
+                            p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
+                        }   
+                    }
+                    for (Location loc : pi.getReg2()) {
+                        DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), dustsize);
+                        for (Location lo : getBorder(loc, dustcount)){
+                            p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
+                        }   
+                    }
+                } else {
+                    int index = (int)counter%count;
+                    DustOptions dustOptions;
+                    Iterator<Location> it;
+                    if (pi.getReg1().size() > index) {
+                        it = pi.getReg1().iterator();
+                        dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), dustsize);
+                    } else {
+                        index -= pi.getReg1().size();
+                        it = pi.getReg2().iterator();
+                        dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), dustsize);
+                    }
+                    while(it.hasNext() && index-- > 0)it.next();
+                    if (!it.hasNext()) continue;
+                    for (Location lo : getBorder(it.next(), 3)){
                         p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
-                    }   
+                    }
                 }
             }
-        }, 10, 10);
+        }, 10, 1);
     }
     private static Location[] getBorder(Location loc, int count) {
         ArrayList<Location> ret = new ArrayList<Location>();
