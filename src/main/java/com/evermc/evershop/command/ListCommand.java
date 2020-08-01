@@ -20,6 +20,7 @@ import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.util.TranslationUtil;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
@@ -27,7 +28,7 @@ import static com.evermc.evershop.util.TranslationUtil.show_location;
 
 public class ListCommand extends AbstractCommand {
     public ListCommand() {
-        super("list", "evershop.list", "list shops", "[player] [page]");
+        super("list", "evershop.list", "list shops", "[name] [page]");
     }
     public boolean executeAsPlayer(Player player, String[] args) {
         int page = 1;
@@ -144,13 +145,13 @@ public class ListCommand extends AbstractCommand {
                     }
                 }
                 ComponentBuilder builder = new ComponentBuilder("");
-                builder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+                builder.append("EverShop // ").color(TranslationUtil.title_color)
                        .append(tr("%1$ss shop list", sender, pi.getName())).bold(true).color(ChatColor.WHITE)
-                       .append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
+                       .append("\nEverShop // ").bold(false).color(TranslationUtil.title_color)
                        .append(tr("Showing %1$s results Page %2$s of %3$s", sender, count, showingpage, (count-1)/10 + 1)).bold(false).color(ChatColor.GRAY)
                        .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
                 for (ShopInfo si : sis){
-                    builder.append(" [" + si.getId() + "] ").color(ChatColor.GREEN)
+                    builder.append(" [" + si.getId() + "] ").color(TranslationUtil.command_color)
                                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("click to view shop info").create()))
                                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es info " + si.getId()))
                            .append(" ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
@@ -173,7 +174,7 @@ public class ListCommand extends AbstractCommand {
                 if (sender instanceof Player) {
                     builder.append("  ").color(ChatColor.GRAY);
                     if (showingpage > 1) {
-                        builder.append("[<< Prev]").color(ChatColor.DARK_AQUA)
+                        builder.append("[<< Prev]").color(TranslationUtil.command_color)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", sender)).create()))
                                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage-1)))
                                .append(" ", ComponentBuilder.FormatRetention.NONE);
@@ -182,7 +183,7 @@ public class ListCommand extends AbstractCommand {
                     }
                     builder.append("| ").color(ChatColor.WHITE);
                     if (showingpage <= (count-1)/10) {
-                        builder.append("[Next >>]").color(ChatColor.DARK_AQUA)
+                        builder.append("[Next >>]").color(TranslationUtil.command_color)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", sender)).create()))
                                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage+1)))
                                .append(" | ", ComponentBuilder.FormatRetention.NONE);
@@ -190,7 +191,7 @@ public class ListCommand extends AbstractCommand {
                         builder.append("[Next >>]").color(ChatColor.GRAY)
                                .append(" | ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
                     }
-                    builder.append("[Enter Page]").color(ChatColor.DARK_AQUA)
+                    builder.append("[Enter Page]").color(TranslationUtil.command_color)
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", sender)).create()))
                                     .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es list " + _player))
                            .append(" ", ComponentBuilder.FormatRetention.NONE);

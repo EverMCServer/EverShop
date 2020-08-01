@@ -22,6 +22,7 @@ import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.ExtraInfo;
 import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.util.TranslationUtil;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
@@ -135,17 +136,17 @@ public class SlotCommand extends AbstractCommand {
         } else {
             help(player);
             player.spigot().sendMessage(
-                new ComponentBuilder("<possibility>").color(ChatColor.LIGHT_PURPLE)
+                new ComponentBuilder("<possibility>").color(TranslationUtil.title_color)
                              .append(" = \n  ").color(ChatColor.WHITE)
-                             .append("<amount>").color(ChatColor.GREEN)
+                             .append("<amount>").color(TranslationUtil.command_color)
                              .append(":").color(ChatColor.YELLOW)
-                             .append("<possibility>").color(ChatColor.GREEN)
+                             .append("<possibility>").color(TranslationUtil.command_color)
                              .append(";").color(ChatColor.YELLOW)
-                             .append("<amount>").color(ChatColor.GREEN)
+                             .append("<amount>").color(TranslationUtil.command_color)
                              .append(":").color(ChatColor.YELLOW)
-                             .append("<possibility>").color(ChatColor.GREEN)
+                             .append("<possibility>").color(TranslationUtil.command_color)
                              .append("...\n  ").color(ChatColor.WHITE)
-                             .append("<amount>").color(ChatColor.LIGHT_PURPLE)
+                             .append("<amount>").color(TranslationUtil.title_color)
                              .append(" should not exceed the MaxStackSize").color(ChatColor.WHITE)
                              .create());
         }
@@ -153,17 +154,17 @@ public class SlotCommand extends AbstractCommand {
 
     private void show_info(final CommandSender player, final ShopInfo si){
         ComponentBuilder builder = new ComponentBuilder("");
-        builder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+        builder.append("EverShop // ").color(TranslationUtil.title_color)
                .append(tr("Slot Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.WHITE);
         ExtraInfo extra = si.getExtraInfo();
-        builder.append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
-               .append(tr("Possibility List: (%1$s possibilitis in total)", player, extra.slotPossibilityAll())).color(ChatColor.YELLOW);
+        builder.append("\nEverShop // ").bold(false).color(TranslationUtil.title_color)
+               .append(tr("Possibility List: (%1$s possibilitis in total)", player, extra.slotPossibilityAll())).color(TranslationUtil.command_parameter_color);
 
         int count = 0;
         for (Entry<String, ItemStack> entry : ExtraInfo.slotItemMap(si.getItemOut()).entrySet()) {
             count ++;
             builder.append("\n")
-                   .append("#" + count + " ").color(ChatColor.LIGHT_PURPLE)
+                   .append("#" + count + " ").color(TranslationUtil.title_color)
                    .append(tr(entry.getValue(),false))
                    .append(": ").color(ChatColor.WHITE);
             String possibility = extra.getSlotPossibilityMap().get(entry.getKey());
@@ -173,7 +174,7 @@ public class SlotCommand extends AbstractCommand {
                 builder.append(tr("[win %1$s: p=%2$s] ", player, amount, possi)).color(ChatColor.WHITE);
             }
             if (player instanceof Player && (player.hasPermission("evershop.info.others") || si.getOwnerId() == PlayerLogic.getPlayerId((Player)player))) {
-                builder.append("[+]").color(ChatColor.GREEN)
+                builder.append("[+]").color(TranslationUtil.command_color)
                      .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es slot " + si.getId() + " set " + entry.getKey() + " " + possibility))
                      .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{tr("Click to edit", player)}));
             } else if (!(player instanceof Player)){

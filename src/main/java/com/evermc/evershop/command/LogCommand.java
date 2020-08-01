@@ -7,6 +7,7 @@ import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.ExtraInfo;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.util.TranslationUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -112,9 +113,9 @@ public class LogCommand extends AbstractCommand {
             itemmap = ExtraInfo.slotItemMap(si.getItemOut());
         }
         ComponentBuilder builder = new ComponentBuilder("");
-        builder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+        builder.append("EverShop // ").color(TranslationUtil.command_color)
                .append(tr("Shop #%1$s Transactions", player, si.getId())).bold(true).color(ChatColor.WHITE)
-               .append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
+               .append("\nEverShop // ").bold(false).color(TranslationUtil.command_color)
                .append(tr("Showing %1$s results Page %2$s of %3$s", player, countAll, page, countAll/10+1)).color(ChatColor.GRAY)
                .append("\n").color(ChatColor.WHITE);
         if (data != null) {
@@ -122,7 +123,7 @@ public class LogCommand extends AbstractCommand {
                 PlayerInfo pi = PlayerLogic.getPlayerInfo(data[i].player_id);
                 builder.append(" + ").color(ChatColor.GREEN)
                        .append(String.format("[%1$s] ", countAll - (page-1)*10 - i)).color(ChatColor.GRAY)
-                       .append((pi==null?"Unknown":pi.getName())).color(ChatColor.DARK_AQUA)
+                       .append((pi==null?"Unknown":pi.getName())).color(TranslationUtil.command_color)
                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
                             .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
                        .append(" ", ComponentBuilder.FormatRetention.NONE);
@@ -133,7 +134,7 @@ public class LogCommand extends AbstractCommand {
                 } else {
                     builder.append(tr("accessed", player)).color(ChatColor.WHITE)
                            .append(" ").color(ChatColor.WHITE)
-                           .append(tr("%1$s times", player, data[i].count)).color(ChatColor.DARK_AQUA);
+                           .append(tr("%1$s times", player, data[i].count)).color(TranslationUtil.command_color);
                 }
                 builder.append(" ").color(ChatColor.WHITE)
                        .append(show_date(data[i].time, player)).color(ChatColor.GRAY)
@@ -143,7 +144,7 @@ public class LogCommand extends AbstractCommand {
         if (player instanceof Player) {
             builder.append("  ").color(ChatColor.GRAY);
             if (page > 1) {
-                builder.append("[<< Prev]").color(ChatColor.DARK_AQUA)
+                builder.append("[<< Prev]").color(TranslationUtil.command_color)
                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", player)).create()))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es log " + si.getId() + " " + (page-1)))
                        .append(" ", ComponentBuilder.FormatRetention.NONE);
@@ -152,7 +153,7 @@ public class LogCommand extends AbstractCommand {
             }
             builder.append("| ").color(ChatColor.WHITE);
             if (page < countAll/10+1) {
-                builder.append("[Next >>]").color(ChatColor.DARK_AQUA)
+                builder.append("[Next >>]").color(TranslationUtil.command_color)
                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", player)).create()))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es log " + si.getId() + " " + (page+1)))
                        .append(" | ", ComponentBuilder.FormatRetention.NONE);
@@ -160,7 +161,7 @@ public class LogCommand extends AbstractCommand {
                 builder.append("[Next >>]").color(ChatColor.GRAY)
                        .append(" | ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
             }
-            builder.append("[Enter Page]").color(ChatColor.DARK_AQUA)
+            builder.append("[Enter Page]").color(TranslationUtil.command_color)
                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", player)).create()))
                             .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es log " + si.getId() + " "))
                    .append(" ", ComponentBuilder.FormatRetention.NONE);

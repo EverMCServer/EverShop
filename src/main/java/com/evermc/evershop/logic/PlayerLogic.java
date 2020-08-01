@@ -1,10 +1,13 @@
 package com.evermc.evershop.logic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.structure.PlayerInfo;
@@ -255,4 +258,34 @@ public class PlayerLogic {
     
         });
     }
+    
+    public static List<String> tabCompleter(String startWith) {
+        // show offline player names when:
+        //   1. startWith.length() >= 2
+        //   2. no match in online players
+        if (startWith == null || startWith.length() == 0) {
+            return Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toList());
+        }
+        if (startWith.length() >= 2) {
+            return tabCompleterOfflinePlayer(startWith.toLowerCase());
+        } else {
+            List<String> ret = Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).filter(name -> name.toLowerCase().startsWith(startWith.toLowerCase())).collect(Collectors.toList());
+            if (ret.size() == 0) {
+                return tabCompleterOfflinePlayer(startWith.toLowerCase());
+            } else {
+                return ret;
+            }
+        }
+    }
+
+    public static List<String> tabCompleterOfflinePlayer(String startWith) {
+        ArrayList<String> ret = new ArrayList<String>();
+        for (Entry<String, PlayerInfo> entry : cachedPlayerName.entrySet()) {
+            if (entry.getKey().startsWith(startWith)) {
+                ret.add(entry.getValue().getName());
+            }
+        }
+        return ret;
+    }
+
 }

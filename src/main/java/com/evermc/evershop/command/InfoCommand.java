@@ -20,6 +20,7 @@ import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.SerializableLocation;
+import com.evermc.evershop.util.TranslationUtil;
 
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
@@ -91,55 +92,55 @@ public class InfoCommand extends AbstractCommand {
         }
         ComponentBuilder builder = new ComponentBuilder("");
         PlayerInfo pi = PlayerLogic.getPlayerInfo(si.getOwnerId());
-        builder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
+        builder.append("EverShop // ").color(TranslationUtil.title_color)
                .append(tr("Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.WHITE)
-               .append("\nEverShop // ").bold(false).color(ChatColor.LIGHT_PURPLE)
+               .append("\nEverShop // ").bold(false).color(TranslationUtil.title_color)
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
-               .append(tr("Owner", player)).color(ChatColor.DARK_AQUA)
-               .append(": ").color(ChatColor.DARK_AQUA)
+               .append(tr("Owner", player)).color(TranslationUtil.command_color)
+               .append(": ").color(TranslationUtil.command_color)
                .append(pi.getName()).color(ChatColor.YELLOW)
                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
-               .append(tr("Type", player)).color(ChatColor.DARK_AQUA)
-               .append(": ").color(ChatColor.DARK_AQUA)
+               .append(tr("Type", player)).color(TranslationUtil.command_color)
+               .append(": ").color(TranslationUtil.command_color)
                .append(TransactionLogic.getName(si.getAction())).color(ChatColor.YELLOW)
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
-               .append(tr("Price", player)).color(ChatColor.DARK_AQUA)
-               .append(": ").color(ChatColor.DARK_AQUA)
+               .append(tr("Price", player)).color(TranslationUtil.command_color)
+               .append(": ").color(TranslationUtil.command_color)
                .append("$" + si.getPrice()).color(ChatColor.YELLOW)
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
-               .append(tr("Location", player)).color(ChatColor.DARK_AQUA)
-               .append(": ").color(ChatColor.DARK_AQUA)
+               .append(tr("Location", player)).color(TranslationUtil.command_color)
+               .append(": ").color(TranslationUtil.command_color)
                .append(show_location(SerializableLocation.toLocation(si.getWorldID(), si.getX(), si.getY(), si.getZ()), player)).color(ChatColor.GREEN)
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
-               .append(tr("Creation Time", player)).color(ChatColor.DARK_AQUA)
-               .append(": ").color(ChatColor.DARK_AQUA)
+               .append(tr("Creation Time", player)).color(TranslationUtil.command_color)
+               .append(": ").color(TranslationUtil.command_color)
                .append(si.getEpochString()).color(ChatColor.WHITE)
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         if (si.getTargetIn().size() > 0) {
-            builder.append(tr("TargetIn Containers", player)).color(ChatColor.DARK_AQUA)
-                   .append(": ").color(ChatColor.DARK_AQUA);
+            builder.append(tr("TargetIn Containers", player)).color(TranslationUtil.command_color)
+                   .append(": ").color(TranslationUtil.command_color);
             for (SerializableLocation loc : si.getTargetIn()) {
-                builder.append("[").color(ChatColor.LIGHT_PURPLE)
+                builder.append("[").color(TranslationUtil.title_color)
                        .append(show_location(loc.toLocation(), player)).color(ChatColor.GREEN)
-                       .append("] ").color(ChatColor.LIGHT_PURPLE);
+                       .append("] ").color(TranslationUtil.title_color);
             }
             builder.append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         }
         if (si.getTargetOut().size() > 0) {
-            builder.append(tr("TargetOut Containers", player)).color(ChatColor.DARK_AQUA)
-                   .append(": ").color(ChatColor.DARK_AQUA);
+            builder.append(tr("TargetOut Containers", player)).color(TranslationUtil.command_color)
+                   .append(": ").color(TranslationUtil.command_color);
             for (SerializableLocation loc : si.getTargetOut()) {
-                builder.append("[").color(ChatColor.LIGHT_PURPLE)
+                builder.append("[").color(TranslationUtil.title_color)
                        .append(show_location(loc.toLocation(), player)).color(ChatColor.GREEN)
-                       .append("] ").color(ChatColor.LIGHT_PURPLE);
+                       .append("] ").color(TranslationUtil.title_color);
             }
             builder.append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         }
         if (si.getItemIn().size() > 0) {
-            builder.append(tr("ItemsIn", player)).color(ChatColor.DARK_AQUA)
-                   .append(": ").color(ChatColor.DARK_AQUA);
+            builder.append(tr("ItemsIn", player)).color(TranslationUtil.command_color)
+                   .append(": ").color(TranslationUtil.command_color);
             for (ItemStack item : si.getItemIn()) {
                 builder.append(tr(item))
                        .append(", ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
@@ -147,8 +148,8 @@ public class InfoCommand extends AbstractCommand {
             builder.append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
         }
         if (si.getItemOut().size() > 0) {
-            builder.append(tr("ItemsOut", player)).color(ChatColor.DARK_AQUA)
-                   .append(": ").color(ChatColor.DARK_AQUA);
+            builder.append(tr("ItemsOut", player)).color(TranslationUtil.command_color)
+                   .append(": ").color(TranslationUtil.command_color);
             for (ItemStack item : si.getItemOut()) {
                 builder.append(tr(item))
                        .append(", ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);

@@ -112,7 +112,7 @@ public class TranslationUtil {
 
         String prefix = plugin.getConfig().getString("evershop.log_prefix");
         if (prefix == null || prefix.length() == 0) {
-            prefix = "&x3DFFB5[ES]";
+            prefix = "&x039BE5&l[ES] ";
         }
         log_prefix = toComponent(transform(prefix));
 
@@ -157,7 +157,7 @@ public class TranslationUtil {
 
         String prefix = plugin.getConfig().getString("evershop.log_prefix");
         if (prefix == null || prefix.length() == 0) {
-            prefix = "&x3DFFB5&l[ES] ";
+            prefix = "&x039BE5&l[ES] ";
         }
         log_prefix = toComponent(transform(prefix));
         

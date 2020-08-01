@@ -96,7 +96,7 @@ public abstract class AbstractSetCommand extends AbstractCommand {
             this.executeAs(sender, args, shopid);
             return true;
         } else {
-            this.help(sender, cmd);
+            this.help(sender, args, cmd);
             return true;
         }
     }
