@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.evermc.evershop.EverShop;
 import com.google.gson.Gson;
@@ -54,16 +56,92 @@ import static com.evermc.evershop.util.LogUtil.severe;
 import static com.evermc.evershop.util.LogUtil.info;
 import static com.evermc.evershop.util.LogUtil.warn;
 
+import static net.md_5.bungee.api.ChatColor.COLOR_CHAR;
+
 public class TranslationUtil {
     
+    private static final Pattern argsformat = Pattern.compile("(?i)\\%(\\d+)(\\$s)?");
+
     private static HashMap<String, HashMap<String, String>> tr_dicts = null;
-    private static Set<String> item_dicts = null;
+    private static Set<String> item_list = null;
     private static String default_translation = null;
+    private static BaseComponent log_prefix = null;
+    public static ChatColor item_translation_color = null;
+    public static ChatColor command_color = null;
+    public static ChatColor command_parameter_color = null;
+    public static ChatColor title_color = null;
+
+    public static final Pattern COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-ORX&]");
+    public static final Pattern SIMPLI_RGB = Pattern.compile("(?i)" + COLOR_CHAR + "x[0-9a-f]{6}");
+
+    public static String transform(String chatString) {
+        Matcher match = COLOR_PATTERN.matcher(chatString);
+        StringBuffer sb = new StringBuffer();
+        while(match.find()) {
+            if (match.group().charAt(1) == '&') {
+                match.appendReplacement(sb, "&");
+            } else {
+                match.appendReplacement(sb, "" + COLOR_CHAR + match.group().charAt(1));
+            }
+        }
+        match.appendTail(sb);
+        String ret = sb.toString();
+        match = SIMPLI_RGB.matcher(ret);
+        sb = new StringBuffer();
+        while(match.find()) {
+            String rep = COLOR_CHAR + "x";
+            for (int i = 2; i < 8; i ++) {
+                rep += "" + COLOR_CHAR + match.group().charAt(i);
+            }
+            match.appendReplacement(sb, rep);
+        }
+        match.appendTail(sb);
+        return sb.toString();
+    }
+
+    public static BaseComponent toComponent(String legacy) {
+        TextComponent ret = new TextComponent("");
+        for (BaseComponent c : TextComponent.fromLegacyText(legacy)) {
+            ret.addExtra(c);
+        }
+        return ret;
+    }
 
     public static void init(EverShop plugin){
         default_translation = plugin.getConfig().getString("evershop.default_translation");
+
+        String prefix = plugin.getConfig().getString("evershop.log_prefix");
+        if (prefix == null || prefix.length() == 0) {
+            prefix = "&x3DFFB5[ES]";
+        }
+        log_prefix = toComponent(transform(prefix));
+
+        String color = plugin.getConfig().getString("evershop.item_translation_color");
+        if (color == null || color.length() == 0) {
+            color = "#C2EDFF";
+        }
+        item_translation_color = ChatColor.of(color);
+
+        color = plugin.getConfig().getString("evershop.command_color");
+        if (color == null || color.length() == 0) {
+            color = "#3DFFB5";
+        }
+        command_color = ChatColor.of(color);
+
+        color = plugin.getConfig().getString("evershop.command_parameter_color");
+        if (color == null || color.length() == 0) {
+            color = "#90CAF9";
+        }
+        command_parameter_color = ChatColor.of(color);
+
+        color = plugin.getConfig().getString("evershop.title_color");
+        if (color == null || color.length() == 0) {
+            color = "#039BE5";
+        }
+        title_color = ChatColor.of(color);
+
         if (default_translation == null) {
-            severe("TranslationLogic: No default translation set. Please check your configuration.");
+            severe("TranslationUtil: No default translation set. Please check your configuration.");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
@@ -74,17 +152,42 @@ public class TranslationUtil {
     }
 
     public static void reload(EverShop plugin){
+        plugin.reloadConfig();
         String default_translation_bak = default_translation;
+
+        String prefix = plugin.getConfig().getString("evershop.log_prefix");
+        if (prefix == null || prefix.length() == 0) {
+            prefix = "&x3DFFB5&l[ES] ";
+        }
+        log_prefix = toComponent(transform(prefix));
+        
+        String color = plugin.getConfig().getString("evershop.item_translation_color");
+        if (color == null || color.length() == 0) {
+            color = "#C2EDFF";
+        }
+        item_translation_color = ChatColor.of(color);
+
+        color = plugin.getConfig().getString("evershop.command_color");
+        if (color == null || color.length() == 0) {
+            color = "#3DFFB5";
+        }
+        command_color = ChatColor.of(color);
+
+        color = plugin.getConfig().getString("evershop.command_parameter_color");
+        if (color == null || color.length() == 0) {
+            color = "#90CAF9";
+        }
+        command_parameter_color = ChatColor.of(color);
 
         default_translation = plugin.getConfig().getString("evershop.default_translation");
         if (default_translation == null) {
-            severe("TranslationLogic: No default translation set. Please check your configuration.");
-            severe("TranslationLogic: Plugin reload failed.");
+            severe("TranslationUtil: No default translation set. Please check your configuration.");
+            severe("TranslationUtil: Plugin reload failed.");
             default_translation = default_translation_bak;
             return;
         }
-        if (!loadMsgsLang(plugin)) {
-            severe("TranslationLogic: Plugin reload failed.");
+        if (!loadMsgsLang(plugin) || !loadItemLang()) {
+            severe("TranslationUtil: Plugin reload failed.");
             default_translation = default_translation_bak;
             return;
         }
@@ -98,9 +201,7 @@ public class TranslationUtil {
     }
 
     public static BaseComponent title(){
-        TextComponent tc = new TextComponent("[EverShop] ");
-        tc.setColor(ChatColor.DARK_AQUA);
-        return tc;
+        return log_prefix;
     }
 
     public static void send(String msg, CommandSender sender){
@@ -237,21 +338,61 @@ public class TranslationUtil {
     public static BaseComponent tr(String str, String lang, Object...args){
         String s;
         s = tr_dicts.get(lang).get(str);
-        if (s != null)
-            return new TranslatableComponent(s, args);
-        else 
-            return new TranslatableComponent(str, args);
+        if (s == null) {
+            s = str;
+        }
+        BaseComponent[] temp = TextComponent.fromLegacyText(transform(s));
+        BaseComponent ret = new TextComponent("");
+        for (BaseComponent b : temp) {
+            if (b instanceof TextComponent) {
+                TextComponent t = (TextComponent)b;
+                Matcher match = argsformat.matcher(t.getText());
+                if (!match.find()) {
+                    ret.addExtra(t);
+                } else {
+                    match.reset();
+                    int last = 0;
+                    while(match.find()) {
+                        TextComponent cur = t.duplicate();
+                        cur.setText(t.getText().substring(last, match.start()));
+                        ret.addExtra(cur);
+                        last = match.end();
+                        int index = Integer.parseInt(match.group(1)) - 1;
+                        if (args.length <= index) {
+                            severe("TranslationUtil: Error when translate \"" + str + "\": argument " + index + " not exists.");
+                        } else {
+                            if (args[index] instanceof BaseComponent)
+                                ret.addExtra((BaseComponent)args[index]);
+                            else 
+                                ret.addExtra(args[index].toString());
+                        }
+                    }
+                    TextComponent cur = t.duplicate();
+                    cur.setText(t.getText().substring(last));
+                    ret.addExtra(cur);
+                }
+            }
+        }
+        return ret;
     }
-    
+
     public static BaseComponent tr(ItemStack is){
         return tr(is, true);
     }
 
+    public static BaseComponent tr(ItemStack is, ChatColor mainColor){
+        return tr(is, true, mainColor);
+    }
+
     public static BaseComponent tr(ItemStack is, boolean showAmount){
+        return tr(is, showAmount, TranslationUtil.item_translation_color);
+    }
+
+    public static BaseComponent tr(ItemStack is, boolean showAmount, ChatColor mainColor){
         
         TextComponent message = new TextComponent();
 
-        message.setColor(ChatColor.YELLOW);
+        message.setColor(mainColor);
         if (showAmount) {
             message.setText(is.getAmount() + " ");
         }
@@ -403,7 +544,8 @@ public class TranslationUtil {
     }
 
     public static String tr(Location loc){
-        return "(" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + ")";
+        if (loc == null) return "(?:0,0,0)";
+        return "(" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + ")";
     }
 
     public static String binaryToRoman(int binary) {
@@ -500,10 +642,10 @@ public class TranslationUtil {
         if (name.endsWith("_wall_banner")){
             name = name.replace("_wall_banner", "_banner");
         }
-        if (item_dicts.contains("item.minecraft." + name)){
+        if (item_list.contains("item.minecraft." + name)){
             return new TranslatableComponent("item.minecraft." + name);
         }
-        if (item_dicts.contains("block.minecraft." + name)){
+        if (item_list.contains("block.minecraft." + name)){
             return new TranslatableComponent("block.minecraft." + name);
         }
         warn("TranslationUtil: Unsupported material: " + is.getType());
@@ -515,15 +657,16 @@ public class TranslationUtil {
         if (name.endsWith("_wall_banner")){
             name = name.replace("_wall_banner", "_banner");
         }
-        if (item_dicts.contains("item.minecraft." + name)){
+        if (item_list.contains("item.minecraft." + name)){
             return new TranslatableComponent("item.minecraft." + name);
         }
-        if (item_dicts.contains("block.minecraft." + name)){
+        if (item_list.contains("block.minecraft." + name)){
             return new TranslatableComponent("block.minecraft." + name);
         }
         warn("TranslationUtil: Unsupported material: " + t);
         return new TextComponent(name);
     }
+
     private static boolean loadItemLang(){
         BufferedReader reader = null;
         URL json = null;
@@ -546,16 +689,16 @@ public class TranslationUtil {
             e.printStackTrace();
             warn("TranslationLogic: failed to close item list file");
         }
-        item_dicts = map.keySet();
+        item_list = map.keySet();
         info("TranslationLogic: Item list loaded");
         
-        if (item_dicts == null || item_dicts.size() == 0) {
-            severe("TranslationLogic: unable to load item list, disable the plugin.");
+        if (item_list == null || item_list.size() == 0) {
+            severe("TranslationUtil: unable to load item list, disable the plugin.");
             return false;
         }
         return true;
     }
-    
+
     private static boolean loadMsgsLang(EverShop plugin){
         HashMap<String, HashMap<String, String>> tr_dicts_bak = tr_dicts;
         tr_dicts = new HashMap<String, HashMap<String, String>>();
@@ -564,7 +707,7 @@ public class TranslationUtil {
             folder.mkdirs();
         }
         if (!folder.exists()){
-            severe("TranslationLogic: failed to create message translation folder.");
+            severe("TranslationUtil: failed to create message translation folder.");
             tr_dicts = tr_dicts_bak;
             return false;
         }
@@ -574,20 +717,25 @@ public class TranslationUtil {
                 plugin.saveResource("i18n/" + n, false);
         }
         for (File f : folder.listFiles()){
+            if (!f.isFile()) {
+                continue;
+            }
             HashMap<String, String> dict = new HashMap<String, String>();
             FileConfiguration conf = YamlConfiguration.loadConfiguration(f);
             for (String key: conf.getKeys(false)){
-                dict.put(key, conf.getString(key));
+                if (conf.getString(key).length() > 0) {
+                    dict.put(key, conf.getString(key));
+                }
             }
             tr_dicts.put(f.getName().split("\\.")[0] , dict);
         }
-        info("TranslationLogic: loaded " + tr_dicts.size() + " message translations.");
+        info("TranslationUtil: loaded " + tr_dicts.size() + " message translations." + tr_dicts.keySet());
         if (tr_dicts.size() == 0)  {
             tr_dicts = tr_dicts_bak;
             return false;
         }
         if (!tr_dicts.containsKey(default_translation)) {
-            severe("TranslationLogic: Messages of default language " + default_translation + " is not loaded.");
+            severe("TranslationUtil: Messages of default language " + default_translation + " is not loaded.");
             tr_dicts = tr_dicts_bak;
             return false;
         }
