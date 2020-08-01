@@ -2,6 +2,8 @@ package com.evermc.evershop.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -21,7 +23,9 @@ public class ParticlesUtil {
             ParticlesUtil.counter ++;
             for (Player p : Bukkit.getOnlinePlayers()) {
                 PlayerInfo pi = PlayerLogic.getPlayerInfo(p);
-                int count = pi.getReg1().size() + pi.getReg2().size();
+                Set<Location> reg1 = pi.getReg1().stream().filter(loc -> loc.getWorld().equals(p.getWorld())).collect(Collectors.toSet());
+                Set<Location> reg2 = pi.getReg2().stream().filter(loc -> loc.getWorld().equals(p.getWorld())).collect(Collectors.toSet());
+                int count = reg1.size() + reg2.size();
                 int dustcount = 5;
                 float dustsize = 0.5f;
                 if (count > 5) {
@@ -30,13 +34,13 @@ public class ParticlesUtil {
                 }
                 if (count <= 10) {
                     if (counter % 10 != 0) continue;
-                    for (Location loc : pi.getReg1()) {
+                    for (Location loc : reg1) {
                         DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), dustsize);
                         for (Location lo : getBorder(loc, dustcount)){
                             p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
                         }   
                     }
-                    for (Location loc : pi.getReg2()) {
+                    for (Location loc : reg2) {
                         DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), dustsize);
                         for (Location lo : getBorder(loc, dustcount)){
                             p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
@@ -46,12 +50,12 @@ public class ParticlesUtil {
                     int index = (int)counter%count;
                     DustOptions dustOptions;
                     Iterator<Location> it;
-                    if (pi.getReg1().size() > index) {
-                        it = pi.getReg1().iterator();
+                    if (reg1.size() > index) {
+                        it = reg1.iterator();
                         dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), dustsize);
                     } else {
-                        index -= pi.getReg1().size();
-                        it = pi.getReg2().iterator();
+                        index -= reg1.size();
+                        it = reg2.iterator();
                         dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), dustsize);
                     }
                     while(it.hasNext() && index-- > 0)it.next();
