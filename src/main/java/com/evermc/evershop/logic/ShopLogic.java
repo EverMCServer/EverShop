@@ -65,7 +65,10 @@ public class ShopLogic {
         Material.JUNGLE_BUTTON,
         Material.OAK_BUTTON,
         Material.SPRUCE_BUTTON,
-        Material.STONE_BUTTON
+        Material.STONE_BUTTON,
+        Material.CRIMSON_BUTTON,
+        Material.WARPED_BUTTON,
+        Material.POLISHED_BLACKSTONE_BUTTON
     );
     
     public static void init(EverShop _plugin){
