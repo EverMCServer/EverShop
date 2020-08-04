@@ -145,19 +145,13 @@
                     <artifactItems>
                         <artifactItem>
                           <groupId>${project.groupId}</groupId>
-                          <artifactId>EverShop-API</artifactId>
-                          <version>${project.version}</version>
-                          <type>jar</type>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>${project.groupId}</groupId>
                           <artifactId>EverShop-Plugin</artifactId>
                           <version>${project.version}</version>
                           <type>jar</type>
                           <destFileName>${project.parent.artifactId}-${project.version}.jar</destFileName>
                         </artifactItem>
                     </artifactItems>
-                    <outputDirectory>../target/${project.version}/</outputDirectory>
+                    <outputDirectory>../target/EverShop/${project.version}/</outputDirectory>
                   </configuration>
                 </execution>
               </executions>

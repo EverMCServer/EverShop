@@ -41,4 +41,32 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <executions>
+                <execution>             
+                  <id>copy-artifact</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>copy</goal>
+                  </goals>
+                  <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                          <groupId>${project.groupId}</groupId>
+                          <artifactId>EverShop-API</artifactId>
+                          <version>${project.version}</version>
+                          <type>jar</type>
+                        </artifactItem>
+                    </artifactItems>
+                    <outputDirectory>../target/EverShop-API/${project.version}/</outputDirectory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
