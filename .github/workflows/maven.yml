@@ -14,20 +14,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Apache Maven Central
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-        server-id: maven-djytw
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_CENTRAL_TOKEN
     - name: Build EverShop
       run: mvn clean package 
-    - name: Deploy EverShop
-      run: mvn deploy 
-      env:
-        MAVEN_USERNAME: ${{ secrets.maven_djytw_user }}
-        MAVEN_CENTRAL_TOKEN: ${{ secrets.maven_djytw_pwd }}
+    - name: FTP Deploy
+      uses: sebastianpopp/ftp-action@releases/v2
+      with:
+        host: ftps://waws-prod-hk1-025.ftp.azurewebsites.windows.net/
+        user: maven-djytw\$maven-djytw
+        password: ${{ secrets.FTP_PASSWORD }}
+        localDir: target/
+        remoteDir: site/wwwroot/maven-repository/com/evermc/evershop/EverShop/
     - uses: actions/upload-artifact@v2
       with:
         name: EverShop
