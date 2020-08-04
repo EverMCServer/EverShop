@@ -1,8 +1,11 @@
 package com.evermc.evershop.structure;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.evermc.evershop.api.ShopType;
 import com.evermc.evershop.database.SQLDataSource;
@@ -310,5 +313,23 @@ public class ShopInfo implements com.evermc.evershop.api.ShopInfo{
         result.addAll(this.targetOut);
         result.addAll(this.targetIn);
         return result;
+    }
+
+    public Set<ItemStack> getShopItemsOut() {
+        return Collections.unmodifiableSet(this.itemOut);
+    }
+
+    public Set<ItemStack> getShopItemsIn() {
+        return Collections.unmodifiableSet(this.itemIn);
+    }
+
+    public Set<Location> getShopTargetsOut(){
+        Set<Location> ret = this.targetOut.stream().map(lo->lo.toLocation()).collect(Collectors.toSet());
+        return Collections.unmodifiableSet(ret);
+    }
+
+    public Set<Location> getShopTargetsIn(){
+        Set<Location> ret = this.targetIn.stream().map(lo->lo.toLocation()).collect(Collectors.toSet());
+        return Collections.unmodifiableSet(ret);
     }
 }

@@ -1,8 +1,10 @@
 package com.evermc.evershop.api;
 
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 
 public interface ShopInfo {
     
@@ -47,6 +49,29 @@ public interface ShopInfo {
      * @return Shop price
      */
     public int getPrice();
+
+    /**
+     * Gets shop trading items
+     *  BUY, IBUY:      itemOut = ShopItem,           itemIn = empty
+     *  SELL, ISELL :   itemOut = empty,              itemIn = ShopItem,      
+     *  TRADE, ITRADE:  itemOut = OwnerGive/UserGet,  itemIn = UserGive/OwnerGet,    
+     *  Other:          itemOut = empty,              itemIn = empty,      
+     * 
+     * @return immutable set of ItemStack
+     */
+    public Set<ItemStack> getShopItemsOut();
+    public Set<ItemStack> getShopItemsIn();
+
+    
+    /**
+     *  BUY, Redstone:  targetOut = ShopItemChest/Redstone,targetIn = empty
+     *  SELL:           targetOut = empty,                 targetIn = SellItemChest,      
+     *  TRADE:          targetOut = OwnerGiveChest,        targetIn = OwnerGetChest,    
+     *  Other:          targetOut = empty,                 targetIn = empty,      
+     * @return immutable set of Location
+     */
+    public Set<Location> getShopTargetsOut();
+    public Set<Location> getShopTargetsIn();
 
     /**
      * Gets shop extra infomation
