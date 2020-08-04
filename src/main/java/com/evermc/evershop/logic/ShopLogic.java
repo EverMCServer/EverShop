@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.api.event.AccessShopEvent;
+import com.evermc.evershop.api.event.CreateShopEvent;
+import com.evermc.evershop.api.event.RegisterBlockEvent;
+import com.evermc.evershop.api.ShopType;
 import com.evermc.evershop.handler.LocketteProHandler;
 import com.evermc.evershop.handler.WorldGuardHandler;
 import com.evermc.evershop.structure.PlayerInfo;
@@ -26,6 +30,7 @@ import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Switch;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.ItemStack;
@@ -128,11 +133,16 @@ public class ShopLogic {
                     PlayerLogic.getPlayerName(si.getOwnerId()), t[0] , t[1]);
                 });
             } else {
-                if (pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
-                    send("no permission", p);
-                    return;
-                }
                 Bukkit.getScheduler().runTask(plugin, () -> {
+                    AccessShopEvent event = new AccessShopEvent(p, si);
+                    plugin.getServer().getPluginManager().callEvent(event);
+                    if (event.getResult() == Result.DENY) {
+                        return;
+                    }
+                    if (event.getResult() == Result.DEFAULT && pi.getId() != si.getOwnerId() && !si.getExtraInfo().checkPermission(p)) {
+                        send("no permission", p);
+                        return;
+                    }
                     TransactionLogic.doTransaction(si, p);
                 });
             }
@@ -174,15 +184,15 @@ public class ShopLogic {
                     return;
                 } else {
                     // update current shop (only target)
-                    if (si.getAction() == TransactionLogic.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
+                    if (si.getAction() == ShopType.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
                         send("You can link at most one chest to a dispose shop", p);
                         return;
                     }
-                    if (si.getAction() == TransactionLogic.TRADE.id() && (pi.getReg1().size() == 0 || pi.getReg2().size() == 0)) {
+                    if (si.getAction() == ShopType.TRADE.id() && (pi.getReg1().size() == 0 || pi.getReg2().size() == 0)) {
                         send("You should register items first!", p);
                         return;
                     }
-                    if (pi.getReg1().size() == 0 && si.getAction() != TransactionLogic.DISPOSE.id()){
+                    if (pi.getReg1().size() == 0 && si.getAction() != ShopType.DISPOSE.id()){
                         send("You should register items first!", p);
                         return;
                     }
@@ -230,15 +240,15 @@ public class ShopLogic {
                 send("You cant make multi-world shops", p);
                 return true;
             }
-            if (si.getAction() == TransactionLogic.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
+            if (si.getAction() == ShopType.DISPOSE.id() && pi.getReg1().size() + pi.getReg2().size() > 1) {
                 send("You can link at most one chest to a dispose shop", p);
                 return true;
             }
-            if (si.getAction() == TransactionLogic.TRADE.id() && (pi.getReg1().size() == 0 || pi.getReg2().size() == 0)) {
+            if (si.getAction() == ShopType.TRADE.id() && (pi.getReg1().size() == 0 || pi.getReg2().size() == 0)) {
                 send("You should register items first!", p);
                 return true;
             }
-            if (pi.getReg1().size() == 0 && si.getAction() != TransactionLogic.DISPOSE.id()){
+            if (pi.getReg1().size() == 0 && si.getAction() != ShopType.DISPOSE.id()){
                 send("You should register items first!", p);
                 return true;
             }
@@ -330,11 +340,17 @@ public class ShopLogic {
         }
         if (linkable_container.contains(block.getType()) || linkable_redstone.contains(block.getType()) || block.getState() instanceof Sign){
 
-            if (!(block.getState() instanceof Sign) && !(
-            WorldGuardHandler.canAccessChest(p, block.getLocation()) &&
-            LocketteProHandler.canAccessChest(p, block.getLocation()))) {
-                send("You cant link this", p);
-                return true;
+            if (block.getState() instanceof Sign == false) {
+                RegisterBlockEvent event = new RegisterBlockEvent(p, block);
+                plugin.getServer().getPluginManager().callEvent(event);
+                if (event.getResult() == Result.DENY) {
+                    return true;
+                } else if (event.getResult() == Result.DEFAULT && (
+                    !WorldGuardHandler.canAccessChest(p, block.getLocation()) || 
+                    !LocketteProHandler.canAccessChest(p, block.getLocation()))) {
+                    send("You cant link this", p);
+                    return true;
+                }
             }
 
             if (linkable_container.contains(block.getType())){
@@ -425,15 +441,15 @@ public class ShopLogic {
                     send("You cant create shops on formatted signs!", p);
                     return true;
                 }
-                if (player.getReg1().size() == 0 && actionid != TransactionLogic.DISPOSE.id()){
+                if (player.getReg1().size() == 0 && actionid != ShopType.DISPOSE.id()){
                     send("You should register items first!", p);
                     return true;
                 }
-                if (actionid == TransactionLogic.DISPOSE.id() && player.getReg1().size() + player.getReg2().size() > 1) {
+                if (actionid == ShopType.DISPOSE.id() && player.getReg1().size() + player.getReg2().size() > 1) {
                     send("You can link at most one chest to a dispose shop", p);
                     return true;
                 }
-                if (actionid == TransactionLogic.ITRADE.id() || actionid == TransactionLogic.TRADE.id()) {
+                if (actionid == ShopType.ITRADE.id() || actionid == ShopType.TRADE.id()) {
                     if (player.getReg1().size() == 0 || player.getReg2().size() == 0) {
                         send("You should register items first!", p);
                         return true;
@@ -442,31 +458,6 @@ public class ShopLogic {
                 if (player.isContainer() != TransactionLogic.isContainerShop(actionid) && (player.getReg1().size() != 0 || player.getReg2().size() != 0)){
                     send("Shop type and your selection is not match!", p);
                     return true;
-                }
-                if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(actionid).name().toLowerCase())){
-                    send("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(actionid));
-                    return true;
-                }
-                if (!p.hasPermission("evershop.multiworld")){
-                    World w = null;
-                    for (Location l : player.getReg1()){
-                        if (w == null) w = l.getWorld();
-                        else if (!w.equals(l.getWorld())){
-                            send("You cant make multi-world shops", p);
-                            return true;
-                        }
-                    }
-                    for (Location l : player.getReg2()){
-                        if (w == null) w = l.getWorld();
-                        else if (!w.equals(l.getWorld())){
-                            send("You cant make multi-world shops", p);
-                            return true;
-                        }
-                    }
-                    if (w != null && !w.equals(block.getWorld())) {
-                        send("You cant make multi-world shops", p);
-                        return true;
-                    }
                 }
                 if (TransactionLogic.needItemSet(actionid) && player.getReg1Items().size() == 0){
                     send("You should put some items in the chest first!", p);
@@ -477,10 +468,42 @@ public class ShopLogic {
                 if (price == 0) {
                     price = TransactionLogic.getPrice(line4);
                 }
-                if (price != 0 && !p.hasPermission("evershop.create.price")) {
-                    send("You do not have permission to create a shop with price", p);
+                CreateShopEvent event = new CreateShopEvent(p, TransactionLogic.getEnum(actionid), (Sign)block.getState(), price);
+                plugin.getServer().getPluginManager().callEvent(event);
+                if (event.getResult() == Result.DENY) {
                     return true;
+                } else if (event.getResult() == Result.DEFAULT) {
+                    if (!p.hasPermission("evershop.create." + TransactionLogic.getEnum(actionid).name().toLowerCase())){
+                        send("You do not have permission to create a %1$s shop", p, TransactionLogic.getName(actionid));
+                        return true;
+                    }
+                    if (!p.hasPermission("evershop.multiworld")){
+                        World w = null;
+                        for (Location l : player.getReg1()){
+                            if (w == null) w = l.getWorld();
+                            else if (!w.equals(l.getWorld())){
+                                send("You cant make multi-world shops", p);
+                                return true;
+                            }
+                        }
+                        for (Location l : player.getReg2()){
+                            if (w == null) w = l.getWorld();
+                            else if (!w.equals(l.getWorld())){
+                                send("You cant make multi-world shops", p);
+                                return true;
+                            }
+                        }
+                        if (w != null && !w.equals(block.getWorld())) {
+                            send("You cant make multi-world shops", p);
+                            return true;
+                        }
+                    }
+                    if (price != 0 && !p.hasPermission("evershop.create.price")) {
+                        send("You do not have permission to create a shop with price", p);
+                        return true;
+                    }
                 }
+
                 final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), price);
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {

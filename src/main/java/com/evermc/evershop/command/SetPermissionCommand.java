@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.PlayerLogic;
-import com.evermc.evershop.structure.ExtraInfo;
+import com.evermc.evershop.structure.ExtraInfoImpl;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 
@@ -46,7 +46,7 @@ class SetPermissionTypeCommand extends AbstractSetCommand{
         if (args.length != 1) {
             return false;
         }
-        ExtraInfo ei = si.getExtraInfo();
+        ExtraInfoImpl ei = si.getExtraInfo();
         if(ei.permissionType(args[0].charAt(0))) {
             send("Permission type set to %1$s", sender, tr(ei.getPermissionType(), sender));
             return true;
@@ -65,7 +65,7 @@ class SetPermissionAddCommand extends AbstractSetCommand{
         if (args.length != 1) {
             return false;
         }
-        ExtraInfo ei = si.getExtraInfo();
+        ExtraInfoImpl ei = si.getExtraInfo();
         if ("DISABLED".equals(ei.getPermissionType())) {
             send("Set permission type first", sender);
             return true;
@@ -100,7 +100,7 @@ class SetPermissionRemoveCommand extends AbstractSetCommand{
         if (args.length != 1) {
             return false;
         }
-        ExtraInfo ei = si.getExtraInfo();
+        ExtraInfoImpl ei = si.getExtraInfo();
         if ("DISABLED".equals(ei.getPermissionType())) {
             send("Set permission type first", sender);
             return true;
@@ -132,7 +132,7 @@ class SetPermissionShowCommand extends AbstractSetCommand{
 
     @Override
     public boolean executeAs(CommandSender sender, String[] args, ShopInfo si){
-        ExtraInfo ei = si.getExtraInfo();
+        ExtraInfoImpl ei = si.getExtraInfo();
         ComponentBuilder msgBuilder = new ComponentBuilder("");
         msgBuilder.append("EverShop // ").color(ChatColor.LIGHT_PURPLE)
                   .append(tr("Shop #%1$s Access Control info", sender, si.getId())).bold(true).color(ChatColor.WHITE)

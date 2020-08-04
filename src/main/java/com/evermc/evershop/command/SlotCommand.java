@@ -16,11 +16,11 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import java.util.Map.Entry;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.api.ShopType;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
-import com.evermc.evershop.logic.TransactionLogic;
-import com.evermc.evershop.structure.ExtraInfo;
+import com.evermc.evershop.structure.ExtraInfoImpl;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.TranslationUtil;
 
@@ -94,7 +94,7 @@ public class SlotCommand extends AbstractCommand {
                 return;
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (si.getAction() != TransactionLogic.SLOT.id() && si.getAction() != TransactionLogic.ISLOT.id()) {
+                if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id()) {
                     send("not a slot shop", player);
                     return;
                 } else {
@@ -115,7 +115,7 @@ public class SlotCommand extends AbstractCommand {
                 if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
                     send("no permission", player);
                     return;
-                } else if (si.getAction() != TransactionLogic.SLOT.id() && si.getAction() != TransactionLogic.ISLOT.id()) {
+                } else if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id()) {
                     send("not a slot shop", player);
                     return;
                 } else {
@@ -127,8 +127,8 @@ public class SlotCommand extends AbstractCommand {
     }
 
     private void modify_info(final CommandSender player, final ShopInfo si, String key, String possi){
-        ExtraInfo extra = si.getExtraInfo();
-        ItemStack item = ExtraInfo.slotItemMap(si.getItemOut()).get(key);
+        ExtraInfoImpl extra = si.getExtraInfo();
+        ItemStack item = ExtraInfoImpl.slotItemMap(si.getItemOut()).get(key);
         if (extra.slotSetPossibility(item, possi)) {
             DataLogic.saveShop(si, (a) -> {
                 show_info(player, si);
@@ -156,12 +156,12 @@ public class SlotCommand extends AbstractCommand {
         ComponentBuilder builder = new ComponentBuilder("");
         builder.append("EverShop // ").color(TranslationUtil.title_color)
                .append(tr("Slot Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.WHITE);
-        ExtraInfo extra = si.getExtraInfo();
+        ExtraInfoImpl extra = si.getExtraInfo();
         builder.append("\nEverShop // ").bold(false).color(TranslationUtil.title_color)
                .append(tr("Possibility List: (%1$s possibilitis in total)", player, extra.slotPossibilityAll())).color(TranslationUtil.command_parameter_color);
 
         int count = 0;
-        for (Entry<String, ItemStack> entry : ExtraInfo.slotItemMap(si.getItemOut()).entrySet()) {
+        for (Entry<String, ItemStack> entry : ExtraInfoImpl.slotItemMap(si.getItemOut()).entrySet()) {
             count ++;
             builder.append("\n")
                    .append("#" + count + " ").color(TranslationUtil.title_color)

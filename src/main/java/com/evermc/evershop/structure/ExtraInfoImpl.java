@@ -6,9 +6,11 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.PlayerLogic;
@@ -21,13 +23,13 @@ import org.bukkit.inventory.ItemStack;
 
 import static com.evermc.evershop.util.LogUtil.severe;
 
-public class ExtraInfo {
+public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo{
 
     private PermissionInfo perm;
     private int rc_ticks;
     private HashMap<String, String> slot;
 
-    public ExtraInfo(){
+    public ExtraInfoImpl(){
         this.perm = new PermissionInfo();
         this.rc_ticks = 20;
         this.slot = null;
@@ -36,9 +38,9 @@ public class ExtraInfo {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
-    public static ExtraInfo fromJson(String json){
+    public static ExtraInfoImpl fromJson(String json){
         Gson gson = new Gson();
-        return gson.fromJson(json, ExtraInfo.class);
+        return gson.fromJson(json, ExtraInfoImpl.class);
     }
     public boolean permissionType(char _type) {
         Type type;
@@ -114,10 +116,13 @@ public class ExtraInfo {
     public String getPermissionType(){
         return this.perm.type.name();
     }
-    public ArrayList<Integer> getPermissionUsers(){
+    public List<Integer> getPermissionUsers(){
         return this.perm.users;
     }
-    public ArrayList<String> getPermissionGroups(){
+    public List<PlayerInfo> getPermissionUserInfo(){
+        return this.perm.users.stream().map(i->PlayerLogic.getPlayerInfo(i)).collect(Collectors.toList());
+    }
+    public List<String> getPermissionGroups(){
         return this.perm.groups;
     }
     public boolean checkPermission(Player p) {

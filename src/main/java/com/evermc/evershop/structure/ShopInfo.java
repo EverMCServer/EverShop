@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 
+import com.evermc.evershop.api.ShopType;
 import com.evermc.evershop.database.SQLDataSource;
 import com.evermc.evershop.logic.DataLogic;
+import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
 import com.evermc.evershop.logic.TransactionLogic;
 import com.evermc.evershop.util.NBTUtil;
@@ -18,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import static com.evermc.evershop.util.LogUtil.severe;
 
-public class ShopInfo {
+public class ShopInfo implements com.evermc.evershop.api.ShopInfo{
 
     // Shop UID
     private int id;
@@ -58,7 +60,7 @@ public class ShopInfo {
     private HashSet<SerializableLocation> targetIn;
 
     // Extra Infomation
-    private ExtraInfo extra;
+    private ExtraInfoImpl extra;
 
     // Shop revision. 
     // Only rev=0 is available shop, others are old shops which share the same location with the current shop.
@@ -75,13 +77,13 @@ public class ShopInfo {
         this.x = shoploc.getBlockX();
         this.y = shoploc.getBlockY();
         this.z = shoploc.getBlockZ();
-        if (action_id != TransactionLogic.ITRADE.id() && action_id != TransactionLogic.TRADE.id())
+        if (action_id != ShopType.ITRADE.id() && action_id != ShopType.TRADE.id())
             price = Math.abs(price);
         this.price = price;
-        if (action_id == TransactionLogic.DONATEHAND.id() || action_id == TransactionLogic.DISPOSE.id()) {
+        if (action_id == ShopType.DONATEHAND.id() || action_id == ShopType.DISPOSE.id()) {
             this.price = 0;
         }
-        this.extra = new ExtraInfo();
+        this.extra = new ExtraInfoImpl();
         this.rev = 0;
         // items record
         if (TransactionLogic.itemsetCount(action_id) == 0){
@@ -90,10 +92,10 @@ public class ShopInfo {
         } else if (TransactionLogic.itemsetCount(action_id) == 2){
             this.itemOut = pi.getReg1Items();
             this.itemIn = pi.getReg2Items();
-        } else if (action_id == TransactionLogic.BUY.id() || action_id == TransactionLogic.IBUY.id() || action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()){
+        } else if (action_id == ShopType.BUY.id() || action_id == ShopType.IBUY.id() || action_id == ShopType.ISLOT.id() || action_id == ShopType.SLOT.id()){
             this.itemOut = pi.getReg1Items();
             this.itemIn = new HashSet<ItemStack>();
-        } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.ISELL.id()){
+        } else if (action_id == ShopType.SELL.id() || action_id == ShopType.ISELL.id()){
             this.itemOut = new HashSet<ItemStack>();
             this.itemIn = pi.getReg1Items();
         } else {
@@ -103,7 +105,7 @@ public class ShopInfo {
         this.setTarget(pi);
 
         // init slot
-        if (action_id == TransactionLogic.ISLOT.id() || action_id == TransactionLogic.SLOT.id()) {
+        if (action_id == ShopType.ISLOT.id() || action_id == ShopType.SLOT.id()) {
             this.extra.initSlot(this.itemOut);
         }
     }
@@ -133,7 +135,7 @@ public class ShopInfo {
         } else if (TransactionLogic.targetCount(action_id) == 2){
             this.targetOut = pi.getReg1Loc();
             this.targetIn = pi.getReg2Loc();
-        } else if (action_id == TransactionLogic.SELL.id() || action_id == TransactionLogic.DONATEHAND.id() || action_id == TransactionLogic.DISPOSE.id()){
+        } else if (action_id == ShopType.SELL.id() || action_id == ShopType.DONATEHAND.id() || action_id == ShopType.DISPOSE.id()){
             this.targetOut = new HashSet<SerializableLocation>();
             this.targetIn = pi.getRegsLoc();
         } else {
@@ -163,7 +165,7 @@ public class ShopInfo {
             HashSet<ItemStack>[] items = NBTUtil.deserialize((byte[]) data[10]);
             result.itemOut = items[0];
             result.itemIn = items[1];
-            result.extra = ExtraInfo.fromJson((String) data[11]);
+            result.extra = ExtraInfoImpl.fromJson((String) data[11]);
             result.rev = SQL.getInt(data[12]);
             return result;
         }catch(Exception e){
@@ -220,8 +222,16 @@ public class ShopInfo {
         return this.action_id;
     }
 
+    public ShopType getShopType() {
+        return TransactionLogic.getEnum(this.action_id);
+    }
+
     public int getOwnerId(){
         return this.player_id;
+    }
+
+    public PlayerInfo getShopOwner() {
+        return PlayerLogic.getPlayerInfo(this.player_id);
     }
 
     public void setOwnerId(int id){
@@ -260,7 +270,7 @@ public class ShopInfo {
         return this.extra.toJSON();
     }
 
-    public ExtraInfo getExtraInfo(){
+    public ExtraInfoImpl getExtraInfo(){
         return this.extra;
     }
 

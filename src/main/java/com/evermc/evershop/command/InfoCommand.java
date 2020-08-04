@@ -91,7 +91,7 @@ public class InfoCommand extends AbstractCommand {
             return;
         }
         ComponentBuilder builder = new ComponentBuilder("");
-        PlayerInfo pi = PlayerLogic.getPlayerInfo(si.getOwnerId());
+        PlayerInfo pi = si.getShopOwner();
         builder.append("EverShop // ").color(TranslationUtil.title_color)
                .append(tr("Shop #%1$s Infomation", player, si.getId())).bold(true).color(ChatColor.WHITE)
                .append("\nEverShop // ").bold(false).color(TranslationUtil.title_color)

@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.api.ShopType;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.TaxLogic;
 import com.evermc.evershop.logic.TransactionLogic;
@@ -46,7 +47,7 @@ public class TransactionInfo{
     private int action_id;
     private HashSet<Location> rsComponents;
     private int rsDuration;
-    private ExtraInfo extra;
+    private ExtraInfoImpl extra;
     private HashMap<String,ItemStack> slotMap;
 
     public TransactionInfo(ShopInfo si, Player p){
@@ -81,15 +82,15 @@ public class TransactionInfo{
                 this.shopIn = new HashSet<Inventory>();
                 addAllTargets(this.shopIn, si.getTargetIn());
             }
-            if (si.getAction() == TransactionLogic.DONATEHAND.id() || si.getAction() == TransactionLogic.DISPOSE.id()) {
+            if (si.getAction() == ShopType.DONATEHAND.id() || si.getAction() == ShopType.DISPOSE.id()) {
                 this.itemsIn = new HashMap<ItemStack, Integer>();
                 ItemStack it = p.getInventory().getItemInMainHand();
                 this.itemsIn.put(it, it.getAmount());
             }
         }
-        if (si.getAction() == TransactionLogic.ISLOT.id() || si.getAction() == TransactionLogic.SLOT.id()){
+        if (si.getAction() == ShopType.ISLOT.id() || si.getAction() == ShopType.SLOT.id()){
             this.extra = si.getExtraInfo();
-            this.slotMap = ExtraInfo.slotItemMap(si.getItemOut());
+            this.slotMap = ExtraInfoImpl.slotItemMap(si.getItemOut());
         }
     }
     
@@ -122,7 +123,7 @@ public class TransactionInfo{
 
     // Only checks if shopOut has itemsOut 
     public boolean shopHasItems(){
-        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != ShopType.BUY.id() && this.action_id != ShopType.TRADE.id()){
             return true;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>(itemsOut);
@@ -146,7 +147,7 @@ public class TransactionInfo{
 
     // used in slot
     public boolean shopHasSlotItems(){
-        if (this.action_id != TransactionLogic.SLOT.id() && this.action_id != TransactionLogic.ISLOT.id()){
+        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id()){
             return true;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>();
@@ -185,9 +186,9 @@ public class TransactionInfo{
     }
     // Only checks if shopIn has itemsIn 
     public boolean shopCanHold(){
-        if (this.action_id != TransactionLogic.SELL.id()
-        && this.action_id != TransactionLogic.TRADE.id()
-        && this.action_id != TransactionLogic.DONATEHAND.id()){
+        if (this.action_id != ShopType.SELL.id()
+        && this.action_id != ShopType.TRADE.id()
+        && this.action_id != ShopType.DONATEHAND.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -218,10 +219,10 @@ public class TransactionInfo{
 
     // Only checks if player has itemsIn 
     public boolean playerHasItems(){
-        if (this.action_id != TransactionLogic.SELL.id() 
-        && this.action_id != TransactionLogic.ISELL.id() 
-        && this.action_id != TransactionLogic.ITRADE.id() 
-        && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != ShopType.SELL.id() 
+        && this.action_id != ShopType.ISELL.id() 
+        && this.action_id != ShopType.ITRADE.id() 
+        && this.action_id != ShopType.TRADE.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -244,8 +245,8 @@ public class TransactionInfo{
 
     // used in slot
     public boolean playerHasEmptyInv(){
-        if (this.action_id != TransactionLogic.ISLOT.id() 
-        && this.action_id != TransactionLogic.SLOT.id()){
+        if (this.action_id != ShopType.ISLOT.id() 
+        && this.action_id != ShopType.SLOT.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -257,10 +258,10 @@ public class TransactionInfo{
 
     // Only checks if player has itemsOut 
     public boolean playerCanHold(){
-        if (this.action_id != TransactionLogic.BUY.id()
-         && this.action_id != TransactionLogic.IBUY.id()
-          && this.action_id != TransactionLogic.TRADE.id()
-          && this.action_id != TransactionLogic.ITRADE.id()){
+        if (this.action_id != ShopType.BUY.id()
+         && this.action_id != ShopType.IBUY.id()
+          && this.action_id != ShopType.TRADE.id()
+          && this.action_id != ShopType.ITRADE.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -300,7 +301,7 @@ public class TransactionInfo{
     }
 
     public void shopRemoveItems(){
-        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.TRADE.id()){
+        if (this.action_id != ShopType.BUY.id() && this.action_id != ShopType.TRADE.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -331,7 +332,7 @@ public class TransactionInfo{
     }
 
     public void shopRemoveItems(ItemStack item){
-        if (this.action_id != TransactionLogic.SLOT.id()){
+        if (this.action_id != ShopType.SLOT.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -363,12 +364,12 @@ public class TransactionInfo{
     }
 
     public void playerRemoveItems(){
-        if (this.action_id != TransactionLogic.SELL.id()
-            && this.action_id != TransactionLogic.ISELL.id()
-            && this.action_id != TransactionLogic.TRADE.id()
-            && this.action_id != TransactionLogic.ITRADE.id()
-            && this.action_id != TransactionLogic.DONATEHAND.id()
-            && this.action_id != TransactionLogic.DISPOSE.id()){
+        if (this.action_id != ShopType.SELL.id()
+            && this.action_id != ShopType.ISELL.id()
+            && this.action_id != ShopType.TRADE.id()
+            && this.action_id != ShopType.ITRADE.id()
+            && this.action_id != ShopType.DONATEHAND.id()
+            && this.action_id != ShopType.DISPOSE.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -397,9 +398,9 @@ public class TransactionInfo{
     }
 
     public void shopGiveItems(){
-        if (this.action_id != TransactionLogic.SELL.id()
-        && this.action_id != TransactionLogic.TRADE.id()
-        && this.action_id != TransactionLogic.DONATEHAND.id()){
+        if (this.action_id != ShopType.SELL.id()
+        && this.action_id != ShopType.TRADE.id()
+        && this.action_id != ShopType.DONATEHAND.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -431,7 +432,7 @@ public class TransactionInfo{
     }
 
     public void playerGiveItems(){
-        if (this.action_id != TransactionLogic.BUY.id() && this.action_id != TransactionLogic.IBUY.id() && this.action_id != TransactionLogic.TRADE.id() && this.action_id != TransactionLogic.ITRADE.id()){
+        if (this.action_id != ShopType.BUY.id() && this.action_id != ShopType.IBUY.id() && this.action_id != ShopType.TRADE.id() && this.action_id != ShopType.ITRADE.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -459,7 +460,7 @@ public class TransactionInfo{
     }
 
     public ItemStack playerGiveSlot(){
-        if (this.action_id != TransactionLogic.SLOT.id() && this.action_id != TransactionLogic.ISLOT.id()){
+        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id()){
             severe("TransactionInfo: Illegal invocation");
             return null;
         }
@@ -593,7 +594,7 @@ public class TransactionInfo{
     }
 
     public void shopDispose(){
-        if (this.action_id != TransactionLogic.DISPOSE.id()){
+        if (this.action_id != ShopType.DISPOSE.id()){
             severe("TransactionInfo: Illegal invocation");
             return;
         }

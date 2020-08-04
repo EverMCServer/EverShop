@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.evermc.evershop.EverShop;
-import com.evermc.evershop.structure.ExtraInfo;
+import com.evermc.evershop.api.ShopType;
+import com.evermc.evershop.structure.ExtraInfoImpl;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.structure.TransactionInfo;
 import com.evermc.evershop.util.LogUtil;
@@ -22,69 +23,37 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
 
-public enum TransactionLogic {
+public class TransactionLogic {
     
-    //
-    // Transaction type enum
-    // type(id, location_count, item_set_count)
-    BUY(1, 1, 1),
-    SELL(2, 1, 1),
-    TRADE(3, 2, 2),
-    IBUY(4, 0, 1),
-    ISELL(5, 0, 1),
-    ITRADE(6, 0, 2),
-
-    TOGGLE(8, 1, 0),
-    DEVICE(9, 1, 0),
-    DEVICEON(10, 1, 0),
-    DEVICEOFF(11, 1, 0),
-
-    SLOT(12, 1, 1),
-    ISLOT(13, 0, 1),
-
-    DONATEHAND(15, 1, 0),
-    DISPOSE(16, 1, 0)
-    ;
-    
-    private static Map<Integer, TransactionLogic> map = new HashMap<Integer, TransactionLogic>();
+    private static Map<Integer, ShopType> map = new HashMap<Integer, ShopType>();
     private static Map<String, Integer> actions = new HashMap<String, Integer>();
     private static Map<Integer, String> actionstr = new HashMap<Integer, String>();
 
-    private int index;
-    private int location_count;
-    private int item_set_count;
-
-    TransactionLogic(int index, int location_count, int item_set_count){
-        this.index = index;
-        this.location_count = location_count;
-        this.item_set_count = item_set_count;
-    }
-
     public static void init(EverShop plugin){
 
-        for (TransactionLogic tl : TransactionLogic.values()){
-            actions.put(tl.name(), tl.index);
-            map.put(tl.index, tl);
+        for (ShopType tl : ShopType.values()){
+            actions.put(tl.name(), tl.id());
+            map.put(tl.id(), tl);
             Object con = plugin.getConfig().get("evershop.alias." + tl.name());
             if (con == null) {
-                actionstr.put(tl.index, tl.name());
+                actionstr.put(tl.id(), tl.name());
                 continue;
             }
             if (con instanceof String){
-                actions.put((String)con, tl.index);
-                actionstr.put(tl.index, (String)con);
+                actions.put((String)con, tl.id());
+                actionstr.put(tl.id(), (String)con);
             } else if (con instanceof List<?>){
                 for (Object o : (List<?>) con){
                     if (o instanceof String){
-                        actions.put((String)o, tl.index);
-                        if (!actionstr.containsKey(tl.index)){
-                            actionstr.put(tl.index, (String)o);
+                        actions.put((String)o, tl.id());
+                        if (!actionstr.containsKey(tl.id())){
+                            actionstr.put(tl.id(), (String)o);
                         }
                     }
                 }
             }
-            if (!actionstr.containsKey(tl.index)){
-                actionstr.put(tl.index, tl.name());
+            if (!actionstr.containsKey(tl.id())){
+                actionstr.put(tl.id(), tl.name());
             }
         }
     }
@@ -133,38 +102,34 @@ public enum TransactionLogic {
     }
 
     public static boolean isContainerShop(int action){
-        return TransactionLogic.getEnum(action).item_set_count > 0 || action == TransactionLogic.DONATEHAND.id() || action == TransactionLogic.DISPOSE.id();
+        return TransactionLogic.getEnum(action).item_set_count() > 0 || action == ShopType.DONATEHAND.id() || action == ShopType.DISPOSE.id();
     }
 
     public static boolean needItemSet(int action) {
-        return TransactionLogic.getEnum(action).item_set_count > 0;
+        return TransactionLogic.getEnum(action).item_set_count() > 0;
     }
 
     public static int targetCount(int action){
-        return TransactionLogic.getEnum(action).location_count;
+        return TransactionLogic.getEnum(action).location_count();
     }
 
     public static int itemsetCount(int action){
-        return TransactionLogic.getEnum(action).item_set_count;
+        return TransactionLogic.getEnum(action).item_set_count();
     }
 
     public static boolean isRedStoneShop(int action){
-        return action == TransactionLogic.DEVICE.id()
-        || action == TransactionLogic.DEVICEON.id()
-        || action == TransactionLogic.DEVICEOFF.id()
-        || action == TransactionLogic.TOGGLE.id();
+        return action == ShopType.DEVICE.id()
+        || action == ShopType.DEVICEON.id()
+        || action == ShopType.DEVICEOFF.id()
+        || action == ShopType.TOGGLE.id();
     }
 
-    public static TransactionLogic getEnum(int action){
+    public static ShopType getEnum(int action){
         return map.get(action);
     }
 
     public static String getName(int action){
         return actionstr.get(action);
-    }
-
-    public int id(){
-        return this.index;
     }
 
     public static void doTransaction(ShopInfo si, Player p){
@@ -460,7 +425,7 @@ public enum TransactionLogic {
             }
             ti.playerPayMoney();
             slotItem = ti.playerGiveSlot();
-            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfoImpl.getItemKey(slotItem), slotItem.getAmount());
             send("%1$s won %2$s!", p, tr("You", p), tr(slotItem));
             if (!ti.isOwner() && ti.getOnlineOwner() != null){
                 send("%1$s won %2$s!", ti.getOnlineOwner(), ti.getPlayerName(), tr(slotItem));
@@ -484,7 +449,7 @@ public enum TransactionLogic {
             ti.shopGiveMoney();
             slotItem = ti.playerGiveSlot();
             ti.shopRemoveItems(slotItem);
-            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfo.getItemKey(slotItem), slotItem.getAmount());
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfoImpl.getItemKey(slotItem), slotItem.getAmount());
             send("%1$s won %2$s!", p, tr("You", p), tr(slotItem));
             if (!ti.isOwner() && ti.getOnlineOwner() != null){
                 send("%1$s won %2$s!", ti.getOnlineOwner(), ti.getPlayerName(), tr(slotItem));

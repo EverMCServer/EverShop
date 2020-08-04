@@ -3,8 +3,7 @@ package com.evermc.evershop.command;
 import com.evermc.evershop.logic.DataLogic;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.logic.ShopLogic;
-import com.evermc.evershop.logic.TransactionLogic;
-import com.evermc.evershop.structure.ExtraInfo;
+import com.evermc.evershop.structure.ExtraInfoImpl;
 import com.evermc.evershop.structure.PlayerInfo;
 import com.evermc.evershop.structure.ShopInfo;
 import com.evermc.evershop.util.TranslationUtil;
@@ -24,6 +23,8 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import java.util.HashMap;
 
 import com.evermc.evershop.EverShop;
+import com.evermc.evershop.api.ShopType;
+
 import static com.evermc.evershop.util.TranslationUtil.send;
 import static com.evermc.evershop.util.TranslationUtil.tr;
 import static com.evermc.evershop.util.TranslationUtil.show_date;
@@ -101,7 +102,7 @@ public class LogCommand extends AbstractCommand {
             send("shop not found", player);
             return;
         }
-        boolean isSlotShop = (si.getAction() == TransactionLogic.SLOT.id() || si.getAction() == TransactionLogic.ISLOT.id());
+        boolean isSlotShop = (si.getAction() == ShopType.SLOT.id() || si.getAction() == ShopType.ISLOT.id());
         int countAll = DataLogic.getTransactionCount(si.getId(), isSlotShop);
         if (countAll == 0) {
             send("no logs", player);
@@ -110,7 +111,7 @@ public class LogCommand extends AbstractCommand {
         DataLogic.TransactionLog[] data = DataLogic.getTransaction(si.getId(), page, isSlotShop);
         HashMap<String,ItemStack> itemmap = null;
         if (isSlotShop) {
-            itemmap = ExtraInfo.slotItemMap(si.getItemOut());
+            itemmap = ExtraInfoImpl.slotItemMap(si.getItemOut());
         }
         ComponentBuilder builder = new ComponentBuilder("");
         builder.append("EverShop // ").color(TranslationUtil.command_color)

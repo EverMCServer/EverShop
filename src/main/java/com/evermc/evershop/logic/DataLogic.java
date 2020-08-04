@@ -289,6 +289,7 @@ public class DataLogic{
             int shopid = SQL.getInt(k[0]);
             Location loc = SerializableLocation.toLocation(SQL.getInt(k[1]), SQL.getInt(k[2]), SQL.getInt(k[3]), SQL.getInt(k[4]));
             if (loc == null) {
+                // TODO - load shops when load world
                 warn("Shop #" + shopid + " is at a not loaded world.");
                 continue;
             }

@@ -1,5 +1,6 @@
 package com.evermc.evershop.structure;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -13,7 +14,7 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class PlayerInfo {
+public class PlayerInfo implements com.evermc.evershop.api.PlayerInfo{
     private int id;
     private UUID uuid;
     private String name;
@@ -133,9 +134,17 @@ public class PlayerInfo {
     public Set<Location> getReg1(){
         return this.reg1;
     }
+    
+    public Set<Location> getRegLeftClick() {
+        return Collections.unmodifiableSet(this.reg1);
+    }
 
     public Set<Location> getReg2(){
         return this.reg2;
+    }
+    
+    public Set<Location> getRegRightClick() {
+        return Collections.unmodifiableSet(this.reg2);
     }
     
     public HashSet<SerializableLocation> getReg1Loc(){
