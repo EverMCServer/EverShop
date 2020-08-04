@@ -151,7 +151,7 @@
                           <destFileName>${project.parent.artifactId}-${project.version}.jar</destFileName>
                         </artifactItem>
                     </artifactItems>
-                    <outputDirectory>../target/</outputDirectory>
+                    <outputDirectory>../target/${project.version}/</outputDirectory>
                   </configuration>
                 </execution>
               </executions>
