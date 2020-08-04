@@ -1,6 +1,6 @@
 package com.evermc.evershop.api.event;
 
-import com.evermc.evershop.structure.ShopInfo;
+import com.evermc.evershop.api.ShopInfo;
 
 import org.bukkit.entity.Player;
 
@@ -22,7 +22,7 @@ public class AccessShopEvent extends EverShopEvent{
         this.shopInfo = shopInfo;
     }
 
-    public com.evermc.evershop.api.ShopInfo getShopInfo() {
+    public ShopInfo getShopInfo() {
         return this.shopInfo;
     }
 }
