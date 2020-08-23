@@ -382,17 +382,29 @@ public class DataLogic{
         List<String> shops = Arrays.asList(shopstr.split(","));
         Set<String> notremove = new HashSet<String>();
         for (String str : shops){
-            int shop = Integer.parseInt(str);
+            int shop = 0;
+            try {
+                shop = Integer.parseInt(str);
+            } catch(Exception e){}
+            if (shop == 0) {
+                continue;
+            }
             ShopInfo t = getShopInfo(shop);
             if (t != null){
                 retval.add(t);
                 notremove.add(str);
             }
         }
-        String new_shopstr = String.join(",", notremove);
-        query = "UPDATE `" + SQL.getPrefix() + "target` SET `shops` = '" + new_shopstr + "' WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
-        + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
-        SQL.exec(query);
+        if (notremove.size() > 0) {
+            String new_shopstr = String.join(",", notremove);
+            query = "UPDATE `" + SQL.getPrefix() + "target` SET `shops` = '" + new_shopstr + "' WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+            + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+            SQL.exec(query);
+        } else {
+            query = "DELETE FROM `" + SQL.getPrefix() + "target` WHERE `world_id` = '" + DataLogic.getWorldId(loc.getWorld())
+            + "' AND `x` = '" + loc.getBlockX() + "' AND `y` = '" + loc.getBlockY() + "' AND `z` = '" + loc.getBlockZ() + "'";
+            SQL.exec(query);
+        }
         if (retval.size() > 0){
             return retval.toArray(new ShopInfo[retval.size()]);
         } else {
