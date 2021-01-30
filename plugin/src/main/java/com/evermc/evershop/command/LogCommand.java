@@ -102,7 +102,7 @@ public class LogCommand extends AbstractCommand {
             send("shop not found", player);
             return;
         }
-        boolean isSlotShop = (si.getAction() == ShopType.SLOT.id() || si.getAction() == ShopType.ISLOT.id());
+        boolean isSlotShop = (si.getAction() == ShopType.SLOT.id() || si.getAction() == ShopType.ISLOT.id() || si.getAction() == ShopType.ITEMISLOT.id());
         int countAll = DataLogic.getTransactionCount(si.getId(), isSlotShop);
         if (countAll == 0) {
             send("no logs", player);

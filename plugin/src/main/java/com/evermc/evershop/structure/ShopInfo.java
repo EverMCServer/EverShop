@@ -108,7 +108,7 @@ public class ShopInfo implements com.evermc.evershop.api.ShopInfo{
         this.setTarget(pi);
 
         // init slot
-        if (action_id == ShopType.ISLOT.id() || action_id == ShopType.SLOT.id()) {
+        if (action_id == ShopType.ISLOT.id() || action_id == ShopType.SLOT.id() || action_id == ShopType.ITEMISLOT.id()) {
             this.extra.initSlot(this.itemOut);
         }
     }

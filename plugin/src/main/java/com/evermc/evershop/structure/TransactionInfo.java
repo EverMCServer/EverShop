@@ -88,7 +88,7 @@ public class TransactionInfo{
                 this.itemsIn.put(it, it.getAmount());
             }
         }
-        if (si.getAction() == ShopType.ISLOT.id() || si.getAction() == ShopType.SLOT.id()){
+        if (si.getAction() == ShopType.ISLOT.id() || si.getAction() == ShopType.ITEMISLOT.id() || si.getAction() == ShopType.SLOT.id()){
             this.extra = si.getExtraInfo();
             this.slotMap = ExtraInfoImpl.slotItemMap(si.getItemOut());
         }
@@ -147,7 +147,7 @@ public class TransactionInfo{
 
     // used in slot
     public boolean shopHasSlotItems(){
-        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id()){
+        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id() && this.action_id != ShopType.ITEMISLOT.id()){
             return true;
         }
         HashMap<ItemStack, Integer> it = new HashMap<ItemStack, Integer>();
@@ -222,7 +222,8 @@ public class TransactionInfo{
         if (this.action_id != ShopType.SELL.id() 
         && this.action_id != ShopType.ISELL.id() 
         && this.action_id != ShopType.ITRADE.id() 
-        && this.action_id != ShopType.TRADE.id()){
+        && this.action_id != ShopType.TRADE.id()
+        && this.action_id != ShopType.ITEMISLOT.id() ){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -246,7 +247,8 @@ public class TransactionInfo{
     // used in slot
     public boolean playerHasEmptyInv(){
         if (this.action_id != ShopType.ISLOT.id() 
-        && this.action_id != ShopType.SLOT.id()){
+        && this.action_id != ShopType.SLOT.id() 
+        && this.action_id != ShopType.ITEMISLOT.id()){
             severe("TransactionInfo: Illegal invocation");
             return false;
         }
@@ -369,7 +371,8 @@ public class TransactionInfo{
             && this.action_id != ShopType.TRADE.id()
             && this.action_id != ShopType.ITRADE.id()
             && this.action_id != ShopType.DONATEHAND.id()
-            && this.action_id != ShopType.DISPOSE.id()){
+            && this.action_id != ShopType.DISPOSE.id()
+            && this.action_id != ShopType.ITEMISLOT.id() ){
             severe("TransactionInfo: Illegal invocation");
             return;
         }
@@ -460,7 +463,7 @@ public class TransactionInfo{
     }
 
     public ItemStack playerGiveSlot(){
-        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id()){
+        if (this.action_id != ShopType.SLOT.id() && this.action_id != ShopType.ISLOT.id() && this.action_id != ShopType.ITEMISLOT.id()){
             severe("TransactionInfo: Illegal invocation");
             return null;
         }

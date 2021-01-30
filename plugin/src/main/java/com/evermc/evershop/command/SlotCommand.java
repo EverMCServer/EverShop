@@ -94,7 +94,7 @@ public class SlotCommand extends AbstractCommand {
                 return;
             }
             Bukkit.getScheduler().runTask(EverShop.getInstance(), ()->{
-                if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id()) {
+                if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id() && si.getAction() != ShopType.ITEMISLOT.id()) {
                     send("not a slot shop", player);
                     return;
                 } else {
@@ -115,7 +115,7 @@ public class SlotCommand extends AbstractCommand {
                 if (!player.hasPermission("evershop.info.others") && player instanceof Player && si.getOwnerId() != PlayerLogic.getPlayerId((Player)player)){
                     send("no permission", player);
                     return;
-                } else if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id()) {
+                } else if (si.getAction() != ShopType.SLOT.id() && si.getAction() != ShopType.ISLOT.id() && si.getAction() != ShopType.ITEMISLOT.id()) {
                     send("not a slot shop", player);
                     return;
                 } else {

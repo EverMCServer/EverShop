@@ -16,6 +16,7 @@ public enum ShopType {
 
     SLOT(12, 1, 1),
     ISLOT(13, 0, 1),
+    ITEMISLOT(14, 0, 2),
 
     DONATEHAND(15, 1, 0),
     DISPOSE(16, 1, 0)

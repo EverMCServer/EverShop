@@ -432,6 +432,24 @@ public class TransactionLogic {
             }
             break;
 
+            case ITEMISLOT:
+            if (!ti.playerHasEmptyInv()){
+                send("player cannot hold", p);
+                break;
+            }
+            if (!ti.playerHasItems()){
+                send("player not enough items", p);
+                break;
+            }
+            ti.playerRemoveItems();
+            slotItem = ti.playerGiveSlot();
+            DataLogic.recordTransaction(si.getId(), PlayerLogic.getPlayerId(p), ExtraInfoImpl.getItemKey(slotItem), slotItem.getAmount());
+            send("%1$s won %2$s!", p, tr("You", p), tr(slotItem));
+            if (!ti.isOwner() && ti.getOnlineOwner() != null){
+                send("%1$s won %2$s!", ti.getOnlineOwner(), ti.getPlayerName(), tr(slotItem));
+            }
+            break;
+
             case SLOT:
             if (!ti.playerHasEmptyInv()){
                 send("player cannot hold", p);
