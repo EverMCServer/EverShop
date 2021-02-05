@@ -7,6 +7,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.util.Iterator;
 
@@ -156,7 +157,7 @@ class SetPermissionShowCommand extends AbstractSetCommand{
                         uuid = pi.getUUID().toString();
                     }
                     msgBuilder.append((pi==null?"<Unknown>":pi.getName())).color(ChatColor.YELLOW)
-                              .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(uuid).create()))
+                              .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(uuid)))
                               .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid));
                     if (it.hasNext()) {
                         msgBuilder.append(", ").color(ChatColor.WHITE);

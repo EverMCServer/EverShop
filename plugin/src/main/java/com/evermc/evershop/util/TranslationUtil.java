@@ -46,11 +46,11 @@ import org.bukkit.potion.PotionType;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import static com.evermc.evershop.util.LogUtil.severe;
 import static com.evermc.evershop.util.LogUtil.info;
@@ -459,7 +459,7 @@ public class TranslationUtil {
             if (bm.getAuthor() != null) {
                 message.addExtra(" by " + bm.getAuthor());
             }
-            message.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new ComponentBuilder(bm.getPage(1)).create()));
+            message.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(bm.getPage(1))));
         }
 
         if (is.hasItemMeta() && is.getItemMeta() instanceof FireworkMeta){
@@ -522,7 +522,7 @@ public class TranslationUtil {
 
         if (!is.hasItemMeta() || !(is.getItemMeta() instanceof BookMeta)){
             String nbt = NBTUtil.toNBTString(is);
-            message.setHoverEvent(new HoverEvent(Action.SHOW_ITEM, new ComponentBuilder(nbt).create()));
+            message.setHoverEvent(new HoverEvent(Action.SHOW_ITEM, new Text(nbt)));
         }
         return message;
     }
@@ -744,7 +744,7 @@ public class TranslationUtil {
     public static BaseComponent show_location(Location loc, CommandSender sender) {
         TextComponent ret = new TextComponent("" + loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
         if (sender instanceof Player) {
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to teleport!").create()));
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to teleport!")));
             // first try multi-world teleport
             if (sender.hasPermission("essentials.tppos")) {
                 ret.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
@@ -764,7 +764,7 @@ public class TranslationUtil {
             }
             // no teleport permission
             else {
-                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy location!").create()));
+                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to copy location!")));
                 ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                      "[x:" + loc.getBlockX() + ", y:" + loc.getBlockY() + ", z: " + loc.getBlockZ() + "]"));
             }
@@ -790,7 +790,7 @@ public class TranslationUtil {
         }
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date date = new Date(((long)timerec)*1000*60);
-        retval.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(df.format(date)).create()));
+        retval.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(df.format(date))));
         return retval;
     }
 }  

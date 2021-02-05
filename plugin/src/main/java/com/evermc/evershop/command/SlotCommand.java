@@ -12,6 +12,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.util.Map.Entry;
 
@@ -176,7 +177,7 @@ public class SlotCommand extends AbstractCommand {
             if (player instanceof Player && (player.hasPermission("evershop.info.others") || si.getOwnerId() == PlayerLogic.getPlayerId((Player)player))) {
                 builder.append("[+]").color(TranslationUtil.command_color)
                      .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es slot " + si.getId() + " set " + entry.getKey() + " " + possibility))
-                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{tr("Click to edit", player)}));
+                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to edit", player)})));
             } else if (!(player instanceof Player)){
                 builder.append("\n  Key = " + entry.getKey());
             }

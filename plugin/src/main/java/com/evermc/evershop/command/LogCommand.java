@@ -16,9 +16,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.util.HashMap;
 
@@ -125,7 +127,7 @@ public class LogCommand extends AbstractCommand {
                 builder.append(" + ").color(ChatColor.GREEN)
                        .append(String.format("[%1$s] ", countAll - (page-1)*10 - i)).color(ChatColor.GRAY)
                        .append((pi==null?"Unknown":pi.getName())).color(TranslationUtil.command_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(pi==null?"Unknown":pi.getUUID().toString())))
                             .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
                        .append(" ", ComponentBuilder.FormatRetention.NONE);
                 if (isSlotShop) {
@@ -146,7 +148,7 @@ public class LogCommand extends AbstractCommand {
             builder.append("  ").color(ChatColor.GRAY);
             if (page > 1) {
                 builder.append("[<< Prev]").color(TranslationUtil.command_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", player)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the previous page", player)})))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es log " + si.getId() + " " + (page-1)))
                        .append(" ", ComponentBuilder.FormatRetention.NONE);
             } else {
@@ -155,7 +157,7 @@ public class LogCommand extends AbstractCommand {
             builder.append("| ").color(ChatColor.WHITE);
             if (page < countAll/10+1) {
                 builder.append("[Next >>]").color(TranslationUtil.command_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", player)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the next page", player)})))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es log " + si.getId() + " " + (page+1)))
                        .append(" | ", ComponentBuilder.FormatRetention.NONE);
             } else {
@@ -163,7 +165,7 @@ public class LogCommand extends AbstractCommand {
                        .append(" | ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
             }
             builder.append("[Enter Page]").color(TranslationUtil.command_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", player)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to enter page number", player)})))
                             .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es log " + si.getId() + " "))
                    .append(" ", ComponentBuilder.FormatRetention.NONE);
         }

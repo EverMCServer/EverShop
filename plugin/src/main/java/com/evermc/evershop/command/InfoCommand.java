@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import com.evermc.evershop.EverShop;
 import com.evermc.evershop.logic.DataLogic;
@@ -99,7 +100,7 @@ public class InfoCommand extends AbstractCommand {
                .append(tr("Owner", player)).color(TranslationUtil.command_color)
                .append(": ").color(TranslationUtil.command_color)
                .append(pi.getName()).color(ChatColor.YELLOW)
-                   .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pi==null?"Unknown":pi.getUUID().toString()).create()))
+                   .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(pi==null?"Unknown":pi.getUUID().toString())))
                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, pi==null?"Unknown":pi.getUUID().toString()))
                .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE)
                .append(tr("Type", player)).color(TranslationUtil.command_color)

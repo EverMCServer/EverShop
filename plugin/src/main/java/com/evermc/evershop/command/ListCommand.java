@@ -6,9 +6,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -152,7 +154,7 @@ public class ListCommand extends AbstractCommand {
                        .append("\n", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
                 for (ShopInfo si : sis){
                     builder.append(" [" + si.getId() + "] ").color(TranslationUtil.command_color)
-                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("click to view shop info").create()))
+                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("click to view shop info")))
                                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es info " + si.getId()))
                            .append(" ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
                     if (si.getRev() != 0) {
@@ -175,7 +177,7 @@ public class ListCommand extends AbstractCommand {
                     builder.append("  ").color(ChatColor.GRAY);
                     if (showingpage > 1) {
                         builder.append("[<< Prev]").color(TranslationUtil.command_color)
-                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", sender)).create()))
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the previous page", sender)})))
                                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage-1)))
                                .append(" ", ComponentBuilder.FormatRetention.NONE);
                     } else {
@@ -184,7 +186,7 @@ public class ListCommand extends AbstractCommand {
                     builder.append("| ").color(ChatColor.WHITE);
                     if (showingpage <= (count-1)/10) {
                         builder.append("[Next >>]").color(TranslationUtil.command_color)
-                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", sender)).create()))
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the next page", sender)})))
                                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es list " + _player + (showingpage+1)))
                                .append(" | ", ComponentBuilder.FormatRetention.NONE);
                     } else {
@@ -192,7 +194,7 @@ public class ListCommand extends AbstractCommand {
                                .append(" | ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
                     }
                     builder.append("[Enter Page]").color(TranslationUtil.command_color)
-                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", sender)).create()))
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to enter page number", sender)})))
                                     .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es list " + _player))
                            .append(" ", ComponentBuilder.FormatRetention.NONE);
                 }

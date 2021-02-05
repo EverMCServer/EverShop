@@ -12,9 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import static com.evermc.evershop.util.TranslationUtil.tr;
 
@@ -223,7 +225,7 @@ public abstract class AbstractCommand {
             AbstractCommand command = commands.get(i);
             builder.append(getFullCommand()).color(TranslationUtil.command_color)
                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getFullCommand() + command.getName() + " "))
-                   .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to input this command", sender)).create()));
+                   .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to input this command", sender)})));
             if (getParameters() != null) {
                 builder.append(getParameters() + " ").color(TranslationUtil.command_parameter_color);
             } 
@@ -238,7 +240,7 @@ public abstract class AbstractCommand {
             builder.append("  ").color(ChatColor.GRAY);
             if (page > 1) {
                 builder.append("[<< Prev]").color(TranslationUtil.title_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the previous page", sender)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the previous page", sender)})))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es help " + (page-1)))
                        .append(" ", ComponentBuilder.FormatRetention.NONE);
             } else {
@@ -247,7 +249,7 @@ public abstract class AbstractCommand {
             builder.append("| ").color(ChatColor.WHITE);
             if (page < totalpage) {
                 builder.append("[Next >>]").color(TranslationUtil.title_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to view the next page", sender)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to view the next page", sender)})))
                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/es help " + (page+1)))
                        .append(" | ", ComponentBuilder.FormatRetention.NONE);
             } else {
@@ -255,7 +257,7 @@ public abstract class AbstractCommand {
                        .append(" | ", ComponentBuilder.FormatRetention.NONE).color(ChatColor.WHITE);
             }
             builder.append("[Enter Page]").color(TranslationUtil.title_color)
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tr("Click to enter page number", sender)).create()))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new BaseComponent[]{tr("Click to enter page number", sender)})))
                             .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/es help "))
                    .append(" ", ComponentBuilder.FormatRetention.NONE);
         } else if (totalpage > 1) {
