@@ -505,6 +505,10 @@ public class ShopLogic {
                 }
 
                 final ShopInfo newshop = new ShopInfo(actionid, player, block.getLocation(), price);
+                if (newshop.getId() == -1) {
+                    send("Failed to create shop", p);
+                    return true;
+                }
                 final Sign sign = (Sign)block.getState();
                 DataLogic.saveShop(newshop, (shopid) -> {
                     String lin = sign.getLine(0);

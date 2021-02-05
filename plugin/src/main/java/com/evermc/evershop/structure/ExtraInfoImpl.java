@@ -1,7 +1,5 @@
 package com.evermc.evershop.structure;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +13,6 @@ import java.util.stream.Collectors;
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.structure.PermissionInfo.Type;
-import com.evermc.evershop.util.NBTUtil;
 import com.google.gson.Gson;
 
 import org.bukkit.entity.Player;
@@ -167,37 +164,23 @@ public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo
     public HashMap<String, String> getSlotPossibilityMap(){
         return this.slot;
     }
-    public void initSlot(Set<ItemStack> items) {
+    public boolean initSlot(Set<ItemStack> items) {
         this.slot = new HashMap<String,String>();
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            e.printStackTrace();
-            severe("ExtraInfo: Hash not supported!");
-            return;
-        }
         for (ItemStack item : items) {
             int amount = item.getAmount();
-            ItemStack it = item.clone();
-            it.setAmount(1);
-            byte[] re = messageDigest.digest(NBTUtil.toNBTString(it).getBytes(StandardCharsets.UTF_8));
-            this.slot.put(byteToHex(re), "1:" + amount);
+            if (this.slot.put(getItemKey(item), "1:" + amount) != null) {
+                severe("ExtraInfoImpl:initSlot(): hash collision!");
+                this.slot.clear();
+                return false;
+            }
         }
+        return true;
     }
     public static String getItemKey(ItemStack item){
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            e.printStackTrace();
-            severe("ExtraInfo: Hash not supported!");
-            return null;
-        }
         ItemStack it = item.clone();
         it.setAmount(1);
-        byte[] re = messageDigest.digest(NBTUtil.toNBTString(it).getBytes(StandardCharsets.UTF_8));
-        return byteToHex(re);
+        String hash = Integer.toUnsignedString(it.hashCode(), Character.MAX_RADIX);
+        return hash;
     }
     public int slotPossibilityAll() {
         int ret = 0;
@@ -238,32 +221,13 @@ public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo
         else  return new AbstractMap.SimpleEntry<String, Integer>(entry.getKey(), amount);
     }
     public static HashMap<String,ItemStack> slotItemMap(Set<ItemStack> items){
-        MessageDigest messageDigest;
         HashMap<String,ItemStack> ret = new HashMap<String,ItemStack>();
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            e.printStackTrace();
-            severe("ExtraInfo: Hash not supported!");
-            return null;
-        }
         for (ItemStack item : items) {
-            ItemStack it = item.clone();
-            it.setAmount(1);
-            byte[] re = messageDigest.digest(NBTUtil.toNBTString(it).getBytes(StandardCharsets.UTF_8));
-            ret.put(byteToHex(re), item);
+            ret.put(getItemKey(item), item);
         }
         return ret;
     }
     public boolean slotSetPossibility(ItemStack item, String possibility) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            e.printStackTrace();
-            severe("ExtraInfo: Hash not supported!");
-            return false;
-        }
         for (String pos:possibility.split(";")){
             int amount = 0;
             int possi = 0;
@@ -278,21 +242,8 @@ public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo
                 return false;
             }
         }
-        ItemStack it = item.clone();
-        it.setAmount(1);
-        byte[] re = messageDigest.digest(NBTUtil.toNBTString(it).getBytes(StandardCharsets.UTF_8));
-        this.slot.put(byteToHex(re), possibility);
+        this.slot.put(getItemKey(item), possibility);
         return true;
-    }
-    private static String byteToHex(byte[] bytes){
-        StringBuilder builder = new StringBuilder();
-        String temp;
-        for (byte b : bytes){
-            temp = Integer.toHexString(b & 0xFF);
-            if(temp.length() == 1)builder.append(0);
-            builder.append(temp);
-        }
-        return builder.toString();
     }
     public int slotGetMaxAmount(String key) {
         String possibility = this.slot.get(key);
