@@ -19,7 +19,7 @@ jobs:
     - name: FTP Deploy
       uses: sebastianpopp/ftp-action@releases/v2
       with:
-        host: ftps://waws-prod-hk1-025.ftp.azurewebsites.windows.net/
+        host: ftps://waws-prod-bay-127.ftp.azurewebsites.windows.net
         user: maven-djytw\$maven-djytw
         password: ${{ secrets.FTP_PASSWORD }}
         localDir: target/
