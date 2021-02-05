@@ -47,9 +47,11 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.ItemTag;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
+import net.md_5.bungee.api.chat.hover.content.Item;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
 import static com.evermc.evershop.util.LogUtil.severe;
@@ -522,7 +524,7 @@ public class TranslationUtil {
 
         if (!is.hasItemMeta() || !(is.getItemMeta() instanceof BookMeta)){
             String nbt = NBTUtil.toNBTString(is);
-            message.setHoverEvent(new HoverEvent(Action.SHOW_ITEM, new Text(nbt)));
+            message.setHoverEvent(new HoverEvent(Action.SHOW_ITEM, new Item(is.getType().toString().toLowerCase(), 1, ItemTag.ofNbt(nbt))));
         }
         return message;
     }
