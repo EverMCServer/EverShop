@@ -232,7 +232,7 @@ public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo
                                  .map(a->a.getUniqueId().toString())
                                  .collect(Collectors.joining("|"));
                         return attr;
-                    }).toString();
+                    }).collect(Collectors.joining("||"));
                 crc.update(data.getBytes());
             }
             if (meta instanceof BookMeta) {
