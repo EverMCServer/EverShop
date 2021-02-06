@@ -5,18 +5,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.zip.CRC32;
 
 import com.evermc.evershop.handler.VaultHandler;
 import com.evermc.evershop.logic.PlayerLogic;
 import com.evermc.evershop.structure.PermissionInfo.Type;
 import com.google.gson.Gson;
 
+import org.bukkit.FireworkEffect;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
 
 import static com.evermc.evershop.util.LogUtil.severe;
 
@@ -179,7 +192,81 @@ public class ExtraInfoImpl implements com.evermc.evershop.api.ShopInfo.ExtraInfo
     public static String getItemKey(ItemStack item){
         ItemStack it = item.clone();
         it.setAmount(1);
-        String hash = Integer.toUnsignedString(it.hashCode(), Character.MAX_RADIX);
+        String hash = item.getType().toString();
+        if (it.hasItemMeta()) {
+            hash += "|";
+            ItemMeta meta = it.getItemMeta();
+            CRC32 crc = new CRC32();
+            if (meta.hasLore()) {
+                String lores = String.join("\n", meta.getLore());
+                crc.update(lores.getBytes());
+            }
+            if (meta.hasDisplayName()) {
+                crc.update(meta.getDisplayName().getBytes());
+            }
+            if (meta instanceof Damageable) {
+                crc.update(((Damageable)meta).getDamage());
+            }
+            if (meta.hasEnchants() || meta instanceof EnchantmentStorageMeta) {
+                Map<Enchantment, Integer> map;
+                if (meta.hasEnchants()) map = meta.getEnchants();
+                else map = ((EnchantmentStorageMeta)meta).getStoredEnchants();
+                String enchants = map.entrySet()
+                                     .stream()
+                                     .sorted((a,b)->a.getKey().getKey().toString().compareTo(b.getKey().getKey().toString()))
+                                     .map(a->(a.getKey().getKey().toString() + a.getValue()))
+                                     .collect(Collectors.joining("|"));
+                crc.update(enchants.getBytes());
+            }
+            if (meta.hasAttributeModifiers()) {
+                String data = meta.getAttributeModifiers()
+                    .asMap()
+                    .entrySet()
+                    .stream()
+                    .sorted((a,b)->a.getKey().getKey().toString().compareTo(b.getKey().getKey().toString()))
+                    .map(v -> {
+                        String attr = v.getKey().getKey().toString();
+                        attr += v.getValue()
+                                 .stream()
+                                 .sorted((a,b)->a.getUniqueId().compareTo(b.getUniqueId()))
+                                 .map(a->a.getUniqueId().toString())
+                                 .collect(Collectors.joining("|"));
+                        return attr;
+                    }).toString();
+                crc.update(data.getBytes());
+            }
+            if (meta instanceof BookMeta) {
+                BookMeta bm = (BookMeta)meta;
+                String book = bm.getTitle() + bm.getAuthor();
+                for (int i = 0; i < bm.getPageCount(); i ++) {
+                    book += bm.getPage(i + 1);
+                }
+                crc.update(book.getBytes());
+            }
+            if (meta instanceof PotionMeta) {
+                PotionData pd = ((PotionMeta)meta).getBasePotionData();
+                String pm = pd.getType().name() + pd.isExtended() + pd.isUpgraded();
+                for(PotionEffect pe : ((PotionMeta)meta).getCustomEffects()){
+                    pm += pe.getType().getName().toLowerCase() + pe.getAmplifier() + pe.getDuration();
+                }
+                crc.update(pm.getBytes());
+            }
+            if (meta instanceof FireworkEffectMeta) {
+                FireworkEffectMeta fwem = ((FireworkEffectMeta)meta);
+                String fwe = fwem.getEffect().toString();
+                crc.update(fwe.getBytes());
+            }
+            if (meta instanceof FireworkMeta) {
+                FireworkMeta fwm = ((FireworkMeta)meta);
+                String fw = fwm.getPower() + "|";
+                for (FireworkEffect ef : fwm.getEffects()) {
+                    fw += ef.toString();
+                }
+                crc.update(fw.getBytes());
+            }
+            hash += Long.toHexString(crc.getValue());
+        }
+        
         return hash;
     }
     public int slotPossibilityAll() {
