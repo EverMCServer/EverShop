@@ -16,7 +16,7 @@ A powerful shop plugin which supports remote redstone as well.
 
 ## Installation
 
-Still WIP. You can get nightly builds at [GitHub Actions](https://github.com/EverMCServer/EverShop/actions) or [Maven Repo](http://maven-djytw.azurewebsites.net/maven-repository/com/evermc/evershop/EverShop/1.0/)
+Still WIP. You can get nightly builds at [GitHub Actions](https://github.com/EverMCServer/EverShop/actions) or [Maven Repo](https://ci.djytw.cn/maven-repository/com/evermc/evershop/EverShop/1.0-SNAPSHOT/)
 
 Dependency:
 

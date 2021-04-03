@@ -19,8 +19,8 @@ jobs:
     - name: FTP Deploy
       uses: sebastianpopp/ftp-action@releases/v2
       with:
-        host: ftps://waws-prod-bay-127.ftp.azurewebsites.windows.net
-        user: maven-djytw\$maven-djytw
+        host: ftp://ci.djytw.cn
+        user: djytw_ci
         password: ${{ secrets.FTP_PASSWORD }}
         localDir: target/
         remoteDir: site/wwwroot/maven-repository/com/evermc/evershop/
