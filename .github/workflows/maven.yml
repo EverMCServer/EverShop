@@ -17,15 +17,6 @@ jobs:
     - name: Build EverShop
       run: |
         mvn clean install 
-        cp -r /home/runner/.m2/repository/com/evermc/evershop target/maven
-    - name: FTP Deploy
-      uses: sebastianpopp/ftp-action@releases/v2
-      with:
-        host: ftp://ci.djytw.cn
-        user: djytw_ci
-        password: ${{ secrets.FTP_PASSWORD }}
-        localDir: target/maven/
-        remoteDir: site/wwwroot/maven-repository/com/evermc/evershop/
     - uses: actions/upload-artifact@v2
       with:
         name: EverShop
