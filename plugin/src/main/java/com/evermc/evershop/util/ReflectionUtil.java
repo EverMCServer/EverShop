@@ -19,8 +19,12 @@ public class ReflectionUtil {
         }
     }
 
-    public static Class<?> NMSClass(String className) throws ClassNotFoundException {
-        return Class.forName("net.minecraft.server" + SERVER_VERSION + className);
+    public static Class<?> NMSClass(String className, String fullClassName) throws ClassNotFoundException {
+        try {
+            return Class.forName("net.minecraft.server" + SERVER_VERSION + className);
+        } catch (ClassNotFoundException ignored) {
+            return Class.forName("net.minecraft." + fullClassName);
+        }
     }
 
     public static Class<?> CBClass(String className) throws ClassNotFoundException {

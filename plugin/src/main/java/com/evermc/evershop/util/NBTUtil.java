@@ -37,9 +37,9 @@ public class NBTUtil {
         try{
 
             CB_CraftItemStack = ReflectionUtil.CBClass("inventory.CraftItemStack");
-            NMS_NBTTagCompound = ReflectionUtil.NMSClass("NBTTagCompound");
-            NMS_ItemStack = ReflectionUtil.NMSClass("ItemStack");
-            NMS_MojangsonParser = ReflectionUtil.NMSClass("MojangsonParser");
+            NMS_NBTTagCompound = ReflectionUtil.NMSClass("NBTTagCompound", "nbt.NBTTagCompound");
+            NMS_ItemStack = ReflectionUtil.NMSClass("ItemStack", "world.item.ItemStack");
+            NMS_MojangsonParser = ReflectionUtil.NMSClass("MojangsonParser", "nbt.MojangsonParser");
 
             CB_CraftItemStack_asBukkitCopy = CB_CraftItemStack.getMethod("asBukkitCopy", NMS_ItemStack);
             CB_CraftItemStack_asNMSCopy = CB_CraftItemStack.getMethod("asNMSCopy", ItemStack.class);

@@ -29,10 +29,10 @@ public class RedstoneUtil {
 
     public static void init(){
         try {
-            NMS_Block = ReflectionUtil.NMSClass("Block");
-            NMS_BlockPosition = ReflectionUtil.NMSClass("BlockPosition");
-            NMS_IBlockData = ReflectionUtil.NMSClass("IBlockData");
-            NMS_World = ReflectionUtil.NMSClass("World");
+            NMS_Block = ReflectionUtil.NMSClass("Block", "world.level.block.Block");
+            NMS_BlockPosition = ReflectionUtil.NMSClass("BlockPosition", "core.BlockPosition");
+            NMS_IBlockData = ReflectionUtil.NMSClass("IBlockData", "world.level.block.state.IBlockData");
+            NMS_World = ReflectionUtil.NMSClass("World", "world.level.World");
 
             CB_Block = ReflectionUtil.CBClass("block.CraftBlock");
             CB_World = ReflectionUtil.CBClass("CraftWorld");
