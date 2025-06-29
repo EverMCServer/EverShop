@@ -37,13 +37,13 @@ public class ParticlesUtil {
                     for (Location loc : reg1) {
                         DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 127, 255), dustsize);
                         for (Location lo : getBorder(loc, dustcount)){
-                            p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
+                            p.spawnParticle(Particle.DUST, lo, 1, dustOptions);
                         }   
                     }
                     for (Location loc : reg2) {
                         DustOptions dustOptions = new DustOptions(Color.fromRGB(0, 255, 0), dustsize);
                         for (Location lo : getBorder(loc, dustcount)){
-                            p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
+                            p.spawnParticle(Particle.DUST, lo, 1, dustOptions);
                         }   
                     }
                 } else {
@@ -61,7 +61,7 @@ public class ParticlesUtil {
                     while(it.hasNext() && index-- > 0)it.next();
                     if (!it.hasNext()) continue;
                     for (Location lo : getBorder(it.next(), 3)){
-                        p.spawnParticle(Particle.REDSTONE, lo, 1, dustOptions);
+                        p.spawnParticle(Particle.DUST, lo, 1, dustOptions);
                     }
                 }
             }
